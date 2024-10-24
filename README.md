@@ -1,4 +1,4 @@
-![image](https://github.com/sudedaka/LibraryManagement/assets/90246848/9aa9f75d-3978-46e4-81d4-ac651fc3fcbe)
+![image](https://phoenix.ieu.edu.tr/betanix/images/uploads/haber/3420_1.jpeg)
 
 Faculty of Engineering
 
