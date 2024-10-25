@@ -20,4 +20,4 @@ Doğa Orhan 20210602043
 
 Sude Teslime Daka 20220602207
 
-We welcome contributions from the community. If you find any issues or have feature requests, please open an issue or submit a pull request following our contribution guidelines. :)
+We welcome contributions from the community. If you find any issues or have feature requests, please open an issue or submit a pull request following our contribution guidelines. 
