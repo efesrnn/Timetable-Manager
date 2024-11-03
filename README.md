@@ -4,7 +4,7 @@ Faculty of Engineering
 
 Department of Computer Engineering (Bachelor of Engineering)
 
-Syllabus
+Timetable Manager
 
 SE 302, Principles of Software Engineering , 2024-2025
 
