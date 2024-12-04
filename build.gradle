@@ -26,7 +26,7 @@ tasks.withType(JavaCompile) {
 
 application {
   mainModule = 'com.example.timetablemanager'
-  mainClass = 'com.example.timetablemanager.HelloApplication'
+  mainClass = 'com.example.timetablemanager.TimetableManager'
 }
 
 javafx {
