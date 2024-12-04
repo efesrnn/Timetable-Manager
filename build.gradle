@@ -38,6 +38,8 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+  implementation 'org.openjfx:javafx-controls:21'
+  implementation 'org.openjfx:javafx-fxml:21'
 }
 
 test {
