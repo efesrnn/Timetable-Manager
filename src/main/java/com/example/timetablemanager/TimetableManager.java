@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import java.sql.Statement;
 import java.io.IOException;
 
 public class TimetableManager extends Application {
@@ -16,6 +16,8 @@ public class TimetableManager extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
+
 
     public static void main(String[] args) {
         launch();
