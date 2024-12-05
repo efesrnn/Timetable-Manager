@@ -1,4 +1,4 @@
-module com.example.macven {
+module com.example.timetablemanager {
     requires javafx.controls;
     requires javafx.fxml;
 
