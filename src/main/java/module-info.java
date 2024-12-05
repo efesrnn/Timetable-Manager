@@ -3,6 +3,6 @@ module com.example.macven {
     requires javafx.fxml;
 
 
-    opens com.example.macven to javafx.fxml;
-    exports com.example.macven;
+    opens com.example.timetablemanager to javafx.fxml;
+    exports com.example.timetablemanager;
 }
