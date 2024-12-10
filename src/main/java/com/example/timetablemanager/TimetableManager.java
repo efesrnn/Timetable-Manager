@@ -59,9 +59,7 @@ import static com.example.timetablemanager.Database.*;
 
     public static void main(String[] args) {
 
-        connect();
-        listCourses();
-        close();
+
 
         File file = new File(filePath);
         if (!file.exists()) {
@@ -81,6 +79,9 @@ import static com.example.timetablemanager.Database.*;
 
 
         launch();
+        connect();
+        listCourses();
+        close();
     }
 
     // Read CSV file and return list of courses

@@ -26,18 +26,32 @@ public class Database {
 
     // Create database connection
     public static Connection connect() {
+
         File dbDir = new File(dbPath);
         if (!dbDir.exists()) {
-            dbDir.mkdir();
+            if (dbDir.mkdir()) {
+                System.out.println("Folder created successfully: " + dbDir.getAbsolutePath());
+            } else {
+                System.err.println("Failed to create folder: " + dbDir.getAbsolutePath());
+                return null;
+            }
+        }
+
+        // Check if database file exists
+        File dbFile = new File(dbPath + File.separator + "TimetableManagement.db");
+        if (!dbFile.exists()) {
+            System.out.println("Database file does not exist,creating it.");
+        } else {
+            System.out.println("Database file found: " + dbFile.getAbsolutePath());
         }
 
         if (conn == null) {
             try {
                 conn = DriverManager.getConnection(url);
-                System.out.println("Veritabanına bağlanıldı!");
-                createTables(); // Bağlantı kurulduğunda tabloları oluştur
+                System.out.println("Connected to the database!");
+                createTables();
             } catch (SQLException e) {
-                System.err.println("Bağlantı hatası: " + e.getMessage());
+                System.err.println("Connection error: " + e.getMessage());
             }
         }
         return conn;
@@ -48,10 +62,10 @@ public class Database {
         try {
             if (conn != null) {
                 conn.close();
-                System.out.println("Veritabanı bağlantısı kapatıldı.");
+                System.out.println("Database connection closed.");
             }
         } catch (SQLException e) {
-            System.err.println("Bağlantı kapatılırken hata: " + e.getMessage());
+            System.err.println("Error while closing connection: " + e.getMessage());
         }
     }
 
