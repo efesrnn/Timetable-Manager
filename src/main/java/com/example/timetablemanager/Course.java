@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
-    // Attributes
+
     private String courseId;
     private String courseName;
     private String description;
     private int capacity;
-    private String classroom;
     private List<Student> students;
+  /* */private String classroom;
 
-    // Constructor
-    public Course(String courseId, String courseName, String description, int capacity, String classroom) {
+  public Course(String courseId, String courseName, String description, int capacity, String classroom) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.description = description;
@@ -22,15 +21,26 @@ public class Course {
         this.students = new ArrayList<>();
     }
 
-    // Methods
+    public Course() {
+        this.courseId = courseId;
+        this.courseName = courseName;
+        this.description = description;
+        this.capacity = capacity;
+        this.classroom = classroom;
+        this.students = new ArrayList<>();
+    }
+
     public boolean addStudent(Student student) {
         if (students.size() < capacity && !students.contains(student)) {
             students.add(student);
+            System.out.println("Adding student, returning true");
             return true;
         }
+        System.out.println("Coudn't add student, returning false");
         return false;
     }
 
+    /* */
     public void assignClassroom(String classroom) {
         this.classroom = classroom;
     }
@@ -38,6 +48,8 @@ public class Course {
     public String getSchedule() {
         return "Course: " + courseName + ", Classroom: " + classroom;
     }
+    /* */
+
 
     // Getters and Setters
     public String getCourseId() {
@@ -82,5 +94,9 @@ public class Course {
 
     public List<Student> getStudents() {
         return students;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
     }
 }

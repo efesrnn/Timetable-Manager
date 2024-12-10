@@ -16,18 +16,27 @@ public class Student {
         this.enrolledCourses = enrolledCourses;
     }
 
+    public Student() {
+        this.studentId = studentId;
+        this.name = name;
+        this.surname = surname;
+        this.enrolledCourses = enrolledCourses;
+    }
+
     public boolean enrollInCourse(Course course) {
         if (!enrolledCourses.contains(course)) {
             enrolledCourses.add(course);
-            return true; // Successfully enrolled
+            System.out.println("Successfully enrolled returning true");
+            return true;
         }
-        return false; // Already enrolled
+        System.out.println("Already enrolled returning false");
+        return false;
     }
 
     public List<String> getSchedule() {
         List<String> schedule = new ArrayList<>();
         for (Course course : enrolledCourses) {
-            schedule.add(course.getSchedule()); // Assuming Course has a getDetails method
+            schedule.add(course.getSchedule());
         }
         return schedule;
     }
