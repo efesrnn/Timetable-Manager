@@ -12,13 +12,13 @@ public class TimetableManager extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(TimetableManager.class.getResource("mainLayout.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(TimetableManager.class.getResource("welcomeLayout.fxml"));
         //Creating the initial scene with 1080pixel width and 720pixel length.
         Scene scene = new Scene(fxmlLoader.load(),1080,720);
 
         //ICON OF THE APP
         try {
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icon.png")));
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/icon.png")));
         }catch (RuntimeException e){
             System.err.println("Couldn't load icon");
             e.printStackTrace();

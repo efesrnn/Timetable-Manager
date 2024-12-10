@@ -36,7 +36,7 @@ public class ttManagerController {
 
         //TODO: Add Course Button
         btnAddCourse.setOnAction(event -> {
-            switchToScene("addCourseLayout.fxml");
+            switchScene("addCourseLayout.fxml");
         });
 
 
@@ -128,7 +128,7 @@ public class ttManagerController {
         }
     }
 
-    private void switchToScene(String fxmlFile) {
+    private void switchScene(String fxmlFile) {
         try {
             // Load the new root layout
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/" + fxmlFile));
@@ -156,14 +156,14 @@ public class ttManagerController {
     }
 
 
-    //Alert creator method to test all buttons work properly.
+    //Alert creator method to test all buttons work properly:
     private void showAlert(String title, String message) {
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         //Alert icon initialization:
         try {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/alert.png")));
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
         } catch (RuntimeException e) {
             System.err.println("Couldn't load icon");
             e.printStackTrace();

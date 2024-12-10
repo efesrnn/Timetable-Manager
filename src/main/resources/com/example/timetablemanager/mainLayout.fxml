@@ -3,14 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.ttManagerController"
            style="-fx-background-color: #f9f9f9;">
   <children>
-    <!-- Wrap the MenuBar and main content in a VBox -->
     <VBox spacing="0" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff;">
-      <!-- Top Menu -->
       <MenuBar style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
         <Menu text="File" style="-fx-text-fill: #333333;">
           <MenuItem text="Import CSV" fx:id="menuImportCSV" />
@@ -28,13 +25,8 @@
       <padding>
         <Insets top="0" right="20" bottom="20" left="20" />
       </padding>
-      <!-- Main Content -->
       <VBox alignment="TOP_CENTER" spacing="20" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
-
-        <!-- Header -->
         <Label text="Timetable Manager" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 20; -fx-text-fill: #1c1c1c; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;" />
-
-        <!-- Search Section -->
         <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
           <Label text="Search:" style="-fx-font-size: 14; -fx-text-fill: #4a4a4a;" />
           <TextField fx:id="txtSearch" promptText="Enter student/classroom/course"
@@ -42,8 +34,6 @@
           <Button fx:id="btnSearch" text="Search"
                   style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
         </HBox>
-
-        <!-- Table Section -->
         <TableView fx:id="timetableTable" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;" prefHeight="300.0" prefWidth="700.0">
           <columns>
             <TableColumn text="Day" />
@@ -54,8 +44,6 @@
             <TableColumn text="Enrolled Students" />
           </columns>
         </TableView>
-
-        <!-- Action Buttons -->
         <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
           <Button fx:id="btnAddCourse" text="Add Course"
                   style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
@@ -66,11 +54,8 @@
           <Button fx:id="btnSwapClassroom" text="Swap Classroom"
                   style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
         </HBox>
-
-        <!-- Footer -->
         <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
-          <Label text="Status:" style="-fx-font-size: 14; -fx-text-fill: #4a4a4a;" />
-          <Label fx:id="statusLabel" text="Administrator" style="-fx-font-size: 14; -fx-text-fill: #1c1c1c;" />
+          <Label text="v1.0" style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" />
         </HBox>
       </VBox>
     </VBox>
