@@ -1,48 +1,74 @@
 package com.example.timetablemanager;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
-public class TimetableManager {
-
-    public static class Course {
-        String name;
-        String startTime;
-        int duration;
-        String lecturer;
-        List<String> students;
-
-        public Course(String name, String startTime, int duration, String lecturer, List<String> students) {
-            this.name = name;
-            this.startTime = startTime;
-            this.duration = duration;
-            this.lecturer = lecturer;
-            this.students = students;
-        }
-    }
-
-    private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
-    private static final String filePath = dbPath + File.separator + "Courses.csv";
-    private static final String filePath2 = dbPath + File.separator + "ClassroomCapacity.csv";
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-
 import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.timetablemanager.Database.*;
+
+    public class TimetableManager extends Application {
+
+        public static class Course {
+            String name;
+            String startTime;
+            int duration;
+            String lecturer;
+            List<String> students;
+
+            public Course(String name, String startTime, int duration, String lecturer, List<String> students) {
+                this.name = name;
+                this.startTime = startTime;
+                this.duration = duration;
+                this.lecturer = lecturer;
+                this.students = students;
+            }
+        }
+
+        @Override
+        public void start(Stage stage) throws IOException {
+
+            FXMLLoader fxmlLoader = new FXMLLoader(TimetableManager.class.getResource("welcomeLayout.fxml"));
+            //Creating the initial scene with 1080pixel width and 720pixel length.
+            Scene scene = new Scene(fxmlLoader.load(),1080,720);
+
+            //ICON OF THE APP
+            try {
+                stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/icon.png")));
+            }catch (RuntimeException e){
+                System.err.println("Couldn't load icon");
+                e.printStackTrace();
+            }
+
+            stage.setTitle("Welcome to Timetable Manager");
+            stage.setScene(scene);
+            stage.show();
+
+            System.out.println("Timetable Manager initialized.");
+        }
+
+    private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
+    private static final String filePath = dbPath + File.separator + "Courses.csv";
+    private static final String filePath2 = dbPath + File.separator + "ClassroomCapacity.csv";
+
 
     public static void main(String[] args) {
+
+        connect();
+        listCourses();
+        close();
+
         File file = new File(filePath);
         if (!file.exists()) {
             System.out.println("File not found at: " + filePath);
         } else {
-            Database.connect();
+            connect();
             List<Course> timetable = readCSV(filePath);
-public class TimetableManager extends Application {
-    @Override
-    public void start(Stage stage) throws IOException {
 
             File classroomFile = new File(filePath2);
             if (classroomFile.exists()) {
@@ -52,16 +78,11 @@ public class TimetableManager extends Application {
             }
             printTimetable(timetable);
         }
-    }
-        FXMLLoader fxmlLoader = new FXMLLoader(TimetableManager.class.getResource("welcomeLayout.fxml"));
-        //Creating the initial scene with 1080pixel width and 720pixel length.
-        Scene scene = new Scene(fxmlLoader.load(),1080,720);
 
-        //ICON OF THE APP
-        try {
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/icon.png")));
-        }catch (RuntimeException e){
-            System.err.println("Couldn't load icon");
+
+        launch();
+    }
+
     // Read CSV file and return list of courses
     private static List<Course> readCSV(String filePath) {
         List<Course> courses = new ArrayList<>();
@@ -150,12 +171,6 @@ public class TimetableManager extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        stage.setTitle("Welcome to Timetable Manager");
-        stage.setScene(scene);
-        stage.show();
-
-        System.out.println("Timetable Manager initialized.");
     }
 
 
@@ -177,7 +192,7 @@ public class TimetableManager extends Application {
                     course.lecturer,
                     String.join(", ", course.students));
         }
-    public static void main(String[] args) {
-        launch();
     }
+
+
 }
