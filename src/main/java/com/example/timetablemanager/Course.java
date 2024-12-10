@@ -5,30 +5,26 @@ import java.util.List;
 
 public class Course {
 
-    private String courseId;
     private String courseName;
+    private String courseID;
     private String description;
     private int capacity;
     private List<Student> students;
-  /* */private String classroom;
+    private String classroom;
+    private List<String> days;
+    private List<String> times;
 
-  public Course(String courseId, String courseName, String description, int capacity, String classroom) {
-        this.courseId = courseId;
+    public Course(String courseName, String courseID, String description, int capacity, List<Student> students, String classroom, List<String> days, List<String> times) {
         this.courseName = courseName;
+        this.courseID = courseID;
         this.description = description;
         this.capacity = capacity;
+        this.students = students != null ? students : new ArrayList<>();
         this.classroom = classroom;
-        this.students = new ArrayList<>();
+        this.days = days != null ? days : new ArrayList<>();
+        this.times = times != null ? times : new ArrayList<>();
     }
 
-    public Course() {
-        this.courseId = courseId;
-        this.courseName = courseName;
-        this.description = description;
-        this.capacity = capacity;
-        this.classroom = classroom;
-        this.students = new ArrayList<>();
-    }
 
     public boolean addStudent(Student student) {
         if (students.size() < capacity && !students.contains(student)) {
@@ -38,6 +34,10 @@ public class Course {
         }
         System.out.println("Coudn't add student, returning false");
         return false;
+    }
+    @Override
+    public String toString() {
+        return courseName + " (" + courseID + ")";
     }
 
     /* */
@@ -50,15 +50,7 @@ public class Course {
     }
     /* */
 
-
-    // Getters and Setters
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
+    //Getter Setter
 
     public String getCourseName() {
         return courseName;
@@ -66,6 +58,14 @@ public class Course {
 
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+    public String getCourseID() {
+        return courseID;
+    }
+
+    public void setCourseID(String courseID) {
+        this.courseID = courseID;
     }
 
     public String getDescription() {
@@ -84,6 +84,14 @@ public class Course {
         this.capacity = capacity;
     }
 
+    public List<Student> getStudents() {
+        return students;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
+    }
+
     public String getClassroom() {
         return classroom;
     }
@@ -92,11 +100,21 @@ public class Course {
         this.classroom = classroom;
     }
 
-    public List<Student> getStudents() {
-        return students;
+    public List<String> getDays() {
+        return days;
     }
 
-    public void setStudents(List<Student> students) {
-        this.students = students;
+    public void setDays(List<String> days) {
+        this.days = days;
     }
+
+    public List<String> getTimes() {
+        return times;
+    }
+
+    public void setTimes(List<String> times) {
+        this.times = times;
+    }
+
+
 }

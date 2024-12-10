@@ -2,9 +2,37 @@ package com.example.timetablemanager;
 
 import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
-public class TimetableManager {
+import java.io.IOException;
 
+public class TimetableManager extends Application {
+
+    @Override
+    public void start(Stage stage) throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(TimetableManager.class.getResource("welcomeLayout.fxml"));
+        //Creating the initial scene with 1080pixel width and 720pixel length.
+        Scene scene = new Scene(fxmlLoader.load(),1080,720);
+
+        //ICON OF THE APP
+        try {
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/icon.png")));
+        }catch (RuntimeException e){
+            System.err.println("Couldn't load icon");
+            e.printStackTrace();
+        }
+
+        stage.setTitle("Welcome to Timetable Manager");
+        stage.setScene(scene);
+        stage.show();
+
+        System.out.println("Timetable Manager initialized.");
+    }
     private List<Student> students;
     private List<Course> courses;
 
@@ -45,7 +73,7 @@ public class TimetableManager {
 
     public Course findCourseById(String courseId) {
         for (Course course : courses) {
-            if (course.getCourseId().equals(courseId)) {
+            if (course.getCourseID().equals(courseId)) {
                 System.out.println("CourseId found: " + courseId);
                 return course;
             }
@@ -95,5 +123,8 @@ public class TimetableManager {
             System.out.println("Added");
         }
         return schedule;
+    }
+    public static void main(String[] args) {
+        launch();
     }
 }

@@ -5,21 +5,14 @@ import java.util.List;
 
 public class Student {
     private String studentId;
-    private String name;
-    private String surname;
+    private String fullName;
+    private String email;
     private List<Course> enrolledCourses;
 
-    public Student(String studentId, String name, String surname, List<Course> enrolledCourses) {
+    public Student(String studentId, String fullName, String email, List<Course> enrolledCourses) {
         this.studentId = studentId;
-        this.name = name;
-        this.surname = surname;
-        this.enrolledCourses = enrolledCourses;
-    }
-
-    public Student() {
-        this.studentId = studentId;
-        this.name = name;
-        this.surname = surname;
+        this.fullName = fullName;
+        this.email = email;
         this.enrolledCourses = enrolledCourses;
     }
 
@@ -40,9 +33,12 @@ public class Student {
         }
         return schedule;
     }
+    @Override
+    public String toString() {
+        return fullName + " (" + studentId + ")";
+    }
 
-
-
+    //Geter and setters
     public String getStudentId() {
         return studentId;
     }
@@ -51,20 +47,20 @@ public class Student {
         this.studentId = studentId;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getEmail() {
+        return email;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public List<Course> getEnrolledCourses() {
