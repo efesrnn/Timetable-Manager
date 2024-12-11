@@ -1,44 +1,64 @@
 package com.example.timetablemanager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Student {
-    private String id;
-    private String name;
-    private String email;
+    private String studentId;
+    private String fullName;
+    private List<Course> enrolledCourses;
 
-    public Student(String id, String name) {
-        this.id = id;
-        this.name = name;
-        //this.lastName = lastName;
+    public Student(String studentId, String fullName, List<Course> enrolledCourses) {
+        this.studentId = studentId;
+        this.fullName = fullName;
+        this.enrolledCourses = enrolledCourses;
     }
 
-    public String getId() {
-        return id;
+    public boolean enrollInCourse(Course course) {
+        if (!enrolledCourses.contains(course)) {
+            enrolledCourses.add(course);
+            System.out.println("Successfully enrolled returning true");
+            return true;
+        }
+        System.out.println("Already enrolled returning false");
+        return false;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public List<String> getSchedule() {
+        List<String> schedule = new ArrayList<>();
+        for (Course course : enrolledCourses) {
+            schedule.add(course.getSchedule());
+        }
+        return schedule;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /*public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-     */
-
     @Override
     public String toString() {
-        return name + " (" + id + ")";
+        return fullName + " (" + studentId + ")";
+    }
+
+    //Geter and setters
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public List<Course> getEnrolledCourses() {
+        return enrolledCourses;
+    }
+
+    public void setEnrolledCourses(List<Course> enrolledCourses) {
+        this.enrolledCourses = enrolledCourses;
     }
 }
+

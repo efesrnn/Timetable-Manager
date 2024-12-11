@@ -40,24 +40,24 @@ public class studentSelectionController {
     public void initialize() {
         //Sample data for test use for now:
         allStudents = List.of(
-                new Student("S001", "Alice Johnson"),
-                new Student("S002", "Bob Smith"),
-                new Student("S003", "Charlie Davis"),
-                new Student("S004", "Diana Brown"),
-                new Student("S005", "Ethan Wilson")
+                new Student("S001", "Alice Johnson",null),
+                new Student("S002", "Bob Smith",null),
+                new Student("S003", "Charlie Davis",null),
+                new Student("S004", "Diana Brown",null),
+                new Student("S005", "Ethan Wilson",null)
         );
 
         listViewAvailable.setItems(FXCollections.observableArrayList(
-                allStudents.stream().map(student -> student.getId() + " | " + student.getName()).toList()
+                allStudents.stream().map(student -> student.getStudentId() + " | " + student.getFullName()).toList()
         ));
 
         //Listener to filter available students:
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             listViewAvailable.setItems(FXCollections.observableArrayList(
                     allStudents.stream()
-                            .filter(student -> student.getName().toLowerCase().contains(newValue.toLowerCase()) ||
-                                    student.getId().toLowerCase().contains(newValue.toLowerCase()))
-                            .map(student -> student.getId() + " | " + student.getName())
+                            .filter(student -> student.getFullName().toLowerCase().contains(newValue.toLowerCase()) ||
+                                    student.getStudentId().toLowerCase().contains(newValue.toLowerCase()))
+                            .map(student -> student.getStudentId() + " | " + student.getFullName())
                             .toList()
             ));
         });
@@ -86,7 +86,7 @@ public class studentSelectionController {
             //Map selected strings back to Student objects
             selectedStudents.clear();
             selectedStudents.addAll(allStudents.stream()
-                    .filter(student -> selectedItems.contains(student.getId() + " | " + student.getName()))
+                    .filter(student -> selectedItems.contains(student.getStudentId() + " | " + student.getFullName()))
                     .toList());
 
             closeStage();

@@ -24,6 +24,33 @@ public class Course {
         this.times = times != null ? times : new ArrayList<>();
     }
 
+
+    public boolean addStudent(Student student) {
+        if (students.size() < capacity && !students.contains(student)) {
+            students.add(student);
+            System.out.println("Adding student, returning true");
+            return true;
+        }
+        System.out.println("Coudn't add student, returning false");
+        return false;
+    }
+    @Override
+    public String toString() {
+        return courseName + " (" + courseID + ")";
+    }
+
+    /* */
+    public void assignClassroom(String classroom) {
+        this.classroom = classroom;
+    }
+
+    public String getSchedule() {
+        return "Course: " + courseName + ", Classroom: " + classroom;
+    }
+    /* */
+
+    //Getter Setter
+
     public String getCourseName() {
         return courseName;
     }
@@ -88,15 +115,4 @@ public class Course {
         this.times = times;
     }
 
-    public boolean addStudent(Student student) {
-        if (students.size() >= capacity) {
-            return false; // Cannot add more students than the capacity
-        }
-        return students.add(student);
-    }
-
-    @Override
-    public String toString() {
-        return courseName + " (" + courseID + ")";
-    }
 }
