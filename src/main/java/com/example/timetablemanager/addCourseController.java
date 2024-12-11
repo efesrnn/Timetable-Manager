@@ -104,7 +104,7 @@ public class addCourseController {
             if (selectedStudents != null) {
                 this.selectedStudents.addAll(selectedStudents);
                 studentListView.setItems(FXCollections.observableArrayList(
-                        this.selectedStudents.stream().map(student -> student.getId() + " | " + student.getName()).toList()
+                        this.selectedStudents.stream().map(student -> student.getStudentId() + " | " + student.getFullName()).toList()
                 ));
             }
         } catch (IOException e) {
