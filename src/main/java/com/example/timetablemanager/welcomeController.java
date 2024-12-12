@@ -10,11 +10,14 @@ import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 public class welcomeController {
 
@@ -60,88 +63,81 @@ public class welcomeController {
         }
     }
 
-    public void openExistingCSV() {
-        // Create a File Chooser
+    @FXML
+    public void selectAndAnalyzeCSVFiles() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select a CSV file");
-
-        // Filter for CSV files
+        fileChooser.setTitle("Select Classroom and Course CSV Files");
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv")
         );
 
-        // Create a new Stage (window)
         Stage stage = new Stage();
-        // User selects a file
-        File selectedFile = fileChooser.showOpenDialog(stage);
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
 
-        // If a file is selected
-        if (selectedFile != null) {
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        if (selectedFiles != null && selectedFiles.size() == 2) {
+            File classroomFile = null;
+            File courseFile = null;
 
-            // Project directory
-            File projectDirectory = new File(System.getProperty("user.dir"));
-            // Path where the file will be copied in the project directory
-            File destinationFile = new File(projectDirectory, selectedFile.getName());
-
-            try {
-                // Copy the file to the project directory
-                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("File successfully copied to project directory: " + destinationFile.getAbsolutePath());
-
-                // Read the CSV file using Timetable class
-                TimetableManager.readCSV(selectedFile.getAbsolutePath());
-
-            } catch (IOException e) {
-                // Print error message in case of an error
-                System.err.println("Error while copying the file: " + e.getMessage());
+            for (File file : selectedFiles) {
+                String fileType = analyzeFileContent(file);
+                if ("classroom".equals(fileType)) {
+                    classroomFile = file;
+                } else if ("course".equals(fileType)) {
+                    courseFile = file;
+                }
             }
-        } else {
-            // Print message if no file is selected
-            System.out.println("No file selected.");
-        }
-    }
-        public void openCSV_ClassCapButton()
-        {
-            // Create a File Chooser
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Select a Classroom CSV file");
 
-            // Filter for CSV files
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-            );
-
-            // Create a new Stage (window)
-            Stage stage = new Stage();
-            // User selects a file
-            File selectedFile = fileChooser.showOpenDialog(stage);
-
-            // If a file is selected
-            if (selectedFile != null) {
-                System.out.println("Selected classroom file: " + selectedFile.getAbsolutePath());
-
-                // Project directory
-                File projectDirectory = new File(System.getProperty("user.dir"));
-                // Path where the file will be copied in the project directory
-                File destinationFile = new File(projectDirectory, selectedFile.getName());
-
+            if (classroomFile != null && courseFile != null) {
                 try {
-                    // Copy the classroom file to the project directory
-                    Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("Classroom file successfully copied to project directory: " + destinationFile.getAbsolutePath());
+                    TimetableManager.readClassroomCSV(classroomFile.getAbsolutePath());
+                    TimetableManager.readCSV(courseFile.getAbsolutePath());
+                    System.out.println("Files successfully processed.");
 
-                    // Process the classroom CSV file using Timetable class (with a default method)
-                    TimetableManager.readClassroomCSV(selectedFile.getAbsolutePath());
+                    // Dosyalar başarıyla yüklendikten sonra ana ekranı yükle
+                    loadMainLayout();
 
-                } catch (IOException e) {
-                    System.err.println("Error while copying the classroom file: " + e.getMessage());
+                } catch (Exception e) {
+                    showAlert("Error", "Error processing files: " + e.getMessage());
                 }
             } else {
-                System.out.println("No classroom file selected.");
+                showAlert("Error", "Please select valid Classroom and Course CSV files.");
             }
+        } else {
+            showAlert("Error", "You must select exactly two CSV files.");
         }
+    }
 
+    private String analyzeFileContent(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.toLowerCase().contains("classroom")) {
+                    return "classroom";
+                } else if (line.toLowerCase().contains("course")) {
+                    return "course";
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+        return "unknown";
+    }
+
+    private void loadMainLayout() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
+            javafx.scene.Parent root = fxmlLoader.load();
+
+            Stage stage = (Stage) startBlankButton.getScene().getWindow();
+            stage.setTitle("Timetable Manager - Main View");
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load the main layout.");
+        }
+    }
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
