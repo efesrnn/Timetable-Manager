@@ -14,6 +14,12 @@ import static com.example.timetablemanager.Database.*;
 
     public class TimetableManager extends Application {
 
+        private static List<Course> timetable = new ArrayList<>();  // Zaman çizelgesini tutan liste
+
+        public static List<Course> getTimetable() {
+            return timetable;  // Zaman çizelgesini döndüren metod
+        }
+
         public static class Course {
             String name;
             String startTime;
@@ -52,14 +58,11 @@ import static com.example.timetablemanager.Database.*;
             System.out.println("Timetable Manager initialized.");
         }
 
-    private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
-    private static final String filePath = dbPath + File.separator + "Courses.csv";
-    private static final String filePath2 = dbPath + File.separator + "ClassroomCapacity.csv";
+        public static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
+        public static final String filePath = dbPath + File.separator + "Courses.csv";
+        public static final String filePath2 = dbPath + File.separator + "ClassroomCapacity.csv";
 
-
-    public static void main(String[] args) {
-
-
+        public static void main(String[] args) {
 
         File file = new File(filePath);
         if (!file.exists()) {
@@ -67,133 +70,135 @@ import static com.example.timetablemanager.Database.*;
         } else {
             connect();
             List<Course> timetable = readCSV(filePath);
-
             File classroomFile = new File(filePath2);
             if (classroomFile.exists()) {
-                readClassroomCSV(filePath2,timetable);
+                readClassroomCSV(filePath2);
             } else {
                 System.out.println("Classroom file not found at: " + filePath2);
             }
             printTimetable(timetable);
         }
 
-
-        launch();
         connect();
-        listCourses();
+        launch();
         close();
     }
 
-    // Read CSV file and return list of courses
-    private static List<Course> readCSV(String filePath) {
-        List<Course> courses = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            br.readLine();
-            while ((line = br.readLine()) != null) {
-                String[] columns = line.split(";");
-                if (columns.length < 4) {
-                    System.err.println("Skipping invalid line (not enough columns): " + line);
-                    continue;
-                }
-
-                String courseName = columns[0];
-                String startTime = columns[1];
-
-                // Validate and extract duration
-                String durationStr = columns[2].replaceAll("[^0-9]", "");
-                int duration = 0;
-                if (!durationStr.isEmpty()) {
-                    try {
-                        duration = Integer.parseInt(durationStr);
-                    } catch (NumberFormatException e) {
-                        System.err.println("Invalid duration value for course '" + courseName + "': " + columns[2]);
+        // Read CSV file and return list of courses
+        public static List<Course> readCSV(String filePath) {
+            timetable.clear();
+            List<Course> courses = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                br.readLine();
+                while ((line = br.readLine()) != null) {
+                    String[] columns = line.split(";");
+                    if (columns.length < 4) {
+                        System.err.println("Skipping invalid line (not enough columns): " + line);
                         continue;
                     }
-                } else {
-                    System.err.println("Empty or invalid duration value for course '" + courseName + "'");
-                    continue;
+
+                    String courseName = columns[0];
+                    String startTime = columns[1];
+
+                    // Validate and extract duration
+                    String durationStr = columns[2].replaceAll("[^0-9]", "");
+                    int duration = 0;
+                    if (!durationStr.isEmpty()) {
+                        try {
+                            duration = Integer.parseInt(durationStr);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid duration value for course '" + courseName + "': " + columns[2]);
+                            continue;
+                        }
+                    } else {
+                        System.err.println("Empty or invalid duration value for course '" + courseName + "'");
+                        continue;
+                    }
+
+                    String lecturer = columns[3];
+                    List<String> students = new ArrayList<>();
+                    for (int i = 4; i < columns.length; i++) {
+                        students.add(columns[i]);
+                    }
+
+                    // Add course and students to the database
+                    Database.addCourse(courseName,lecturer,duration,startTime);
+
+                    for (String student : students) {
+                        Database.addStudent(student);  // Add student to the database
+                        Database.addEnrollment(courseName,student);  // Enroll student in the course
+                    }
+
+                    // Add the course to the list
+                    courses.add(new Course(courseName, startTime, duration, lecturer, students));
                 }
-
-                String lecturer = columns[3];
-                List<String> students = new ArrayList<>();
-                for (int i = 4; i < columns.length; i++) {
-                    students.add(columns[i]);
-                }
-
-                // Add course and students to the database
-                Database.addCourse(courseName,lecturer,duration,startTime);
-
-                for (String student : students) {
-                    Database.addStudent(student);  // Add student to the database
-                    Database.addEnrollment(courseName,student);  // Enroll student in the course
-                }
-
-                // Add the course to the list
-                courses.add(new Course(courseName, startTime, duration, lecturer, students));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            return courses;
         }
-        return courses;
-    }
 
-    // Read and process the classroom CSV file
-    private static void readClassroomCSV(String filePath2, List<Course> courses) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath2))) {
-            String line;
-            br.readLine(); // Skip the header line
-            while ((line = br.readLine()) != null) {
-                String[] columns = line.split(";");
-                if (columns.length < 2) {
-                    System.err.println("Skipping invalid line (not enough columns): " + line);
-                    continue;
-                }
-                String classroomName = columns[0];
-                String capacityStr = columns[1];
-                int capacity = 0;
-                try {
-                    capacity = Integer.parseInt(capacityStr);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid capacity value for classroom '" + classroomName + "': " + capacityStr);
-                    continue;
-                }
+        // Read and process the classroom CSV file
+        public static void readClassroomCSV(String filePath2) {
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath2))) {
+                String line;
+                br.readLine(); // Skip the header line
 
-                // Add the classroom to the database
-                Database.addClassroom(classroomName, capacity);
-                System.out.println("Classroom: " + classroomName + " with capacity: " + capacity); // Log statement for debugging
+                // Fetch all courses once
+                List<Course> allCourses = Database.getAllCourses();
 
-                // Allocate each course to the current classroom
-                for (Course course : courses) {
-                    System.out.println("Allocating course: " + course.name + " to classroom: " + classroomName); // Log statement for debugging
-                    Database.allocateCourseToClassroom(course.name, classroomName);
+                while ((line = br.readLine()) != null) {
+                    String[] columns = line.split(";");
+                    if (columns.length < 2) {
+                        System.err.println("Skipping invalid line (not enough columns): " + line);
+                        continue;
+                    }
+                    String classroomName = columns[0];
+                    String capacityStr = columns[1];
+                    int capacity = 0;
+                    try {
+                        capacity = Integer.parseInt(capacityStr);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid capacity value for classroom '" + classroomName + "': " + capacityStr);
+                        continue;
+                    }
+
+                    // Add the classroom to the database
+                    Database.addClassroom(classroomName, capacity);
+                    System.out.println("Classroom added: " + classroomName + " with capacity: " + capacity); // Log statement for debugging
+
+                    // Allocate each course to the current classroom
+                    for (Course course : allCourses) {
+                        Database.allocateCourseToClassroom(course.name, classroomName);
+                        System.out.println("Allocated course: " + course.name + " to classroom: " + classroomName);
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-    }
 
 
-    // Print the timetable in a table-like format
-    private static void printTimetable(List<Course> timetable) {
-        System.out.println();
-        // Print header
-        System.out.printf("%-15s%-20s%-10s%-20s%-50s\n", "Course", "Time", "Duration", "Lecturer", "Students");
-        System.out.println("---------------------------------------------------------------------------------------------");
+        // Print the timetable in a table-like format
+        public static void printTimetable(List<Course> timetable) {
+            System.out.println();
+            // Print header
+            System.out.printf("%-15s%-20s%-10s%-20s%-50s\n", "Course", "Time", "Duration", "Lecturer", "Students");
+            System.out.println("---------------------------------------------------------------------------------------------");
 
-        // Print each course in a formatted table
-        for (Course course : timetable) {
-            String durationString = (course.duration > 0) ? String.valueOf(course.duration) : "";
+            // Print each course in a formatted table
+            for (Course course : timetable) {
+                String durationString = (course.duration > 0) ? String.valueOf(course.duration) : "";
 
-            System.out.printf("%-15s%-20s%-10s%-20s%-50s\n",
-                    course.name,
-                    course.startTime,
-                    durationString,
-                    course.lecturer,
-                    String.join(", ", course.students));
+                System.out.printf("%-15s%-20s%-10s%-20s%-50s\n",
+                        course.name,
+                        course.startTime,
+                        durationString,
+                        course.lecturer,
+                        String.join(", ", course.students));
+            }
         }
-    }
 
 
 }

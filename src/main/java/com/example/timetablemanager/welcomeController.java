@@ -13,14 +13,13 @@ import javafx.scene.Scene;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class welcomeController {
 
     @FXML
     private Button startBlankButton;
-
-    @FXML
-    private Button openCSVButton;
 
     @FXML
     private ImageView logoImageView;
@@ -32,8 +31,6 @@ public class welcomeController {
         //"Start with Blank CSV" button calling related method:
         startBlankButton.setOnAction(event -> startWithBlankCSV());
 
-        //"Open Existing CSV" button calling related method:
-        openCSVButton.setOnAction(event -> openExistingCSV());
     }
 
     private void loadLogo() {
@@ -63,48 +60,87 @@ public class welcomeController {
         }
     }
 
-    private void openExistingCSV() {
+    public void openExistingCSV() {
+        // Create a File Chooser
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open CSV File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setTitle("Select a CSV file");
 
-        try {
-            //TODO: Add a method to copy file to ".../data" directory if user import a .csv file from another directory.
+        // Filter for CSV files
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+        );
 
-            File initialDirectory = new File("src/main/resources/com/example/timetablemanager/data");
-            if (initialDirectory.exists() && initialDirectory.isDirectory()) {
-                fileChooser.setInitialDirectory(initialDirectory);
-            } else {
-                showAlert("Warning", "Default directory not found. Using user home directory.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error", "Failed to locate the default directory. Using user home directory.");
-        }
-
-        Stage stage = (Stage) openCSVButton.getScene().getWindow();
+        // Create a new Stage (window)
+        Stage stage = new Stage();
+        // User selects a file
         File selectedFile = fileChooser.showOpenDialog(stage);
 
+        // If a file is selected
         if (selectedFile != null) {
-            try {
-                // Pass the file path to the main application layout
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
-                javafx.scene.Parent root = fxmlLoader.load();
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
 
-                // Pass the file path to the controller of the main layout
-                ttManagerController mainController = fxmlLoader.getController();
-                mainController.loadTimetableFromCSV(selectedFile);
-                stage.setTitle("Timetable Manager - " + selectedFile.getName());
-                Scene scene = stage.getScene();
-                scene.setRoot(root);
+            // Project directory
+            File projectDirectory = new File(System.getProperty("user.dir"));
+            // Path where the file will be copied in the project directory
+            File destinationFile = new File(projectDirectory, selectedFile.getName());
+
+            try {
+                // Copy the file to the project directory
+                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("File successfully copied to project directory: " + destinationFile.getAbsolutePath());
+
+                // Read the CSV file using Timetable class
+                TimetableManager.readCSV(selectedFile.getAbsolutePath());
 
             } catch (IOException e) {
-                e.printStackTrace();
-                showAlert("Error", "Failed to load the layout or the CSV file.");
+                // Print error message in case of an error
+                System.err.println("Error while copying the file: " + e.getMessage());
             }
+        } else {
+            // Print message if no file is selected
+            System.out.println("No file selected.");
         }
     }
+        public void openCSV_ClassCapButton()
+        {
+            // Create a File Chooser
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select a Classroom CSV file");
 
+            // Filter for CSV files
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+            );
+
+            // Create a new Stage (window)
+            Stage stage = new Stage();
+            // User selects a file
+            File selectedFile = fileChooser.showOpenDialog(stage);
+
+            // If a file is selected
+            if (selectedFile != null) {
+                System.out.println("Selected classroom file: " + selectedFile.getAbsolutePath());
+
+                // Project directory
+                File projectDirectory = new File(System.getProperty("user.dir"));
+                // Path where the file will be copied in the project directory
+                File destinationFile = new File(projectDirectory, selectedFile.getName());
+
+                try {
+                    // Copy the classroom file to the project directory
+                    Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("Classroom file successfully copied to project directory: " + destinationFile.getAbsolutePath());
+
+                    // Process the classroom CSV file using Timetable class (with a default method)
+                    TimetableManager.readClassroomCSV(selectedFile.getAbsolutePath());
+
+                } catch (IOException e) {
+                    System.err.println("Error while copying the classroom file: " + e.getMessage());
+                }
+            } else {
+                System.out.println("No classroom file selected.");
+            }
+        }
 
 
     private void showAlert(String title, String message) {

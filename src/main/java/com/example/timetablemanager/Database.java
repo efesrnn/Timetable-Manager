@@ -1,6 +1,10 @@
 package com.example.timetablemanager;
+
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This static class is responsible for creating and managing the timetable database.
  * The database consists of 5 tables:
@@ -9,47 +13,30 @@ import java.sql.*;
  * - Allocated: Manages the allocation of courses to classrooms.
  * - Students: Stores student information.
  * - Enrollments: Manages the enrollments of students in courses.
-
+ *
  * The database is created and stored in the user's home directory under the Documents folder.
- * Usage of the database can be done using methods like:
- * - Database.connect() to establish a connection.
- * - Database.addCourse() to add a course.
- * - Database.addClassroom() to add a classroom.
- * - Database.allocateCourseToClassroom() to allocate courses to classrooms.
- * - Database.listCourses() to list all courses, etc.
  */
-
 public class Database {
     private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
     private static final String url = "jdbc:sqlite:" + dbPath + File.separator + "TimetableManagement.db";
     private static Connection conn = null;
 
+    // In-memory course list
+    private static List<TimetableManager.Course> courseList = new ArrayList<>();
+
     // Create database connection
     public static Connection connect() {
-
         File dbDir = new File(dbPath);
         if (!dbDir.exists()) {
-            if (dbDir.mkdir()) {
-                System.out.println("Folder created successfully: " + dbDir.getAbsolutePath());
-            } else {
-                System.err.println("Failed to create folder: " + dbDir.getAbsolutePath());
-                return null;
-            }
-        }
-
-        // Check if database file exists
-        File dbFile = new File(dbPath + File.separator + "TimetableManagement.db");
-        if (!dbFile.exists()) {
-            System.out.println("Database file does not exist,creating it.");
-        } else {
-            System.out.println("Database file found: " + dbFile.getAbsolutePath());
+            dbDir.mkdir();
         }
 
         if (conn == null) {
             try {
                 conn = DriverManager.getConnection(url);
-                System.out.println("Connected to the database!");
-                createTables();
+                System.out.println("Connected to database!");
+                createTables(); // Create tables when connected
+                loadAllCourses(); // Load courses into memory
             } catch (SQLException e) {
                 System.err.println("Connection error: " + e.getMessage());
             }
@@ -62,14 +49,14 @@ public class Database {
         try {
             if (conn != null) {
                 conn.close();
-                System.out.println("Database connection closed.");
+                System.out.println("Veritabanı bağlantısı kapatıldı.");
             }
         } catch (SQLException e) {
-            System.err.println("Error while closing connection: " + e.getMessage());
+            System.err.println("Bağlantı kapatılırken hata: " + e.getMessage());
         }
     }
 
-    // CREATE TABLES
+    // CREATE TABLES (Creates five tables: Courses,Classrooms,Allocated,Students,Enrollments)
     private static void createTables() {
         String createCoursesTable = """
             CREATE TABLE IF NOT EXISTS Courses (
@@ -90,34 +77,31 @@ public class Database {
         """;
 
         String createAllocatedTable = """
-        CREATE TABLE IF NOT EXISTS Allocated (
-            allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
-            courseName TEXT NOT NULL,
-            classroomName TEXT NOT NULL,
-            FOREIGN KEY (courseName) REFERENCES Courses (courseName),
-            FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName)
-        );
-    """;
-
-
-        String createEnrollmentsTable = """
-    CREATE TABLE IF NOT EXISTS Enrollments (
-        enrollmentId INTEGER PRIMARY KEY AUTOINCREMENT,
-        courseName TEXT NOT NULL,
-        studentName TEXT NOT NULL,
-        FOREIGN KEY (courseName) REFERENCES Courses (courseName),
-        FOREIGN KEY (studentName) REFERENCES Students (studentName)
-    );
-""";
-
+            CREATE TABLE IF NOT EXISTS Allocated (
+                allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
+                courseName TEXT NOT NULL,
+                classroomName TEXT NOT NULL,
+                FOREIGN KEY (courseName) REFERENCES Courses (courseName),
+                FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName)
+            );
+        """;
 
         String createStudentsTable = """
-        CREATE TABLE IF NOT EXISTS Students (
-            studentId INTEGER PRIMARY KEY AUTOINCREMENT,
-            studentName TEXT NOT NULL
-        );
-    """;
+            CREATE TABLE IF NOT EXISTS Students (
+                studentId INTEGER PRIMARY KEY AUTOINCREMENT,
+                studentName TEXT NOT NULL
+            );
+        """;
 
+        String createEnrollmentsTable = """
+            CREATE TABLE IF NOT EXISTS Enrollments (
+                enrollmentId INTEGER PRIMARY KEY AUTOINCREMENT,
+                courseName TEXT NOT NULL,
+                studentName TEXT NOT NULL,
+                FOREIGN KEY (courseName) REFERENCES Courses (courseName),
+                FOREIGN KEY (studentName) REFERENCES Students (studentName)
+            );
+        """;
 
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createCoursesTable);
@@ -131,143 +115,182 @@ public class Database {
         }
     }
 
-    // ADD COURSE
-    public static void addCourse(String courseName, String lecturer,
-                                 int duration, String timeToStart)
-    {
-        String sql = "INSERT INTO Courses  (courseName, lecturer, duration, timeToStart) " +
-                "VALUES (?, ?, ?, ?)";
+    // Load all courses into the in-memory list(Includes courses and enrolled in each course))
+    private static void loadAllCourses() {
+        courseList.clear();
+        String sql = "SELECT courseName, timeToStart, duration, lecturer FROM Courses";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            boolean coursesFound = false;
+
+            while (rs.next()) {
+                String courseName = rs.getString("courseName");
+                String startTime = rs.getString("timeToStart");
+                int duration = rs.getInt("duration");
+                String lecturer = rs.getString("lecturer");
+
+                List<String> students = getStudentsEnrolledInCourse(courseName);
+
+                courseList.add(new TimetableManager.Course(courseName, startTime, duration, lecturer, students));
+                coursesFound = true;
+            }
+
+            if (coursesFound) {
+                System.out.println("Courses loaded into memory.");
+            } else {
+                System.out.println("No courses found in the database.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error while loading courses: " + e.getMessage());
+        }
+    }
+
+    // Get all courses from the in-memory list
+    public static List<TimetableManager.Course> getAllCourses() {
+        return new ArrayList<>(courseList);
+    }
+
+    // Reload courses (if needed)s
+    public static void reloadCourses() {
+        loadAllCourses();
+    }
+
+    // Get students enrolled in a specific course
+    private static List<String> getStudentsEnrolledInCourse(String courseName) {
+        List<String> students = new ArrayList<>();
+        String sql = "SELECT studentName FROM Enrollments WHERE courseName = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseName);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                students.add(rs.getString("studentName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching students for course '" + courseName + "': " + e.getMessage());
+        }
+        return students;
+    }
+
+    // Add new course to database
+    public static void addCourse(String courseName, String lecturer, int duration, String timeToStart) {
+        String sql = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseName);
             pstmt.setString(2, lecturer);
             pstmt.setInt(3, duration);
             pstmt.setString(4, timeToStart);
-            pstmt.execute();
+            pstmt.executeUpdate();
             System.out.println("Course added successfully!");
+            reloadCourses(); // Update in-memory list
         } catch (SQLException e) {
             System.err.println("Error while adding course: " + e.getMessage());
         }
     }
 
-    // Add enrollment (course-student relationship)
+    //Add new student to course
     public static void addEnrollment(String courseName, String studentName) {
         String sql = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseName);
             pstmt.setString(2, studentName);
             pstmt.executeUpdate();
+            System.out.println("Enrollment added successfully: " + studentName + " -> " + courseName);
         } catch (SQLException e) {
-            System.err.println("Error while adding enrollment:: " + e.getMessage());
+            System.err.println("Error while adding enrollment: " + e.getMessage());
         }
     }
 
-
-
-    // Add student
+    //Add new student to database
     public static void addStudent(String studentName) {
         String sql = "INSERT INTO Students (studentName) VALUES (?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentName);
             pstmt.executeUpdate();
-            System.out.println("Student " + studentName + " added successfully.");
+            System.out.println("Student added successfully: " + studentName);
         } catch (SQLException e) {
-            System.err.println("Error adding student: " + e.getMessage());
+            System.err.println("Error while adding student: " + e.getMessage());
         }
     }
 
-    // Add classroom
+    // Add classroom to the database
     public static void addClassroom(String classroomName, int capacity) {
         String sql = "INSERT INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classroomName);
             pstmt.setInt(2, capacity);
             pstmt.executeUpdate();
-            System.out.println("Classroom added successfully!");
+            System.out.println("Classroom added successfully: " + classroomName);
         } catch (SQLException e) {
             System.err.println("Error while adding classroom: " + e.getMessage());
         }
     }
 
-    // Allocate course to classroom
+    // Allocate a course to a classroom(Assigns a lesson to a class)
     public static void allocateCourseToClassroom(String courseName, String classroomName) {
         String sql = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, courseName);      // courseName'i doğrudan ekliyoruz
-            pstmt.setString(2, classroomName);   // classroomName'i doğrudan ekliyoruz
+            pstmt.setString(1, courseName);
+            pstmt.setString(2, classroomName);
             pstmt.executeUpdate();
-            System.out.println("Course successfully allocated to classroom!");
+            System.out.println("Course allocated to classroom successfully: " + courseName + " -> " + classroomName);
         } catch (SQLException e) {
             System.err.println("Error while allocating course to classroom: " + e.getMessage());
         }
     }
 
-    // List course information
-    public static void listCourses() {
-        String sql = "SELECT * FROM Courses";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                System.out.printf("ID: %s, Name: %s, Lecturer: %s\n",
-                        rs.getString("courseId"), rs.getString("courseName"), rs.getString("lecturer"));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error while fetching course details:  " + e.getMessage());
-        }
-    }
-
-    // Change the classroom for a course
+    //Updates the class of a course
     public static void changeClassroom(String course, String classroom) {
         try {
-            PreparedStatement updateAllocated = conn.prepareStatement("""
-            UPDATE Allocated
-            SET classroomName = ?
-            WHERE courseName = ?;
-        """);
+            String checkAllocation = "SELECT COUNT(*) FROM Allocated WHERE courseName = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkAllocation);
+            checkStmt.setString(1, course);
+            ResultSet rs = checkStmt.executeQuery();
 
-            updateAllocated.setString(1, classroom);
-            updateAllocated.setString(2, course);
-            updateAllocated.executeUpdate();
-            System.out.println("Classroom change successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Match course with classroom
-    public static void matchClassroom(String course, String classroom) {
-        try {
-            PreparedStatement insertAllocated = conn.prepareStatement("""
-            INSERT INTO Allocated (courseName, classroomName)
-            VALUES (?, ?);
-        """);
-
-            insertAllocated.setString(1, course);
-            insertAllocated.setString(2, classroom);
-            insertAllocated.executeUpdate();
-            System.out.println("Classroom matched successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getClassroomOfCourse(String courseName) {
-        String classroom = null;
-        try {
-            PreparedStatement getClassroom = conn.prepareStatement("""
-            SELECT classroomName
-            FROM Allocated
-            WHERE courseName = ?;
-        """);
-            getClassroom.setString(1, courseName);
-            ResultSet rs = getClassroom.executeQuery();
-
-            if (rs.next()) {
-                classroom = rs.getString("classroomName");
+            if (rs.next() && rs.getInt(1) > 0) {
+                PreparedStatement updateStmt = conn.prepareStatement("""
+                UPDATE Allocated
+                SET classroomName = ?
+                WHERE courseName = ?;
+            """);
+                updateStmt.setString(1, classroom);
+                updateStmt.setString(2, course);
+                updateStmt.executeUpdate();
+                System.out.println("Classroom updated successfully for course: " + course);
+            } else {
+                System.out.println("No existing allocation found for course: " + course);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Error while changing classroom: " + e.getMessage());
         }
-        return classroom;
     }
+
+    //Remove a student from a particular course
+    public static void removeStudentFromCourse(String courseName, String studentName) {
+        try {
+            // Enrollments tablosundan kaydı sil
+            PreparedStatement deleteEnrollment = conn.prepareStatement("""
+            DELETE FROM Enrollments
+            WHERE courseName = ? AND studentName = ?;
+        """);
+
+            deleteEnrollment.setString(1, courseName);
+            deleteEnrollment.setString(2, studentName);
+            int rowsAffected = deleteEnrollment.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Student removed from course successfully: " + studentName + " -> " + courseName);
+            } else {
+                System.out.println("No enrollment found for student " + studentName + " in course " + courseName);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while removing student from course: " + e.getMessage());
+        }
+    }
+
 
 }
