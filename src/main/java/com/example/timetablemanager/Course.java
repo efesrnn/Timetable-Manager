@@ -11,9 +11,12 @@ public class Course {
     private List<Student> students;
     private String classroom;
     private List<String> days;
-    private List<String> times;
+    private List<String> timesToStart;
+    private int duration;
+    private String lecturer;
 
-    public Course(String courseName, String courseID, String description, int capacity, List<Student> students, String classroom, List<String> days, List<String> times) {
+    public Course(String courseName, String courseID, String description, int capacity,
+                  List<Student> students, String classroom, List<String> days, List<String> times,int duration, String lecturer) {
         this.courseName = courseName;
         this.courseID = courseID;
         this.description = description;
@@ -21,7 +24,10 @@ public class Course {
         this.students = students != null ? students : new ArrayList<>();
         this.classroom = classroom;
         this.days = days != null ? days : new ArrayList<>();
-        this.times = times != null ? times : new ArrayList<>();
+        this.timesToStart = times != null ? times : new ArrayList<>();
+        this.duration = duration;
+        this.lecturer = lecturer;
+
     }
 
 
@@ -108,11 +114,19 @@ public class Course {
     }
 
     public List<String> getTimes() {
-        return times;
+        return timesToStart;
     }
 
     public void setTimes(List<String> times) {
-        this.times = times;
+        this.timesToStart = times;
     }
+
+    public int getDuration() {return duration;}
+
+    public void setDuration(int duration) {this.duration = duration;}
+
+    public String getLecturer() {return lecturer;}
+
+    public void setLecturer(String lecturer) {this.lecturer = lecturer;}
 
 }

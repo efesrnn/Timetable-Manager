@@ -3,22 +3,60 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane style="-fx-background-color: #f9f9f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.welcomeController">
+<StackPane style="-fx-background-color: #f9f9f9;"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.timetablemanager.welcomeController">
+
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
     <alignment>CENTER</alignment>
 
-    <VBox alignment="CENTER" spacing="20" style="-fx-pref-width: 400; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+    <VBox alignment="CENTER" spacing="20"
+          style="-fx-pref-width: 400; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+
         <ImageView fx:id="logoImageView" fitWidth="200" preserveRatio="true" />
-        <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1c1c1c;" text="Welcome to Timetable Manager" />
+        <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1c1c1c;"
+               text="Welcome to Timetable Manager" />
+
         <VBox alignment="CENTER" spacing="10" style="-fx-padding: 10;">
-            <Button fx:id="startBlankButton" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;" text="Start with Blank CSV File" />
-            <Button fx:id="openCSVButton" onAction="#selectAndAnalyzeCSVFiles" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;" text="Open CSV File" />
+            <Button fx:id="startBlankButton"
+                    style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;"
+                    text="Start with Blank CSV File" />
+
+            <Button fx:id="openCSVButton" onAction="#selectAndAnalyzeCSVFiles"
+                    style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;"
+                    text="Open CSV Files" />
         </VBox>
+
+        <!-- Label to show selected files -->
+        <Label fx:id="selectedFilesLabel"
+               style="-fx-font-size: 14; -fx-text-fill: #202123; -fx-font-style: italic;"
+               visible="false" />
+
+        <!-- A label to indicate that a process is ongoing -->
+        <Label fx:id="loadingLabel" text="Integrating database... Please wait."
+               style="-fx-font-size: 14; -fx-text-fill: #202123;"
+               visible="false" />
+
+        <!-- ProgressBar is initially invisible until user starts integration -->
+        <ProgressBar fx:id="progressBar"
+                     style="-fx-pref-width: 300; -fx-background-color: #f7f7f7; -fx-accent: #10A37F;"
+                     visible="false"
+                     progress="0" />
+
+        <!-- Cancel Button to cancel the process -->
+        <Button fx:id="cancelButton" text="Cancel"
+                style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;"
+                visible="false"
+                onAction="#cancelIntegration" />
+
     </VBox>
+
 </StackPane>

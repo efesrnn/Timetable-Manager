@@ -3,12 +3,9 @@ package com.example.timetablemanager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class studentSelectionController {
@@ -34,61 +31,62 @@ public class studentSelectionController {
     @FXML
     private Button btnCancel;
 
-    private List<Student> allStudents = new ArrayList<>();
+    private List<Student> allStudents;
     private ObservableList<Student> selectedStudents = FXCollections.observableArrayList();
 
     public void initialize() {
-        //Sample data for test use for now:
-        allStudents = List.of(
-                new Student("S001", "Alice Johnson",null),
-                new Student("S002", "Bob Smith",null),
-                new Student("S003", "Charlie Davis",null),
-                new Student("S004", "Diana Brown",null),
-                new Student("S005", "Ethan Wilson",null)
-        );
+        // Fetch actual students from the database
+        allStudents = Database.getAllStudents();
 
+        // Initially display all students
         listViewAvailable.setItems(FXCollections.observableArrayList(
-                allStudents.stream().map(student -> student.getStudentId() + " | " + student.getFullName()).toList()
+                allStudents.stream()
+                        .map(student -> student.getStudentId() + " | " + student.getFullName())
+                        .toList()
         ));
 
-        //Listener to filter available students:
+        // Add listener for searching/filtering available students
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            listViewAvailable.setItems(FXCollections.observableArrayList(
-                    allStudents.stream()
-                            .filter(student -> student.getFullName().toLowerCase().contains(newValue.toLowerCase()) ||
-                                    student.getStudentId().toLowerCase().contains(newValue.toLowerCase()))
-                            .map(student -> student.getStudentId() + " | " + student.getFullName())
-                            .toList()
-            ));
+            // Filter allStudents based on search text
+            List<String> filtered = allStudents.stream()
+                    .filter(student -> student.getFullName().toLowerCase().contains(newValue.toLowerCase())
+                            || student.getStudentId().toLowerCase().contains(newValue.toLowerCase()))
+                    .map(student -> student.getStudentId() + " | " + student.getFullName())
+                    .toList();
+            listViewAvailable.setItems(FXCollections.observableArrayList(filtered));
         });
 
-        //ADD BUTTON:
+        // ADD BUTTON: Move selected students from available to selected
         btnAdd.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewAvailable.getSelectionModel().getSelectedItems();
+            // Add to selected list
             listViewSelected.getItems().addAll(selectedItems);
+            // Remove from available list
             listViewAvailable.getItems().removeAll(selectedItems);
         });
 
-        //REMOVE BUTTON:
+        // REMOVE BUTTON: Move selected students from selected back to available
         btnRemove.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewSelected.getSelectionModel().getSelectedItems();
+            // Add back to available
             listViewAvailable.getItems().addAll(selectedItems);
+            // Remove from selected
             listViewSelected.getItems().removeAll(selectedItems);
         });
 
-        //CANCEL BUTTON:
+        // CANCEL BUTTON: Just close the stage without saving
         btnCancel.setOnAction(event -> closeStage());
 
-        //SAVE BUTTON:
+        // SAVE BUTTON: Map selected strings back to Student objects and close
         btnSave.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewSelected.getItems();
-
-            //Map selected strings back to Student objects
+            // Clear and refetch actual students matching the selected strings
             selectedStudents.clear();
-            selectedStudents.addAll(allStudents.stream()
-                    .filter(student -> selectedItems.contains(student.getStudentId() + " | " + student.getFullName()))
-                    .toList());
-
+            selectedStudents.addAll(
+                    allStudents.stream()
+                            .filter(student -> selectedItems.contains(student.getStudentId() + " | " + student.getFullName()))
+                            .toList()
+            );
             closeStage();
         });
     }

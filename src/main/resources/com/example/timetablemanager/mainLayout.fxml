@@ -36,12 +36,14 @@
         </HBox>
         <TableView fx:id="timetableTable" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;" prefHeight="300.0" prefWidth="700.0">
           <columns>
-            <TableColumn text="Day" />
-            <TableColumn text="Time" />
-            <TableColumn text="Course" />
-            <TableColumn text="Classroom" />
-            <TableColumn text="Capacity" />
-            <TableColumn text="Enrolled Students" />
+            <TableColumn fx:id="courseIDColumn" text="Course ID"/>
+            <TableColumn fx:id="courseColumn" text="Course Name"/>
+            <TableColumn fx:id="lecturerColumn" text="Lecturer"/> <!-- Add this column -->
+            <TableColumn fx:id="dayColumn" text="Day"/>
+            <TableColumn fx:id="timeColumn" text="Time"/>
+            <TableColumn fx:id="classroomColumn" text="Classroom"/>
+            <TableColumn fx:id="capacityColumn" text="Capacity"/>
+            <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Students"/>
           </columns>
         </TableView>
         <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
@@ -55,7 +57,7 @@
                   style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
-          <Label text="v1.0" style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" />
+          <Label text="v1.1" style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" />
         </HBox>
       </VBox>
     </VBox>
