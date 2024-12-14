@@ -12,7 +12,7 @@
 
 <VBox prefHeight="285.0" prefWidth="626.0" spacing="15" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.timetablemanager.swapCourse">
-<Label id="SwapClasroomLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 10 0 15 0;" text="Swap Classroom" />
+<Label fx:id="SwapClasroomLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 10 0 15 0;" text="Swap Classroom" />
    <GridPane>
      <columnConstraints>
        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -27,16 +27,16 @@
          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
      </rowConstraints>
       <children>
-         <ListView id="CapacityListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-         <Label id="CapacityLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="1" />
+         <ListView fx:id="CapacityListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+         <Label fx:id="CapacityLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="1" />
          <ComboBox fx:id="SelectCourseCombo" prefHeight="38.0" promptText="Select Course" style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-         <Label id="EnrollmendLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Enrolled Students" GridPane.rowIndex="2" />
-         <ListView id="EnrolledListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-         <Label id="ClasssroomLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Classroom" GridPane.rowIndex="3" />
-         <ListView id="ClasroomListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-         <ComboBox id="SelectClassroomCombo" fx:id="comboClassroom1" prefHeight="38.0" promptText="Select Classroom" style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" GridPane.rowIndex="4" />
-         <Label id="CapacityLabel2" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="5" />
-         <ListView id="CapacityListView2" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+         <Label fx:id="EnrollmendLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Enrolled Students" GridPane.rowIndex="2" />
+         <ListView fx:id="EnrolledListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+         <Label fx:id="ClasssroomLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Classroom" GridPane.rowIndex="3" />
+         <ListView fx:id="ClasroomListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+         <ComboBox fx:id="SelectClassroomCombo" prefHeight="38.0" promptText="Select Classroom" style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" GridPane.rowIndex="4" />
+         <Label fx:id="CapacityLabel2" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="5" />
+         <ListView fx:id="CapacityListView2" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       </children>
    </GridPane>
 <HBox alignment="CENTER" spacing="20">

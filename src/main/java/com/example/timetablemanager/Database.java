@@ -364,6 +364,41 @@ public class Database {
         return classroomNames;
     }
 
+    // New method to get all classroom capacity from the DB
+    public static List<Integer> getAllClassroomCapacities(String classroomName) {
+        List<Integer> classroomCapacities = new ArrayList<>();
+        String sql = "SELECT DISTINCT capacity FROM Classrooms WHERE classroomName = ?";
+
+        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+            pstmt.setString(1, classroomName); // Set the parameter value
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    classroomCapacities.add(rs.getInt("capacity")); // Fetch the capacity as an integer
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching classroom capacities: " + e.getMessage());
+        }
+
+        return classroomCapacities;
+    }
+
+
+   /* String sql =
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, classroomName);
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next()) {
+            int classroomCapacity = rs.getInt("capacity");
+            return classroomCapacity >= numberOfStudents;
+        }
+    } catch (SQLException e) {
+        System.err.println("Error while checking classroom capacity: " + e.getMessage());
+    }
+        return false;
+}*/
+
+
     public static List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT studentId, studentName FROM Students";
