@@ -17,6 +17,9 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,7 +155,13 @@ public class welcomeController {
         Task<Void> integrationTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                Database.connect();
+                Connection conn = Database.connect();
+                if (conn == null) {
+                    throw new SQLException("Failed to connect to database.");
+                }
+
+                // Disable auto-commit for transaction
+                conn.setAutoCommit(false);
 
                 int totalSteps = countLines(courseCSV) - 1; // minus 1 for header
                 totalSteps += (countLines(classroomCSV) - 1);
@@ -160,7 +169,27 @@ public class welcomeController {
 
                 int currentStep = 0;
 
-                // Process Course CSV
+                // Prepare batch statements
+                String insertCourseSQL = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
+                PreparedStatement courseStmt = conn.prepareStatement(insertCourseSQL);
+
+                String insertStudentSQL = "INSERT INTO Students (studentName) VALUES (?)";
+                PreparedStatement studentStmt = conn.prepareStatement(insertStudentSQL);
+
+                String insertEnrollmentSQL = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
+                PreparedStatement enrollmentStmt = conn.prepareStatement(insertEnrollmentSQL);
+
+                String insertClassroomSQL = "INSERT INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
+                PreparedStatement classroomStmt = conn.prepareStatement(insertClassroomSQL);
+
+                String insertAllocatedSQL = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
+                PreparedStatement allocatedStmt = conn.prepareStatement(insertAllocatedSQL);
+
+                // Process Course CSV (batch inserts)
+                List<String[]> classroomData = new ArrayList<>(); // Store classroom data for later
+                List<String> courseNamesForClassroom = new ArrayList<>(); // We'll need course names after loading
+
+                // First, read and insert courses + enrollments in batch
                 try (BufferedReader br = new BufferedReader(new FileReader(courseCSV))) {
                     String line = br.readLine(); // header
                     while ((line = br.readLine()) != null) {
@@ -183,7 +212,7 @@ public class welcomeController {
                                 continue;
                             }
                         } else {
-                            System.err.println("Empty or invalid duration value for course '" + courseName + "'");
+                            System.err.println("Empty or invalid duration for course '" + courseName + "'");
                             continue;
                         }
 
@@ -193,19 +222,31 @@ public class welcomeController {
                             students.add(columns[i]);
                         }
 
-                        Database.addCourse(courseName, lecturer, duration, startTime);
+                        // Add course to batch
+                        courseStmt.setString(1, courseName);
+                        courseStmt.setString(2, lecturer);
+                        courseStmt.setInt(3, duration);
+                        courseStmt.setString(4, startTime);
+                        courseStmt.addBatch();
+
+                        // Batch students and enrollments
                         for (String student : students) {
-                            Database.addStudent(student);
-                            Database.addEnrollment(courseName, student);
+                            studentStmt.setString(1, student);
+                            studentStmt.addBatch();
+
+                            enrollmentStmt.setString(1, courseName);
+                            enrollmentStmt.setString(2, student);
+                            enrollmentStmt.addBatch();
                         }
+
+                        courseNamesForClassroom.add(courseName);
 
                         currentStep++;
                         updateProgress(currentStep, totalSteps);
                     }
                 }
 
-                // Process Classroom CSV
-                List<Course> allCourses = Database.getAllCourses();
+                // Now process Classroom CSV
                 try (BufferedReader br = new BufferedReader(new FileReader(classroomCSV))) {
                     String line = br.readLine(); // header
                     while ((line = br.readLine()) != null) {
@@ -224,12 +265,18 @@ public class welcomeController {
                             continue;
                         }
 
-                        Database.addClassroom(classroomName, capacity);
-                        System.out.println("Classroom added: " + classroomName + " with capacity: " + capacity);
+                        // Add classroom to batch
+                        classroomStmt.setString(1, classroomName);
+                        classroomStmt.setInt(2, capacity);
+                        classroomStmt.addBatch();
 
-                        for (Course course : allCourses) {
-                            Database.allocateCourseToClassroom(course.getCourseName(), classroomName);
-                            System.out.println("Allocated course: " + course.getCourseName() + " to classroom: " + classroomName);
+                        // We'll allocate each course to this classroom after we load them from DB,
+                        // but since we want speed, let's assume we allocate all known courses:
+                        // This is a simplification; if you need logic to allocate only specific courses, adjust accordingly.
+                        for (String cname : courseNamesForClassroom) {
+                            allocatedStmt.setString(1, cname);
+                            allocatedStmt.setString(2, classroomName);
+                            allocatedStmt.addBatch();
                         }
 
                         currentStep++;
@@ -237,12 +284,34 @@ public class welcomeController {
                     }
                 }
 
+                // Execute all batches inside one transaction
+                courseStmt.executeBatch();
+                studentStmt.executeBatch();
+                enrollmentStmt.executeBatch();
+                classroomStmt.executeBatch();
+                allocatedStmt.executeBatch();
+
+                conn.commit(); // commit once
+                conn.setAutoCommit(true);
+
+                // Reload courses from DB into in-memory TimetableManager
+                TimetableManager.getTimetable().clear();
+                TimetableManager.getTimetable().addAll(Database.getAllCourses());
+
                 return null;
             }
         };
 
         integrationTask.setOnSucceeded(event -> navigateToMainLayout());
-        integrationTask.setOnFailed(event -> showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed."));
+        integrationTask.setOnFailed(event -> {
+            showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed.");
+            // If an error occurs, we can rollback inside setOnFailed if needed
+            // But since we're committing at the end, the error might have occurred before commit.
+            try {
+                Connection c = Database.connect();
+                if (c != null) c.rollback();
+            } catch (SQLException ignored) {}
+        });
 
         progressBar.progressProperty().bind(integrationTask.progressProperty());
 
@@ -250,6 +319,7 @@ public class welcomeController {
         thread.setDaemon(true);
         thread.start();
     }
+
 
     private int countLines(File file) throws IOException {
         int lines = 0;
@@ -277,16 +347,10 @@ public class welcomeController {
             Parent root = fxmlLoader.load();
             ttManagerController controller = fxmlLoader.getController();
 
-            // Update TimetableManager with the new data before refreshing
-            TimetableManager.getTimetable().clear();
-            TimetableManager.getTimetable().addAll(Database.getAllCourses());
-            TimetableManager.getTimetable().addAll(TimetableManager.getTimetable());
-
             Stage stage = (Stage) openCSVButton.getScene().getWindow();
             stage.setTitle("Timetable Manager - Main Layout");
             stage.getScene().setRoot(root);
 
-            // Now refresh the table
             controller.refreshTable();
 
         } catch (IOException e) {
@@ -294,6 +358,7 @@ public class welcomeController {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to load the main layout.");
         }
     }
+
 
 
 

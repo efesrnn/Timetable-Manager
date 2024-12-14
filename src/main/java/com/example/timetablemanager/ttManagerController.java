@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ttManagerController {
@@ -93,9 +94,31 @@ public class ttManagerController {
     }
 
 
+    //TODO: Unique courseID aand StudentName
     public void refreshTable() {
-        timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
+        //Removing duplicate courses by courseName
+        List<Course> original = TimetableManager.getTimetable();
+        LinkedHashMap<String, Course> uniqueCourses = new LinkedHashMap<>();
+        for (Course c : original) {
+            uniqueCourses.put(c.getCourseName(), c);
+        }
+
+        //For each unique course, remove duplicate students
+        for (Course c : uniqueCourses.values()) {
+            LinkedHashMap<String, Student> uniqueStudents = new LinkedHashMap<>();
+            for (Student s : c.getStudents()) {
+                // Use getFullName(), getStudentId(), or another unique field as the key
+                // Assuming fullName is unique for demonstration:
+                uniqueStudents.put(s.getFullName(), s);
+            }
+            // Replace the course's student list with a new list of unique students
+            c.setStudents(new ArrayList<>(uniqueStudents.values()));
+        }
+
+        // Step 3: Update the table with the filtered, unique courses
+        timetableTable.setItems(FXCollections.observableArrayList(uniqueCourses.values()));
     }
+
 
 
 
