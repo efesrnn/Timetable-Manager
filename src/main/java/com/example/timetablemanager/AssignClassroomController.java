@@ -64,7 +64,6 @@ public class AssignClassroomController {
                 showAlert("Error", "Please select a course and a classroom.");                return;
             }
 
-            // Seçilen kursu bul
             Course selectedCourse = allCourses.stream()
                     .filter(course -> course.getCourseName().equals(selectedCourseName))
                     .findFirst().orElse(null);
@@ -123,16 +122,36 @@ public class AssignClassroomController {
         });
 
 
-        buttonBack.setOnAction(event -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
-                Stage stage = (Stage) buttonBack.getScene().getWindow();
-                stage.setScene(new Scene(loader.load()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+
+        buttonBack.setOnAction(event -> switchScene("mainLayout.fxml"));
+
     }
+    private void switchScene(String fxmlFile) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/" + fxmlFile));
+            Object newRoot = loader.load();
+
+            if (!(newRoot instanceof javafx.scene.Parent)) {
+                throw new IllegalArgumentException("Loaded root is not a valid JavaFX parent node.");
+            }
+
+            Stage stage = (Stage) buttonBack.getScene().getWindow(); // Mevcut sahnenin Stage'ini al
+            Scene scene = stage.getScene(); // Mevcut sahneyi al
+            scene.setRoot((javafx.scene.Parent) newRoot); // Yeni kök bileşeni ayarla
+
+            // Sahne geçişinden sonra tam ekran modu gibi özellikleri koruyun
+            boolean wasFullScreen = stage.isFullScreen();
+            stage.setFullScreen(wasFullScreen);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load the scene: " + fxmlFile);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            showAlert("Error", "Invalid root type in FXML: " + fxmlFile);
+        }
+    }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
