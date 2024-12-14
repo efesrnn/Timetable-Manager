@@ -117,7 +117,7 @@ public class Database {
     // Load all courses into the in-memory list (Includes courses and enrolled students)
     private static void loadAllCourses() {
         courseList.clear();
-        String sql = "SELECT courseName, timeToStart, duration, lecturer FROM Courses";
+        String sql = "SELECT DISTINCT courseName, timeToStart, duration, lecturer FROM Courses";
 
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -177,6 +177,7 @@ public class Database {
     }
 
     public static List<Course> getAllCourses() {
+
         return new ArrayList<>(courseList);
     }
 
@@ -184,9 +185,9 @@ public class Database {
         loadAllCourses();
     }
 
-    private static List<String> getStudentsEnrolledInCourse(String courseName) {
+    public static List<String> getStudentsEnrolledInCourse(String courseName) {
         List<String> students = new ArrayList<>();
-        String sql = "SELECT studentName FROM Enrollments WHERE courseName = ?";
+        String sql = "SELECT DISTINCT studentName FROM Enrollments WHERE courseName = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseName);
@@ -249,8 +250,48 @@ public class Database {
             System.err.println("Error while adding classroom: " + e.getMessage());
         }
     }
+    //*****
+    // Method to check if the classroom has enough capacity
+    public static boolean hasSufficientCapacity(String classroomName, int numberOfStudents) {
+        String sql = "SELECT capacity FROM Classrooms WHERE classroomName = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classroomName);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int classroomCapacity = rs.getInt("capacity");
+                return classroomCapacity >= numberOfStudents;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while checking classroom capacity: " + e.getMessage());
+        }
+        return false;
+    }
 
     public static void allocateCourseToClassroom(String courseName, String classroomName) {
+        // Öncelikle daha önce atanmış mı kontrol et
+        String checkAllocation = "SELECT COUNT(*) FROM Allocated WHERE courseName = ? AND classroomName = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(checkAllocation)) {
+            pstmt.setString(1, courseName);
+            pstmt.setString(2, classroomName);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("This course is already allocated to the selected classroom.");
+                return; // Daha önce atanmışsa, işlem yapılmaz
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while checking existing allocation: " + e.getMessage());
+        }
+
+        List<String> enrolledStudents = getStudentsEnrolledInCourse(courseName);
+        int numberOfStudents = enrolledStudents.size();
+
+        // Check if the classroom has enough capacity
+        if (!hasSufficientCapacity(classroomName, numberOfStudents)) {
+            System.out.println("Error: The classroom does not have enough capacity for this course.");
+            return;
+        }
+
+
         String sql = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseName);
@@ -311,7 +352,7 @@ public class Database {
     // New method to get all classroom names from the DB
     public static List<String> getAllClassroomNames() {
         List<String> classroomNames = new ArrayList<>();
-        String sql = "SELECT classroomName FROM Classrooms";
+        String sql = "SELECT DISTINCT classroomName FROM Classrooms";
         try (Statement stmt = connect().createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {

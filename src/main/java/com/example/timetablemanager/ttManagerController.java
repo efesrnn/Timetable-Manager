@@ -79,7 +79,7 @@ public class ttManagerController {
         btnSearch.setOnAction(event -> showAlert("Search", "Search logic not attached yet."));
         btnAddCourse.setOnAction(event -> switchScene("addCourseLayout.fxml"));
         btnEnrollStudent.setOnAction(event -> showAlert("Enroll Student", "Enroll Student logic not attached yet."));
-        btnAssignClassroom.setOnAction(event -> showAlert("Assign Classroom", "Assign Classroom logic not attached yet."));
+        btnAssignClassroom.setOnAction(event -> switchScene("assignClassroomLayout.fxml"));
         btnSwapClassroom.setOnAction(event -> showAlert("Swap Classroom", "Swap Classroom logic not attached yet."));
 
         menuImportCSV.setOnAction(event -> showAlert("Import CSV", "Import CSV not attached yet."));
