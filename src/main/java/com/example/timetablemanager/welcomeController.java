@@ -1,36 +1,49 @@
 package com.example.timetablemanager;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.Parent;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class welcomeController {
 
     @FXML
-    private Button startBlankButton;
+    private Button startBlankButton,openCSVButton,cancelButton;
 
     @FXML
-    private ImageView logoImageView;
+    private Label loadingLabel;
+
+    @FXML
+    private ProgressBar progressBar;
+
+    @FXML
+    private Label selectedFilesLabel;
+
+    @FXML
+    private javafx.scene.image.ImageView logoImageView;
 
     @FXML
     public void initialize() {
-
         loadLogo();
-        //"Start with Blank CSV" button calling related method:
         startBlankButton.setOnAction(event -> startWithBlankCSV());
-
     }
 
     private void loadLogo() {
@@ -44,11 +57,9 @@ public class welcomeController {
 
     private void startWithBlankCSV() {
         try {
-            // Load the main application layout (with an empty timetable)
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
-            // Getting the current stage:
             Stage stage = (Stage) startBlankButton.getScene().getWindow();
             stage.setTitle("Timetable Manager - New Timetable");
             Scene scene = stage.getScene();
@@ -56,100 +67,327 @@ public class welcomeController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error", "Failed to load the main layout.");
+            showAlert(Alert.AlertType.ERROR,"Error", "Failed to load the main layout.");
         }
     }
 
-    public void openExistingCSV() {
-        // Create a File Chooser
+    @FXML
+    public void selectAndAnalyzeCSVFiles() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select a CSV file");
-
-        // Filter for CSV files
+        fileChooser.setTitle("Select Classroom and Course CSV Files");
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv")
         );
 
-        // Create a new Stage (window)
-        Stage stage = new Stage();
-        // User selects a file
-        File selectedFile = fileChooser.showOpenDialog(stage);
+        Stage stage = (Stage) openCSVButton.getScene().getWindow();
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
 
-        // If a file is selected
-        if (selectedFile != null) {
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        if (selectedFiles != null && selectedFiles.size() == 2) {
+            File classroomFile = null;
+            File courseFile = null;
 
-            // Project directory
-            File projectDirectory = new File(System.getProperty("user.dir"));
-            // Path where the file will be copied in the project directory
-            File destinationFile = new File(projectDirectory, selectedFile.getName());
-
-            try {
-                // Copy the file to the project directory
-                Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("File successfully copied to project directory: " + destinationFile.getAbsolutePath());
-
-                // Read the CSV file using Timetable class
-                TimetableManager.readCSV(selectedFile.getAbsolutePath());
-
-            } catch (IOException e) {
-                // Print error message in case of an error
-                System.err.println("Error while copying the file: " + e.getMessage());
+            for (File file : selectedFiles) {
+                String fileType = analyzeFileContent(file);
+                if ("classroom".equals(fileType)) {
+                    classroomFile = file;
+                } else if ("course".equals(fileType)) {
+                    courseFile = file;
+                }
             }
-        } else {
-            // Print message if no file is selected
-            System.out.println("No file selected.");
-        }
-    }
-        public void openCSV_ClassCapButton()
-        {
-            // Create a File Chooser
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Select a Classroom CSV file");
 
-            // Filter for CSV files
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-            );
+            if (classroomFile != null && courseFile != null) {
+                // Show the selected files to the user
+                selectedFilesLabel.setText("Selected Course File: " + courseFile.getName() + "\nSelected Classroom File: " + classroomFile.getName());
+                selectedFilesLabel.setVisible(true);
 
-            // Create a new Stage (window)
-            Stage stage = new Stage();
-            // User selects a file
-            File selectedFile = fileChooser.showOpenDialog(stage);
-
-            // If a file is selected
-            if (selectedFile != null) {
-                System.out.println("Selected classroom file: " + selectedFile.getAbsolutePath());
-
-                // Project directory
-                File projectDirectory = new File(System.getProperty("user.dir"));
-                // Path where the file will be copied in the project directory
-                File destinationFile = new File(projectDirectory, selectedFile.getName());
+                // Hide the startBlankButton while integrating
+                startBlankButton.setVisible(false);
 
                 try {
-                    // Copy the classroom file to the project directory
-                    Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("Classroom file successfully copied to project directory: " + destinationFile.getAbsolutePath());
+                    File projectDirectory = new File(System.getProperty("user.dir"));
 
-                    // Process the classroom CSV file using Timetable class (with a default method)
-                    TimetableManager.readClassroomCSV(selectedFile.getAbsolutePath());
+                    File destinationCourse = new File(projectDirectory, courseFile.getName());
+                    Files.copy(courseFile.toPath(), destinationCourse.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                } catch (IOException e) {
-                    System.err.println("Error while copying the classroom file: " + e.getMessage());
+                    File destinationClassroom = new File(projectDirectory, classroomFile.getName());
+                    Files.copy(classroomFile.toPath(), destinationClassroom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    // Show progress bar and label
+                    // Once files identified and about to run integration:
+                    selectedFilesLabel.setVisible(true);
+                    startBlankButton.setVisible(false);
+                    openCSVButton.setVisible(false);
+                    loadingLabel.setVisible(true);
+                    progressBar.setVisible(true);
+                    cancelButton.setVisible(true);
+
+
+                    runDatabaseIntegrationTask(destinationCourse, destinationClassroom);
+
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR,"Error", "Error processing files: " + e.getMessage());
                 }
             } else {
-                System.out.println("No classroom file selected.");
+                showAlert(Alert.AlertType.ERROR,"Error", "Please select valid Classroom and Course CSV files.");
+            }
+        } else {
+            showAlert(Alert.AlertType.ERROR,"Error", "You must select exactly two CSV files.");
+        }
+    }
+
+    private String analyzeFileContent(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.toLowerCase().contains("classroom")) {
+                    return "classroom";
+                } else if (line.toLowerCase().contains("course")) {
+                    return "course";
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+        return "unknown";
+    }
+
+    private void runDatabaseIntegrationTask(File courseCSV, File classroomCSV) {
+        Task<Void> integrationTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                Connection conn = Database.connect();
+                if (conn == null) {
+                    throw new SQLException("Failed to connect to database.");
+                }
+
+                // Disable auto-commit for transaction
+                conn.setAutoCommit(false);
+
+                int totalSteps = countLines(courseCSV) - 1; // minus 1 for header
+                totalSteps += (countLines(classroomCSV) - 1);
+                if (totalSteps <= 0) totalSteps = 1;
+
+                int currentStep = 0;
+
+                // Prepare batch statements
+                String insertCourseSQL = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
+                PreparedStatement courseStmt = conn.prepareStatement(insertCourseSQL);
+
+                String insertStudentSQL = "INSERT INTO Students (studentName) VALUES (?)";
+                PreparedStatement studentStmt = conn.prepareStatement(insertStudentSQL);
+
+                String insertEnrollmentSQL = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
+                PreparedStatement enrollmentStmt = conn.prepareStatement(insertEnrollmentSQL);
+
+                String insertClassroomSQL = "INSERT INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
+                PreparedStatement classroomStmt = conn.prepareStatement(insertClassroomSQL);
+
+                String insertAllocatedSQL = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
+                PreparedStatement allocatedStmt = conn.prepareStatement(insertAllocatedSQL);
+
+                // Process Course CSV (batch inserts)
+                List<String[]> classroomData = new ArrayList<>(); // Store classroom data for later
+                List<String> courseNamesForClassroom = new ArrayList<>(); // We'll need course names after loading
+
+                // First, read and insert courses + enrollments in batch
+                try (BufferedReader br = new BufferedReader(new FileReader(courseCSV))) {
+                    String line = br.readLine(); // header
+                    while ((line = br.readLine()) != null) {
+                        String[] columns = line.split(";");
+                        if (columns.length < 4) {
+                            System.err.println("Skipping invalid line (not enough columns): " + line);
+                            continue;
+                        }
+
+                        String courseName = columns[0];
+                        String startTime = columns[1];
+
+                        String durationStr = columns[2].replaceAll("[^0-9]", "");
+                        int duration = 0;
+                        if (!durationStr.isEmpty()) {
+                            try {
+                                duration = Integer.parseInt(durationStr);
+                            } catch (NumberFormatException e) {
+                                System.err.println("Invalid duration value for course '" + courseName + "': " + columns[2]);
+                                continue;
+                            }
+                        } else {
+                            System.err.println("Empty or invalid duration for course '" + courseName + "'");
+                            continue;
+                        }
+
+                        String lecturer = columns[3];
+                        List<String> students = new ArrayList<>();
+                        for (int i = 4; i < columns.length; i++) {
+                            students.add(columns[i]);
+                        }
+
+                        // Add course to batch
+                        courseStmt.setString(1, courseName);
+                        courseStmt.setString(2, lecturer);
+                        courseStmt.setInt(3, duration);
+                        courseStmt.setString(4, startTime);
+                        courseStmt.addBatch();
+
+                        // Batch students and enrollments
+                        for (String student : students) {
+                            studentStmt.setString(1, student);
+                            studentStmt.addBatch();
+
+                            enrollmentStmt.setString(1, courseName);
+                            enrollmentStmt.setString(2, student);
+                            enrollmentStmt.addBatch();
+                        }
+
+                        courseNamesForClassroom.add(courseName);
+
+                        currentStep++;
+                        updateProgress(currentStep, totalSteps);
+                    }
+                }
+
+                // Now process Classroom CSV
+                try (BufferedReader br = new BufferedReader(new FileReader(classroomCSV))) {
+                    String line = br.readLine(); // header
+                    while ((line = br.readLine()) != null) {
+                        String[] columns = line.split(";");
+                        if (columns.length < 2) {
+                            System.err.println("Skipping invalid line (not enough columns): " + line);
+                            continue;
+                        }
+                        String classroomName = columns[0];
+                        String capacityStr = columns[1];
+                        int capacity;
+                        try {
+                            capacity = Integer.parseInt(capacityStr);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid capacity value for classroom '" + classroomName + "': " + capacityStr);
+                            continue;
+                        }
+
+                        // Add classroom to batch
+                        classroomStmt.setString(1, classroomName);
+                        classroomStmt.setInt(2, capacity);
+                        classroomStmt.addBatch();
+
+                        // We'll allocate each course to this classroom after we load them from DB,
+                        // but since we want speed, let's assume we allocate all known courses:
+                        // This is a simplification; if you need logic to allocate only specific courses, adjust accordingly.
+                        for (String cname : courseNamesForClassroom) {
+                            allocatedStmt.setString(1, cname);
+                            allocatedStmt.setString(2, classroomName);
+                            allocatedStmt.addBatch();
+                        }
+
+                        currentStep++;
+                        updateProgress(currentStep, totalSteps);
+                    }
+                }
+
+                // Execute all batches inside one transaction
+                courseStmt.executeBatch();
+                studentStmt.executeBatch();
+                enrollmentStmt.executeBatch();
+                classroomStmt.executeBatch();
+                allocatedStmt.executeBatch();
+
+                conn.commit(); // commit once
+                conn.setAutoCommit(true);
+
+                // Reload courses from DB into in-memory TimetableManager
+                TimetableManager.getTimetable().clear();
+                TimetableManager.getTimetable().addAll(Database.getAllCourses());
+
+                return null;
+            }
+        };
+
+        integrationTask.setOnSucceeded(event -> navigateToMainLayout());
+        integrationTask.setOnFailed(event -> {
+            showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed.");
+            // If an error occurs, we can rollback inside setOnFailed if needed
+            // But since we're committing at the end, the error might have occurred before commit.
+            try {
+                Connection c = Database.connect();
+                if (c != null) c.rollback();
+            } catch (SQLException ignored) {}
+        });
+
+        progressBar.progressProperty().bind(integrationTask.progressProperty());
+
+        Thread thread = new Thread(integrationTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+
+    private int countLines(File file) throws IOException {
+        int lines = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            while (br.readLine() != null) {
+                lines++;
             }
         }
+        return lines;
+    }
+
+    private void navigateToMainLayout() {
+        System.out.println("Courses from DB: " + Database.getAllCourses().size());
+        System.out.println("Courses in Timetable after update: " + TimetableManager.getTimetable().size());
+
+        try {
+            URL mainLayoutUrl = getClass().getResource("/com/example/timetablemanager/mainLayout.fxml");
+            if (mainLayoutUrl == null) {
+                System.err.println("Cannot find mainLayout.fxml");
+                showAlert(Alert.AlertType.ERROR, "Error", "mainLayout.fxml not found.");
+                return;
+            }
+
+            FXMLLoader fxmlLoader = new FXMLLoader(mainLayoutUrl);
+            Parent root = fxmlLoader.load();
+            ttManagerController controller = fxmlLoader.getController();
+
+            Stage stage = (Stage) openCSVButton.getScene().getWindow();
+            stage.setTitle("Timetable Manager - Main Layout");
+            stage.getScene().setRoot(root);
+
+            controller.refreshTable();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load the main layout.");
+        }
+    }
 
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+
+
+    public void cancelIntegration() {
+        // Hide progress and loading
+        loadingLabel.setVisible(false);
+        progressBar.setVisible(false);
+        selectedFilesLabel.setVisible(false);
+        cancelButton.setVisible(false);
+
+        // Show the startBlankButton and openCSVButton again
+        startBlankButton.setVisible(true);
+        openCSVButton.setVisible(true);
+
+
+        // Disconnect from database and clear in-memory timetable
+        Database.close(); // Disconnect from database
+        TimetableManager.getTimetable().clear(); // Clear the timetable list
+
+    }
+
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
         try {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
         } catch (RuntimeException e) {
-            System.err.println("Couldn't load icon");
+            System.err.println("Couldn't load alert icon");
             e.printStackTrace();
         }
         alert.setTitle(title);

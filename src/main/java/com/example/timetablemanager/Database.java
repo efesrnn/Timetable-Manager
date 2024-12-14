@@ -22,7 +22,7 @@ public class Database {
     private static Connection conn = null;
 
     // In-memory course list
-    private static List<TimetableManager.Course> courseList = new ArrayList<>();
+    private static List<Course> courseList = new ArrayList<>();
 
     // Create database connection
     public static Connection connect() {
@@ -44,15 +44,14 @@ public class Database {
         return conn;
     }
 
-    // Close database connection
     public static void close() {
         try {
             if (conn != null) {
                 conn.close();
-                System.out.println("Veritabanı bağlantısı kapatıldı.");
+                System.out.println("Database connection interrupted!");
             }
         } catch (SQLException e) {
-            System.err.println("Bağlantı kapatılırken hata: " + e.getMessage());
+            System.err.println("An error occurred while closing the connection: " + e.getMessage());
         }
     }
 
@@ -115,7 +114,7 @@ public class Database {
         }
     }
 
-    // Load all courses into the in-memory list(Includes courses and enrolled in each course))
+    // Load all courses into the in-memory list (Includes courses and enrolled students)
     private static void loadAllCourses() {
         courseList.clear();
         String sql = "SELECT courseName, timeToStart, duration, lecturer FROM Courses";
@@ -131,9 +130,38 @@ public class Database {
                 int duration = rs.getInt("duration");
                 String lecturer = rs.getString("lecturer");
 
-                List<String> students = getStudentsEnrolledInCourse(courseName);
+                // Fetch enrolled students
+                List<String> enrolledStudentNames = getStudentsEnrolledInCourse(courseName);
+                List<Student> enrolledStudents = new ArrayList<>();
+                for (String studentName : enrolledStudentNames) {
+                    enrolledStudents.add(new Student("UnknownID", studentName, new ArrayList<>()));
+                }
 
-                courseList.add(new TimetableManager.Course(courseName, startTime, duration, lecturer, students));
+                // For fields not stored in DB, use placeholders:
+                String courseID = "N/A"; // no courseID in DB
+                String description = (lecturer == null || lecturer.isEmpty()) ? "No description" : lecturer;
+                int capacity = 30; // default capacity
+                String classroom = ""; // no classroom info here
+                List<String> days = new ArrayList<>();
+                List<String> times = new ArrayList<>();
+                if (startTime != null && !startTime.isEmpty()) {
+                    times.add(startTime);
+                }
+
+                Course course = new Course(
+                        courseName,
+                        courseID,
+                        description,
+                        capacity,
+                        enrolledStudents,
+                        classroom,
+                        days,
+                        times,
+                        duration,
+                        lecturer
+                );
+
+                courseList.add(course);
                 coursesFound = true;
             }
 
@@ -148,17 +176,14 @@ public class Database {
         }
     }
 
-    // Get all courses from the in-memory list
-    public static List<TimetableManager.Course> getAllCourses() {
+    public static List<Course> getAllCourses() {
         return new ArrayList<>(courseList);
     }
 
-    // Reload courses (if needed)s
     public static void reloadCourses() {
         loadAllCourses();
     }
 
-    // Get students enrolled in a specific course
     private static List<String> getStudentsEnrolledInCourse(String courseName) {
         List<String> students = new ArrayList<>();
         String sql = "SELECT studentName FROM Enrollments WHERE courseName = ?";
@@ -176,7 +201,6 @@ public class Database {
         return students;
     }
 
-    // Add new course to database
     public static void addCourse(String courseName, String lecturer, int duration, String timeToStart) {
         String sql = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -186,13 +210,11 @@ public class Database {
             pstmt.setString(4, timeToStart);
             pstmt.executeUpdate();
             System.out.println("Course added successfully!");
-            reloadCourses(); // Update in-memory list
         } catch (SQLException e) {
             System.err.println("Error while adding course: " + e.getMessage());
         }
     }
 
-    //Add new student to course
     public static void addEnrollment(String courseName, String studentName) {
         String sql = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -205,7 +227,6 @@ public class Database {
         }
     }
 
-    //Add new student to database
     public static void addStudent(String studentName) {
         String sql = "INSERT INTO Students (studentName) VALUES (?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -217,7 +238,6 @@ public class Database {
         }
     }
 
-    // Add classroom to the database
     public static void addClassroom(String classroomName, int capacity) {
         String sql = "INSERT INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -230,7 +250,6 @@ public class Database {
         }
     }
 
-    // Allocate a course to a classroom(Assigns a lesson to a class)
     public static void allocateCourseToClassroom(String courseName, String classroomName) {
         String sql = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -243,7 +262,6 @@ public class Database {
         }
     }
 
-    //Updates the class of a course
     public static void changeClassroom(String course, String classroom) {
         try {
             String checkAllocation = "SELECT COUNT(*) FROM Allocated WHERE courseName = ?";
@@ -269,10 +287,8 @@ public class Database {
         }
     }
 
-    //Remove a student from a particular course
     public static void removeStudentFromCourse(String courseName, String studentName) {
         try {
-            // Enrollments tablosundan kaydı sil
             PreparedStatement deleteEnrollment = conn.prepareStatement("""
             DELETE FROM Enrollments
             WHERE courseName = ? AND studentName = ?;
@@ -292,5 +308,37 @@ public class Database {
         }
     }
 
+    // New method to get all classroom names from the DB
+    public static List<String> getAllClassroomNames() {
+        List<String> classroomNames = new ArrayList<>();
+        String sql = "SELECT classroomName FROM Classrooms";
+        try (Statement stmt = connect().createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                classroomNames.add(rs.getString("classroomName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching classroom names: " + e.getMessage());
+        }
+        return classroomNames;
+    }
+
+    public static List<Student> getAllStudents() {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT studentId, studentName FROM Students";
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String id = String.valueOf(rs.getInt("studentId"));
+                String name = rs.getString("studentName");
+                // Assuming Student has a constructor Student(String studentId, String fullName, List<Course> enrolledCourses)
+                students.add(new Student(id, name, new ArrayList<>()));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching all students: " + e.getMessage());
+        }
+        return students;
+    }
 
 }

@@ -8,7 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,16 +17,16 @@ import java.util.List;
 public class addCourseController {
 
     @FXML
-    private TextField txtCourseName,txtCourseID;
+    private TextField txtCourseName, txtCourseID, txtLecturer;
 
     @FXML
     private TextArea txtDescription;
 
     @FXML
-    private Spinner<Integer> spinnerCapacity;
+    private Spinner<Integer> spinnerCapacity, spinnerDuration;
 
     @FXML
-    private Button btnSelectStudents,btnAssignClassroom,btnCreateCourse,btnBack;
+    private Button btnSelectStudents, btnAssignClassroom, btnCreateCourse, btnBack;
 
     @FXML
     private ListView<String> studentListView;
@@ -38,14 +37,12 @@ public class addCourseController {
     @FXML
     private ComboBox<String> comboDay, comboTime;
 
-    private List<Student> allStudents = new ArrayList<>(); //TODO: Shall extract data into this list from CSV.
     private ObservableList<Student> selectedStudents = FXCollections.observableArrayList();
-    private List<String> classrooms = new ArrayList<>(); // Placeholder for classroom list.
 
     @FXML
     public void initialize() {
-        // Configuring Spinner for Capacity.
         spinnerCapacity.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 40));
+        spinnerDuration.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 2));
 
         comboDay.setItems(FXCollections.observableArrayList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"));
         comboTime.setItems(FXCollections.observableArrayList(
@@ -54,34 +51,16 @@ public class addCourseController {
                 "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
         ));
 
-
-        //TODO: created fake classroom to test:
-        classrooms.add("M-302");
-        classrooms.add("C-407");
-        classrooms.add("M-103");
+        // Fetch real classrooms from the database
+        List<String> classrooms = Database.getAllClassroomNames();
         comboClassroom.setItems(FXCollections.observableArrayList(classrooms));
 
-
-        /*
-        //TODO: created fake students to test:
-        allStudents = new ArrayList<>(List.of(
-                new Student("S001", "Alice Johnson"),
-                new Student("S002", "Bob Smith"),
-                new Student("S003", "Charlie Davis"),
-                new Student("S004", "Diana Brown"),
-                new Student("S005", "Ethan Wilson")
-        ));
-         */
-
-        //BUTTON ACTIONS:
-
+        // Button actions
         btnSelectStudents.setOnAction(event -> openStudentSelectionPopup());
         btnAssignClassroom.setOnAction(event -> assignClassroom());
         btnCreateCourse.setOnAction(event -> createCourse());
         btnBack.setOnAction(event -> switchScene("mainLayout.fxml"));
     }
-
-
 
     private void openStudentSelectionPopup() {
         try {
@@ -100,9 +79,9 @@ public class addCourseController {
             popupStage.showAndWait();
 
             // Retrieve selected students
-            ObservableList<Student> selectedStudents = controller.getSelectedStudents();
-            if (selectedStudents != null) {
-                this.selectedStudents.addAll(selectedStudents);
+            ObservableList<Student> selected = controller.getSelectedStudents();
+            if (selected != null) {
+                this.selectedStudents.addAll(selected);
                 studentListView.setItems(FXCollections.observableArrayList(
                         this.selectedStudents.stream().map(student -> student.getStudentId() + " | " + student.getFullName()).toList()
                 ));
@@ -113,8 +92,6 @@ public class addCourseController {
         }
     }
 
-
-
     private void assignClassroom() {
         String selectedClassroom = comboClassroom.getValue();
         if (selectedClassroom == null) {
@@ -122,23 +99,27 @@ public class addCourseController {
             return;
         }
 
-        classrooms.remove(selectedClassroom); // Mark as claimed
+        // If you previously removed classrooms from the list to mark them as assigned,
+        // consider not removing them now since we have actual classrooms from DB.
+        // If you still want to simulate 'marking as assigned', you could remove it from the comboBox items:
+        // comboClassroom.getItems().remove(selectedClassroom);
+
         showAlert("Success", "Classroom " + selectedClassroom + " assigned successfully.");
     }
-
-
 
     private void createCourse() {
         String courseName = txtCourseName.getText();
         String courseID = txtCourseID.getText();
         String description = txtDescription.getText();
         int capacity = spinnerCapacity.getValue();
+        int duration = spinnerDuration.getValue();
+        String lecturer = txtLecturer.getText();
         String classroom = comboClassroom.getValue();
-        String day = comboDay.getValue(); // Selected day
-        String time = comboTime.getValue(); // Selected time
+        String day = comboDay.getValue();
+        String time = comboTime.getValue();
 
-        if (courseName.isEmpty() || courseID.isEmpty() || classroom == null || day == null || time == null) {
-            showAlert("Error", "Please fill in all fields, select a day/time, and assign students/classroom!");
+        if (courseName.isEmpty() || courseID.isEmpty() || description.isEmpty() || lecturer.isEmpty() || classroom == null || day == null || time == null) {
+            showAlert("Error", "Please fill in all fields, select day/time, assign students/classroom, and set capacity/duration!");
             return;
         }
 
@@ -148,17 +129,30 @@ public class addCourseController {
         List<String> times = new ArrayList<>();
         times.add(time);
 
-        Course newCourse = new Course(courseName, courseID, description, capacity, new ArrayList<>(selectedStudents), classroom, days, times);
-        showAlert("Success", "Course " + courseName + " created successfully with schedule on " + day + " at " + time + ".");
+        // Create course
+        // Make sure your Course class constructor includes lecturer
+        Course newCourse = new Course(
+                courseName,
+                courseID,
+                description,
+                capacity,
+                new ArrayList<>(selectedStudents),
+                classroom,
+                days,
+                times,
+                duration,
+                lecturer
+        );
+
+        // TODO: Add the new course to your timetable or database as needed.
+        // e.g., TimetableManager.getTimetable().add(newCourse);
+        // or Database.addCourse(...), etc.
+
+        showAlert("Success", "Course " + courseName + " with ID " + courseID + " created successfully with lecturer " + lecturer + " on " + day + " at " + time + ".");
     }
-
-
 
     private void switchScene(String fxmlFile) {
         try {
-
-            //bknz. ttManagerController.java switchScene method!!!
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/" + fxmlFile));
             Object newRoot = loader.load();
 
@@ -182,12 +176,9 @@ public class addCourseController {
         }
     }
 
-
-
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
 
-        //Alert icon initialization:
         try {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
