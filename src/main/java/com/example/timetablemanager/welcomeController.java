@@ -269,7 +269,7 @@ public class welcomeController {
                         classroomStmt.setString(1, classroomName);
                         classroomStmt.setInt(2, capacity);
                         classroomStmt.addBatch();
-
+/*
                         // We'll allocate each course to this classroom after we load them from DB,
                         // but since we want speed, let's assume we allocate all known courses:
                         // This is a simplification; if you need logic to allocate only specific courses, adjust accordingly.
@@ -278,7 +278,7 @@ public class welcomeController {
                             allocatedStmt.setString(2, classroomName);
                             allocatedStmt.addBatch();
                         }
-
+*/
                         currentStep++;
                         updateProgress(currentStep, totalSteps);
                     }

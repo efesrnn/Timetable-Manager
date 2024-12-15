@@ -72,6 +72,8 @@ public class ttManagerController {
             return new javafx.beans.property.SimpleStringProperty(String.valueOf(count));
         });
 
+
+
         // Populate table with current timetable courses
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
 

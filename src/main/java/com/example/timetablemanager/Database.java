@@ -118,7 +118,8 @@ public class Database {
     private static void loadAllCourses() {
         courseList.clear();
         String sql = "SELECT DISTINCT courseName, timeToStart, duration, lecturer FROM Courses";
-
+         String sql2 = "SELECT * FROM Allocated WHERE courseName = ? ";
+         String sql3 = "SELECT * FROM Classrooms WHERE classroomName = ? ";
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -140,12 +141,28 @@ public class Database {
                 // For fields not stored in DB, use placeholders:
                 String courseID = "N/A"; // no courseID in DB
                 String description = (lecturer == null || lecturer.isEmpty()) ? "No description" : lecturer;
-                int capacity = 30; // default capacity
+                int capacity = 0; // default capacity
                 String classroom = ""; // no classroom info here
                 List<String> days = new ArrayList<>();
                 List<String> times = new ArrayList<>();
                 if (startTime != null && !startTime.isEmpty()) {
                     times.add(startTime);
+                }
+
+                PreparedStatement stmt2 = conn.prepareStatement(sql2);
+                stmt2.setString(1, courseName);
+                ResultSet rs2 = stmt2.executeQuery();
+                String classroomName = "";
+
+                while (rs2.next()) {
+                    classroomName = rs2.getString("classroomName");
+                }
+
+                PreparedStatement stmt3 = conn.prepareStatement(sql3);
+                stmt3.setString(1, classroomName);
+                ResultSet rs3 = stmt3.executeQuery();
+                while (rs3.next()) {
+                    capacity = rs3.getInt("capacity");
                 }
 
                 Course course = new Course(
@@ -154,7 +171,7 @@ public class Database {
                         description,
                         capacity,
                         enrolledStudents,
-                        classroom,
+                        classroomName,
                         days,
                         times,
                         duration,

@@ -83,6 +83,7 @@ public class AssignClassroomController {
             }
 
             outline.add(selectedCourse.getCourseName() + " -> " + selectedClassroomName);
+            Database.allocateCourseToClassroom(selectedCourse.getCourseName(), selectedClassroomName);
 
             // Outline ListView refresh
             listViewOutline.setItems(outline);
@@ -119,6 +120,7 @@ public class AssignClassroomController {
 
             outline.clear();
             listViewOutline.setItems(outline);
+
         });
 
 
@@ -134,7 +136,8 @@ public class AssignClassroomController {
             if (!(newRoot instanceof javafx.scene.Parent)) {
                 throw new IllegalArgumentException("Loaded root is not a valid JavaFX parent node.");
             }
-
+            ttManagerController controller = (ttManagerController) loader.getController();
+            controller.refreshTable();
             Stage stage = (Stage) buttonBack.getScene().getWindow(); // Mevcut sahnenin Stage'ini al
             Scene scene = stage.getScene(); // Mevcut sahneyi al
             scene.setRoot((javafx.scene.Parent) newRoot); // Yeni kök bileşeni ayarla
