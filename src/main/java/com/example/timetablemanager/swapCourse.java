@@ -28,61 +28,83 @@ public class swapCourse {
     @FXML
     private ComboBox SelectCourseCombo, SelectClassroomCombo;
 
+    private String courseCapacity;
+
+    private String classroomCapacity;
+
+    private  String selectedClass;
+
+    private int numberOfStudents;
+
     // Fetch real classrooms from the database
     List<String> classrooms = Database.getAllClassroomNames();
     private static List<Course> courseList = new ArrayList<>();
     @FXML
     public void initialize() {
-        //SelectCourseCombo.getItems().add(data.getValue().getCourseName());
-        SelectCourseCombo.setItems(FXCollections.observableArrayList(Database.getAllCourses()));
+
+
+        SelectCourseCombo.setItems(FXCollections.observableArrayList(Database.getAllCourseNames()));
         SelectCourseCombo.setOnAction(event -> {
             String selectedCourse = SelectCourseCombo.getValue().toString(); // Seçilen değeri alır
+
+            List<String> enrolledStudents = Database.getStudentsEnrolledInCourse(selectedCourse);
+             numberOfStudents = enrolledStudents.size();
+            EnrolledListView.setItems(FXCollections.observableArrayList(numberOfStudents));
+
+
+            List<Integer> capacities = getCourseCapacities(selectedCourse);
+            if (capacities.isEmpty()) {
+                courseCapacity = "No data";
+            } else {
+                courseCapacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            }
+            System.out.println(courseCapacity);
+
+            CapacityListView.setItems(FXCollections.observableArrayList(courseCapacity));
+
             System.out.println("Seçilen kurs: " + selectedCourse);
+
         });
 
-        ObservableList<Course> courses = FXCollections.observableArrayList(Database.getAllCourses());
-        // 1. for-each döngüsü ile yazdırma
-        for (Course course : courses) {
-            System.out.println(course);
-        }
+
+
 
         SelectClassroomCombo.setItems(FXCollections.observableArrayList(Database.getAllClassroomNames()));
         SelectClassroomCombo.setOnAction(event -> {
-            String selectedClass = SelectClassroomCombo.getValue().toString();
+             selectedClass = SelectClassroomCombo.getValue().toString();
 
             List<Integer> capacities = getAllClassroomCapacities(selectedClass);
-            String capacity;
 
             if (capacities.isEmpty()) {
-                capacity = "No data";
+                classroomCapacity = "No data";
             } else {
-                capacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
+                classroomCapacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
             }
             System.out.println(selectedClass);
-            System.out.println(capacity);
+            System.out.println(classroomCapacity);
 
-            CapacityListView2.setItems(FXCollections.observableArrayList(capacity));
+            CapacityListView2.setItems(FXCollections.observableArrayList(classroomCapacity));
         });
 
-//        SelectClassroomCombo.setItems(FXCollections.observableArrayList(Database.getAllClassroomNames()));
-//        SelectClassroomCombo.setOnAction(event -> {
-//            String selectedClass = SelectClassroomCombo.getValue().toString();
-//
-//            String capacity = getAllClassroomCapacities(selectedClass).toString(); // Metodunuz kapasiteyi String döndürmeli.
-//            System.out.println(selectedClass);
-//            System.out.println(capacity);
-//            // CapacityListView2'nin içeriğini güncelle
-//            CapacityListView2.setItems(FXCollections.observableArrayList(capacity));
-//        });
+
+
+
+
+        btnSave.setOnAction(event -> {
+            if (!Database.hasSufficientCapacity(selectedClass, numberOfStudents)) {
+                showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
+                return;
+            }
+
+        });
         btnBack.setOnAction(event -> switchScene("mainLayout.fxml"));
 
 
-    }
-
-    public void All() {
-
 
     }
+
+
+
 
     private void switchScene(String fxmlFile) {
         try {
