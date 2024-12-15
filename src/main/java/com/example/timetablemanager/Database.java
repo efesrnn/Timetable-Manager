@@ -381,6 +381,27 @@ public class Database {
         return classroomNames;
     }
 
+    // New method to get all classroom capacity from the DB
+    public static List<Integer> getAllClassroomCapacities(String classroomName) {
+        List<Integer> classroomCapacities = new ArrayList<>();
+        String sql = "SELECT DISTINCT capacity FROM Classrooms WHERE classroomName = ?";
+
+        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+            pstmt.setString(1, classroomName); // Set the parameter value
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    classroomCapacities.add(rs.getInt("capacity")); // Fetch the capacity as an integer
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching classroom capacities: " + e.getMessage());
+        }
+
+        return classroomCapacities;
+    }
+
+
+
     public static List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT studentId, studentName FROM Students";
@@ -397,6 +418,40 @@ public class Database {
             System.err.println("Error while fetching all students: " + e.getMessage());
         }
         return students;
+    }
+
+    // New method to get all Course names from the DB
+    public static List<String> getAllCourseNames() {
+        List<String> courseNames = new ArrayList<>();
+        String sql = "SELECT DISTINCT courseName FROM Courses";
+        try (Statement stmt = connect().createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                courseNames.add(rs.getString("courseName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching course names: " + e.getMessage());
+        }
+        return courseNames;
+    }
+
+    // New method to get all classroom capacity from the DB
+    public static List<Integer> getCourseCapacities(String courseName) {
+        List<Integer> courseCapacities = new ArrayList<>();
+        String sql = "SELECT DISTINCT En FROM Courses WHERE courseName = ?";
+
+        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+            pstmt.setString(1, courseName); // Set the parameter value
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    courseCapacities.add(rs.getInt("capacity")); // Fetch the capacity as an integer
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while fetching course capacities: " + e.getMessage());
+        }
+
+        return courseCapacities;
     }
 
 }

@@ -30,7 +30,6 @@ public class Course {
 
     }
 
-
     public boolean addStudent(Student student) {
         if (students.size() < capacity && !students.contains(student)) {
             students.add(student);
