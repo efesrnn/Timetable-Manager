@@ -384,20 +384,6 @@ public class Database {
     }
 
 
-   /* String sql =
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setString(1, classroomName);
-        ResultSet rs = pstmt.executeQuery();
-        if (rs.next()) {
-            int classroomCapacity = rs.getInt("capacity");
-            return classroomCapacity >= numberOfStudents;
-        }
-    } catch (SQLException e) {
-        System.err.println("Error while checking classroom capacity: " + e.getMessage());
-    }
-        return false;
-}*/
-
 
     public static List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
