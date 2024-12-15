@@ -1,65 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.ttManagerController"
-           style="-fx-background-color: #f9f9f9;">
+<StackPane style="-fx-background-color: #f9f9f9;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="com.example.timetablemanager.ttManagerController">
   <children>
     <VBox spacing="0" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff;">
       <MenuBar style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
-        <Menu text="File" style="-fx-text-fill: #333333;">
-          <MenuItem text="Import CSV" fx:id="menuImportCSV" />
-          <MenuItem text="Load Timetable" fx:id="menuLoadTimetable" />
-          <MenuItem text="Save Timetable" fx:id="menuSaveTimetable" />
-          <MenuItem text="Export Timetable" fx:id="menuExportTimetable" />
+        <Menu style="-fx-text-fill: #333333;" text="File">
+          <MenuItem fx:id="menuImportCSV" text="Import CSV" />
+          <MenuItem fx:id="menuLoadTimetable" text="Load Timetable" />
+          <MenuItem fx:id="menuSaveTimetable" text="Save Timetable" />
+          <MenuItem fx:id="menuExportTimetable" text="Export Timetable" />
           <SeparatorMenuItem />
-          <MenuItem text="Exit" fx:id="menuExit" />
+          <MenuItem fx:id="menuExit" text="Exit" />
         </Menu>
-        <Menu text="Help" style="-fx-text-fill: #333333;">
-          <MenuItem text="User Manual" fx:id="menuUserManual" />
-          <MenuItem text="About" fx:id="menuAbout" />
+        <Menu style="-fx-text-fill: #333333;" text="Help">
+          <MenuItem fx:id="menuUserManual" text="User Manual" />
+          <MenuItem fx:id="menuAbout" text="About" />
         </Menu>
       </MenuBar>
-      <padding>
-        <Insets top="0" right="20" bottom="20" left="20" />
-      </padding>
       <VBox alignment="TOP_CENTER" spacing="20" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
-        <Label text="Timetable Manager" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 20; -fx-text-fill: #1c1c1c; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;" />
-        <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
-          <Label text="Search:" style="-fx-font-size: 14; -fx-text-fill: #4a4a4a;" />
-          <TextField fx:id="txtSearch" promptText="Enter student/classroom/course"
-                     style="-fx-pref-width: 300; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-          <Button fx:id="btnSearch" text="Search"
-                  style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
+        <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 20; -fx-text-fill: #1c1c1c; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;" text="Timetable Manager" />
+        <HBox alignment="CENTER" spacing="10" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
+          <Label style="-fx-font-size: 14; -fx-text-fill: #4a4a4a;" text="Search:" />
+          <TextField fx:id="txtSearch" promptText="Enter student/classroom/course" style="-fx-pref-width: 300; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+          <Button fx:id="btnSearch" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Search" />
         </HBox>
-        <TableView fx:id="timetableTable" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;" prefHeight="300.0" prefWidth="700.0">
+        <TableView fx:id="timetableTable" prefHeight="300.0" prefWidth="700.0" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;">
           <columns>
-            <TableColumn fx:id="courseIDColumn" text="Course ID"/>
-            <TableColumn fx:id="courseColumn" text="Course Name"/>
-            <TableColumn fx:id="lecturerColumn" text="Lecturer"/> <!-- Add this column -->
-            <TableColumn fx:id="dayColumn" text="Day"/>
-            <TableColumn fx:id="timeColumn" text="Time"/>
-            <TableColumn fx:id="classroomColumn" text="Classroom"/>
-            <TableColumn fx:id="capacityColumn" text="Capacity"/>
-            <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Students"/>
+            <TableColumn fx:id="courseIDColumn" text="Course ID" />
+            <TableColumn fx:id="courseColumn" text="Course Name" />
+            <TableColumn fx:id="lecturerColumn" text="Lecturer" /> <!-- Add this column -->
+            <TableColumn fx:id="dayColumn" text="Day" />
+            <TableColumn fx:id="timeColumn" text="Time" />
+            <TableColumn fx:id="classroomColumn" text="Classroom" />
+            <TableColumn fx:id="capacityColumn" text="Capacity" />
+            <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Students" />
           </columns>
         </TableView>
-        <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
-          <Button fx:id="btnAddCourse" text="Add Course"
-                  style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
-          <Button fx:id="btnEnrollStudent" text="Enroll Student"
-                  style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
-          <Button fx:id="btnAssignClassroom" text="Assign Classroom"
-                  style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
-          <Button fx:id="btnSwapClassroom" text="Swap Classroom"
-                  style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" />
+        <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+          <Button fx:id="btnAddCourse" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Add Course" />
+          <Button fx:id="btnEnrollStudent" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Enroll Student" />
+          <Button fx:id="btnAssignClassroom" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Assign Classroom" />
+          <Button fx:id="btnSwapClassroom" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Swap Classroom" />
         </HBox>
-        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
-          <Label text="v1.1" style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" />
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+          <Label style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" text="v1.1" />
         </HBox>
       </VBox>
+      <padding>
+        <Insets bottom="20" left="20" right="20" top="0" />
+      </padding>
     </VBox>
   </children>
 </StackPane>

@@ -44,6 +44,7 @@ public class welcomeController {
     public void initialize() {
         loadLogo();
         startBlankButton.setOnAction(event -> startWithBlankCSV());
+
     }
 
     private void loadLogo() {

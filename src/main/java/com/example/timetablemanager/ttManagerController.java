@@ -72,6 +72,16 @@ public class ttManagerController {
             return new javafx.beans.property.SimpleStringProperty(String.valueOf(count));
         });
 
+        // TableView'e çift tıklama dinleyicisi ekleme
+        timetableTable.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Course selectedCourse = timetableTable.getSelectionModel().getSelectedItem();
+                if (selectedCourse != null) {
+                    openCourseSchedulerController(selectedCourse);
+                }
+            }
+        });
+
 
 
         // Populate table with current timetable courses
@@ -132,6 +142,27 @@ public class ttManagerController {
             System.err.println("File is null, cannot load timetable.");
         }
     }
+
+
+    public void openCourseSchedulerController(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/courseSchedulerLayout.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
+
+            CourseSchedulerController controller = loader.getController();
+            controller.setCourseData(course);
+            stage.setTitle("Course Scheduler");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load Course Scheduler.");
+        }
+    }
+
+
+
+
 
     private void switchScene(String fxmlFile) {
         try {
