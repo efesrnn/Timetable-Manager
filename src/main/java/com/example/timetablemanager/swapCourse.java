@@ -32,7 +32,9 @@ public class swapCourse {
 
     private String classroomCapacity;
 
-    private  String selectedClass;
+    private String selectedClass;
+
+    private String selectedCourse;
 
     private int numberOfStudents;
 
@@ -45,7 +47,7 @@ public class swapCourse {
 
         SelectCourseCombo.setItems(FXCollections.observableArrayList(Database.getAllCourseNames()));
         SelectCourseCombo.setOnAction(event -> {
-            String selectedCourse = SelectCourseCombo.getValue().toString(); // Seçilen değeri alır
+             selectedCourse = SelectCourseCombo.getValue().toString(); // Seçilen değeri alır
 
             List<String> enrolledStudents = Database.getStudentsEnrolledInCourse(selectedCourse);
              numberOfStudents = enrolledStudents.size();
@@ -94,6 +96,10 @@ public class swapCourse {
             if (!Database.hasSufficientCapacity(selectedClass, numberOfStudents)) {
                 showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
                 return;
+            } else {
+                changeClassroom(selectedCourse,selectedClass);
+                System.out.println("done");
+                allocateCourseToClassroom(selectedCourse,selectedClass);
             }
 
         });
@@ -102,8 +108,6 @@ public class swapCourse {
 
 
     }
-
-
 
 
     private void switchScene(String fxmlFile) {

@@ -30,11 +30,6 @@ public class Course {
 
     }
 
-    public int returnCapacity(String courseName) {
-
-        return capacity;
-    }
-
     public boolean addStudent(Student student) {
         if (students.size() < capacity && !students.contains(student)) {
             students.add(student);
