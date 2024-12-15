@@ -17,64 +17,67 @@ import java.util.stream.Collectors;
 
 public class swapCourse {
     @FXML
-    private Label SwapClasroomLabel, CapacityLabel, EnrollmendLabel, ClasssroomLabel, CapacityLabel2;
+    private Label SwapClasroomLabel, EnrollmendLabel, ClasssroomLabel, EnrollmendLabel2, ClasssroomLabel2, CapacityLabel2, CapacityLabel;
 
     @FXML
-    private Button btnSave, btnCancel, btnBack;
+    private Button btnSave, btnAssign, btnBack;
 
     @FXML
-    private ListView CapacityListView, EnrolledListView, ClasroomListView, CapacityListView2;
+    private ListView EnrolledListView, ClassroomListView, EnrolledListView2, ClassroomListView2, CapacityListView, CapacityListView2;
 
     @FXML
-    private ComboBox SelectCourseCombo, SelectClassroomCombo;
+    private ComboBox SelectCourseCombo, SelectCourse2;
 
     private String courseCapacity;
 
     private String classroomCapacity;
 
+    private String classroomCapacity2;
+
     private String selectedClass;
+
+    private String selectedClass2;
 
     private String selectedCourse;
 
+    private String selectedCourse2;
+
     private int numberOfStudents;
 
-    // Fetch real classrooms from the database
-    List<String> classrooms = Database.getAllClassroomNames();
-    private static List<Course> courseList = new ArrayList<>();
+    private int numberOfStudents2;
+
+    private List<Course> allCourses;
+
+
+
     @FXML
     public void initialize() {
 
+        allCourses = Database.getAllCourses();
 
         SelectCourseCombo.setItems(FXCollections.observableArrayList(Database.getAllCourseNames()));
         SelectCourseCombo.setOnAction(event -> {
-             selectedCourse = SelectCourseCombo.getValue().toString(); // Seçilen değeri alır
+             selectedCourse = SelectCourseCombo.getValue().toString();
 
+             //Adding enrolled studend number
             List<String> enrolledStudents = Database.getStudentsEnrolledInCourse(selectedCourse);
              numberOfStudents = enrolledStudents.size();
             EnrolledListView.setItems(FXCollections.observableArrayList(numberOfStudents));
 
+            //Adding Classroom
+            Course selectedCourseObject = allCourses.stream()
+                    .filter(course -> course.getCourseName().equals(selectedCourse))
+                    .findFirst().orElse(null);
 
-            List<Integer> capacities = getCourseCapacities(selectedCourse);
-            if (capacities.isEmpty()) {
-                courseCapacity = "No data";
-            } else {
-                courseCapacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            if (selectedCourseObject == null) {
+                showAlert("Error", "Invalid selection. Please try again.");
+                return;
             }
-            System.out.println(courseCapacity);
+            String classroom1 = selectedCourseObject.getClassroom();
+            ClassroomListView.setItems(FXCollections.observableArrayList(classroom1));
 
-            CapacityListView.setItems(FXCollections.observableArrayList(courseCapacity));
-
-            System.out.println("Seçilen kurs: " + selectedCourse);
-
-        });
-
-
-
-
-        SelectClassroomCombo.setItems(FXCollections.observableArrayList(Database.getAllClassroomNames()));
-        SelectClassroomCombo.setOnAction(event -> {
-             selectedClass = SelectClassroomCombo.getValue().toString();
-
+            //Adding classroom capacity
+            selectedClass=classroom1;
             List<Integer> capacities = getAllClassroomCapacities(selectedClass);
 
             if (capacities.isEmpty()) {
@@ -82,25 +85,80 @@ public class swapCourse {
             } else {
                 classroomCapacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
             }
-            System.out.println(selectedClass);
-            System.out.println(classroomCapacity);
+            CapacityListView.setItems(FXCollections.observableArrayList(classroomCapacity));
 
-            CapacityListView2.setItems(FXCollections.observableArrayList(classroomCapacity));
+        });
+
+        SelectCourse2.setItems(FXCollections.observableArrayList(Database.getAllCourseNames()));
+        SelectCourse2.setOnAction(event -> {
+            selectedCourse2 = SelectCourse2.getValue().toString(); // Seçilen değeri alır
+
+            //Adding enrolled studend number
+            List<String> enrolledStudents = Database.getStudentsEnrolledInCourse(selectedCourse2);
+            numberOfStudents2 = enrolledStudents.size();
+            EnrolledListView2.setItems(FXCollections.observableArrayList(numberOfStudents2));
+
+            //Adding Classroom
+            Course selectedCourseObject = allCourses.stream()
+                    .filter(course -> course.getCourseName().equals(selectedCourse2))
+                    .findFirst().orElse(null);
+
+            if (selectedCourseObject == null) {
+                showAlert("Error", "Invalid selection. Please try again.");
+                return;
+            }
+            String classroom1 = selectedCourseObject.getClassroom();
+            ClassroomListView2.setItems(FXCollections.observableArrayList(classroom1));
+
+            //Adding classroom capacity
+            selectedClass2=classroom1;
+            List<Integer> capacities = getAllClassroomCapacities(selectedClass2);
+
+            if (capacities.isEmpty()) {
+                classroomCapacity2 = "No data";
+            } else {
+                classroomCapacity2 = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            }
+            CapacityListView2.setItems(FXCollections.observableArrayList(classroomCapacity2));
         });
 
 
 
 
 
+
+
+
+
         btnSave.setOnAction(event -> {
-            if (!Database.hasSufficientCapacity(selectedClass, numberOfStudents)) {
-                showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
+
+            Course selectedCourseObject = allCourses.stream()
+                    .filter(course -> course.getCourseName().equals(selectedCourse))
+                    .findFirst().orElse(null);
+
+            if (selectedCourseObject == null) {
+                showAlert("Error", "Invalid selection. Please try again.");
                 return;
-            } else {
-                changeClassroom(selectedCourse,selectedClass);
-                System.out.println("done");
-                allocateCourseToClassroom(selectedCourse,selectedClass);
             }
+            String classroom1 =selectedCourseObject.getClassroom();
+            System.out.println(classroom1);
+
+
+
+//            selectedCourseObject.setClassroom(selectedCourse);
+//            Database.allocateCourseToClassroom(selectedCourseObject.getCourseName(), selectedCourse);
+
+
+
+//
+//            if (!Database.hasSufficientCapacity(selectedClass, numberOfStudents)) {
+//                showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
+//                return;
+//            } else {
+//                changeClassroom(selectedCourse,selectedClass);
+//                System.out.println("done");
+//                allocateCourseToClassroom(selectedCourse,selectedClass);
+//            }
 
         });
         btnBack.setOnAction(event -> switchScene("mainLayout.fxml"));
