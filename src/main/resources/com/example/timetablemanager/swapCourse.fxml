@@ -1,46 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox prefHeight="285.0" prefWidth="626.0" spacing="15" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.swapCourse">
-<Label fx:id="SwapClasroomLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 10 0 15 0;" text="Swap Classroom" />
-   <GridPane>
-     <columnConstraints>
-       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-     </columnConstraints>
-     <rowConstraints>
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-     </rowConstraints>
-      <children>
-         <ListView fx:id="CapacityListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-         <Label fx:id="CapacityLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="1" />
-         <ComboBox fx:id="SelectCourseCombo" prefHeight="38.0" promptText="Select Course" style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-         <Label fx:id="EnrollmendLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Enrolled Students" GridPane.rowIndex="2" />
-         <ListView fx:id="EnrolledListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-         <Label fx:id="ClasssroomLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Classroom" GridPane.rowIndex="3" />
-         <ListView fx:id="ClasroomListView" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-         <ComboBox fx:id="SelectClassroomCombo" prefHeight="38.0" promptText="Select Classroom" style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" GridPane.rowIndex="4" />
-         <Label fx:id="CapacityLabel2" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Capacity" GridPane.rowIndex="5" />
-         <ListView fx:id="CapacityListView2" prefHeight="34.0" prefWidth="134.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-      </children>
-   </GridPane>
-<HBox alignment="CENTER" spacing="20">
-    <Button fx:id="btnSave" style="-fx-pref-width: 90;" text="Save" />
-    <Button fx:id="btnCancel" style="-fx-pref-width: 90;" text="Cancel" />
-    <Button fx:id="btnBack" style="-fx-pref-width: 90;" text="Back" />
-</HBox>
-</VBox>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.timetablemanager.swapCourse"
+           style="-fx-background-color: #f9f9f9;">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+    </padding>
+    <children>
+        <VBox alignment="CENTER" spacing="20" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
+            <Label text="Swap Classroom for a Course" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 20; -fx-text-fill: #1c1c1c;" />
+            <GridPane alignment="CENTER" hgap="20" vgap="15" style="-fx-padding: 20;">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT" minWidth="150" />
+                    <ColumnConstraints halignment="LEFT" minWidth="300" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="40" />
+                </rowConstraints>
+
+                <!-- Select Course -->
+                <Label text="Select Course ID:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="0" />
+                <ComboBox fx:id="selectCourseCombo" promptText="Choose Course ID" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                          style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+
+                <!-- Enrolled Students -->
+                <Label text="Number of Enrolled Students:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="1" />
+                <ListView fx:id="enrolledListView" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                          style="-fx-pref-height: 30; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0;" />
+
+                <!-- Course Capacity -->
+                <Label text="Course Capacity:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="2" />
+                <ListView fx:id="capacityListView" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                          style="-fx-pref-height: 30; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0;" />
+
+                <!-- Select Classroom -->
+                <Label text="Select Classroom:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="3" />
+                <ComboBox fx:id="selectClassroomCombo" promptText="Choose Classroom" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                          style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+
+                <!-- Classroom Capacity -->
+                <Label text="Classroom Capacity:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="4" />
+                <ListView fx:id="capacityListView2" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                          style="-fx-pref-height: 30; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0;" />
+            </GridPane>
+            <HBox spacing="20" alignment="CENTER">
+                <Button fx:id="btnSave" text="Save" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14;" />
+                <Button fx:id="btnCancel" text="Cancel" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 14;" />
+            </HBox>
+            <HBox spacing="20" alignment="CENTER">
+                <Button fx:id="btnBack" text="Back" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14;" />
+            </HBox>
+        </VBox>
+    </children>
+</StackPane>

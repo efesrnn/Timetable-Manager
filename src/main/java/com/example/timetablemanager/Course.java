@@ -13,7 +13,7 @@ public class Course {
     private int duration;
     private String lecturer;
 
-    public Course(String courseID,int capacity,
+    public Course(String courseID, int capacity,
                   List<Student> students, String classroom, List<String> days, List<String> times, int duration, String lecturer) {
         this.courseID = courseID;
         this.capacity = capacity;
@@ -23,7 +23,6 @@ public class Course {
         this.timesToStart = times != null ? times : new ArrayList<>();
         this.duration = duration;
         this.lecturer = lecturer;
-
     }
 
     public boolean addStudent(Student student) {
@@ -32,10 +31,9 @@ public class Course {
             System.out.println("Adding student, returning true");
             return true;
         }
-        System.out.println("Coudn't add student, returning false");
+        System.out.println("Couldn't add student, returning false");
         return false;
     }
-
 
     /* */
     public void assignClassroom(String classroom) {
@@ -43,11 +41,11 @@ public class Course {
     }
 
     public String getSchedule() {
-        return "Course: " + courseID + ", Classroom: " + classroom;
+        return "Course ID: " + courseID + ", Classroom: " + classroom;
     }
     /* */
 
-    //Getter Setter
+    // Getters and Setters
 
     public String getCourseID() {
         return courseID;
@@ -97,13 +95,13 @@ public class Course {
         this.timesToStart = times;
     }
 
-    public int getDuration() {return duration;}
+    public int getDuration() { return duration; }
 
-    public void setDuration(int duration) {this.duration = duration;}
+    public void setDuration(int duration) { this.duration = duration; }
 
-    public String getLecturer() {return lecturer;}
+    public String getLecturer() { return lecturer; }
 
-    public void setLecturer(String lecturer) {this.lecturer = lecturer;}
+    public void setLecturer(String lecturer) { this.lecturer = lecturer; }
 
     public boolean assignClassroom(String classroom, int classroomCapacity) {
         if (students.size() <= classroomCapacity) {
@@ -115,5 +113,4 @@ public class Course {
             return false;  // Classroom is too small, assignment failed
         }
     }
-
 }

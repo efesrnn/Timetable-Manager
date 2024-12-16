@@ -127,7 +127,6 @@ public class Database {
 
             while (rs.next()) {
                 String courseName = rs.getString("courseName");
-                String startTime = rs.getString("timeToStart");
                 int duration = rs.getInt("duration");
                 String lecturer = rs.getString("lecturer");
 
@@ -138,15 +137,25 @@ public class Database {
                     enrolledStudents.add(new Student(studentName, new ArrayList<>()));
                 }
 
-                // For fields not stored in DB, use placeholders:
-                String courseID = "N/A"; // no courseID in DB
-                String description = (lecturer == null || lecturer.isEmpty()) ? "No description" : lecturer;
+
                 int capacity = 0; // default capacity
                 String classroom = ""; // no classroom info here
+                String startTime = rs.getString("timeToStart");
+
+                //The part where we separate day and start time
                 List<String> days = new ArrayList<>();
                 List<String> times = new ArrayList<>();
+
                 if (startTime != null && !startTime.isEmpty()) {
-                    times.add(startTime);
+                    // Split the string into day and time
+                    String[] parts = startTime.split(" ");
+                    if (parts.length >= 2) {
+                        days.add(parts[0]);   // Day (e.g., "Monday")
+                        times.add(parts[1]);  // Time (e.g., "10:00")
+                    } else {
+                        // Handle cases where the format is unexpected
+                        System.err.println("Unexpected timeToStart format: " + startTime);
+                    }
                 }
 
                 PreparedStatement stmt2 = conn.prepareStatement(sql2);

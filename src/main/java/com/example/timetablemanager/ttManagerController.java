@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ttManagerController {
 
@@ -28,10 +29,7 @@ public class ttManagerController {
     private TableView<Course> timetableTable;
 
     @FXML
-    private TableColumn<Course, String> courseIDColumn,lecturerColumn,dayColumn,timeColumn,enrolledStudentsColumn,classroomColumn;
-
-    @FXML
-    private TableColumn<Course, Number> capacityColumn;
+    private TableColumn<Course, String> courseIDColumn,lecturerColumn,dayColumn,timeColumn,enrolledStudentsColumn,classroomColumn,capacityColumn;
 
 
     @FXML
@@ -46,25 +44,54 @@ public class ttManagerController {
 
         // Days
         dayColumn.setCellValueFactory(data -> {
-            // Join all days into a single string
-            String joinedDays = String.join(", ", data.getValue().getDays());
-            return new javafx.beans.property.SimpleStringProperty(joinedDays);
+            // Extract the part before the space as the day
+            List<String> days = data.getValue().getDays();
+            String extractedDays = days.stream()
+                    .map(day -> day.split(" ")[0]) // Take the part before the first space
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+            return new javafx.beans.property.SimpleStringProperty(extractedDays);
         });
 
         // Times
         timeColumn.setCellValueFactory(data -> {
-            // Join all times into a single string
-            String joinedTimes = String.join(", ", data.getValue().getTimes());
-            return new javafx.beans.property.SimpleStringProperty(joinedTimes);
+            // Extract the part after the space as the time
+            List<String> times = data.getValue().getTimes();
+            String extractedTimes = times.stream()
+                    .map(time -> time.contains(" ") ? time.substring(time.indexOf(" ") + 1) : time) // Take the part after the first space
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+            return new javafx.beans.property.SimpleStringProperty(extractedTimes);
         });
 
         // Classroom
-        classroomColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getClassroom()));
+        classroomColumn.setCellValueFactory(data -> {
+            String classroom = data.getValue().getClassroom();
+            if (classroom == null || classroom.trim().isEmpty()) {
+                return new javafx.beans.property.SimpleStringProperty("N/A");
+            } else {
+                return new javafx.beans.property.SimpleStringProperty(classroom);
+            }
+        });
 
-        // Capacity
-        capacityColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleIntegerProperty(data.getValue().getCapacity()));
+        // Capacity as "Enrolled/Capacity"
+        capacityColumn.setCellValueFactory(data -> {
+            int enrolled = data.getValue().getStudents().size();
+            int capacity = data.getValue().getCapacity();
+            String display = enrolled + " / " + capacity;
+            if (capacity == 0) {
+                return new javafx.beans.property.SimpleStringProperty("N/A");
+            } else {
+                return new javafx.beans.property.SimpleStringProperty(display);
+            }
+        });
+
+        // Enrolled Students (show count instead of names)
+        enrolledStudentsColumn.setCellValueFactory(data -> {
+            int count = data.getValue().getStudents().size();
+            return new javafx.beans.property.SimpleStringProperty(String.valueOf(count));
+        });
+
 
         // Enrolled Students (show count instead of names)
         enrolledStudentsColumn.setCellValueFactory(data -> {
@@ -108,28 +135,30 @@ public class ttManagerController {
 
     //TODO: Unique courseID aand StudentName
     public void refreshTable() {
-        //Removing duplicate courses by courseName
-        List<Course> original = TimetableManager.getTimetable();
+        // Reload courses from the database to get updated assignments
+        Database.reloadCourses();
+
+        // Removing duplicate courses by courseID
+        List<Course> original = Database.getAllCourses();
         LinkedHashMap<String, Course> uniqueCourses = new LinkedHashMap<>();
         for (Course c : original) {
             uniqueCourses.put(c.getCourseID(), c);
         }
 
-        //For each unique course, remove duplicate students
+        // For each unique course, remove duplicate students
         for (Course c : uniqueCourses.values()) {
             LinkedHashMap<String, Student> uniqueStudents = new LinkedHashMap<>();
             for (Student s : c.getStudents()) {
-                // Use getFullName(), getStudentId(), or another unique field as the key
-                // Assuming fullName is unique for demonstration:
                 uniqueStudents.put(s.getFullName(), s);
             }
             // Replace the course's student list with a new list of unique students
             c.setStudents(new ArrayList<>(uniqueStudents.values()));
         }
 
-        // Step 3: Update the table with the filtered, unique courses
+        // Update the table with the filtered, unique courses
         timetableTable.setItems(FXCollections.observableArrayList(uniqueCourses.values()));
     }
+
 
 
 
