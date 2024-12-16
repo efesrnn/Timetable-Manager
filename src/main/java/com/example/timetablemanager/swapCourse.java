@@ -20,7 +20,7 @@ public class swapCourse {
     private Label SwapClasroomLabel, EnrollmendLabel, ClasssroomLabel, EnrollmendLabel2, ClasssroomLabel2, CapacityLabel2, CapacityLabel;
 
     @FXML
-    private Button btnSave, btnAssign, btnBack;
+    private Button btnSave,btnBack;
 
     @FXML
     private ListView EnrolledListView, ClassroomListView, EnrolledListView2, ClassroomListView2, CapacityListView, CapacityListView2;
@@ -74,6 +74,7 @@ public class swapCourse {
                 return;
             }
             String classroom1 = selectedCourseObject.getClassroom();
+            System.out.println(classroom1);
             ClassroomListView.setItems(FXCollections.observableArrayList(classroom1));
 
             //Adding classroom capacity
@@ -81,7 +82,7 @@ public class swapCourse {
             List<Integer> capacities = getAllClassroomCapacities(selectedClass);
 
             if (capacities.isEmpty()) {
-                classroomCapacity = "No data";
+                classroomCapacity = "";
             } else {
                 classroomCapacity = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
             }
@@ -115,7 +116,7 @@ public class swapCourse {
             List<Integer> capacities = getAllClassroomCapacities(selectedClass2);
 
             if (capacities.isEmpty()) {
-                classroomCapacity2 = "No data";
+                classroomCapacity2 = "";
             } else {
                 classroomCapacity2 = capacities.stream().map(String::valueOf).collect(Collectors.joining(", "));
             }
@@ -126,22 +127,42 @@ public class swapCourse {
 
 
 
-
-
-
-
         btnSave.setOnAction(event -> {
-
-            Course selectedCourseObject = allCourses.stream()
-                    .filter(course -> course.getCourseName().equals(selectedCourse))
-                    .findFirst().orElse(null);
-
-            if (selectedCourseObject == null) {
+             if(classroomCapacity==null||classroomCapacity2==null) {
+                 showAlert("Error", "Invalid selection. Please try again.");
+             } else if (classroomCapacity.equals("")||classroomCapacity2.equals("")) {
                 showAlert("Error", "Invalid selection. Please try again.");
-                return;
             }
-            String classroom1 =selectedCourseObject.getClassroom();
-            System.out.println(classroom1);
+             else if(Integer.parseInt(classroomCapacity)<numberOfStudents2 || Integer.parseInt(classroomCapacity2)<numberOfStudents) {
+                showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
+            } else {
+                Course selectedCourseObject = allCourses.stream()
+                        .filter(course -> course.getCourseName().equals(selectedCourse))
+                        .findFirst().orElse(null);
+
+                if (selectedCourseObject == null) {
+                    showAlert("Error", "Invalid selection. Please try again.");
+                    return;
+                }
+                String classroom1 =selectedCourseObject.getClassroom();
+
+                Course selectedCourseObject2 = allCourses.stream()
+                        .filter(course -> course.getCourseName().equals(selectedCourse2))
+                        .findFirst().orElse(null);
+
+                if (selectedCourseObject2 == null) {
+                    showAlert("Error", "Invalid selection. Please try again.");
+                    return;
+                }
+                String classroom2 =selectedCourseObject2.getClassroom();
+
+                selectedCourseObject.setClassroom(classroom2);
+                selectedCourseObject2.setClassroom(classroom1);
+
+            }
+
+
+
 
 
 
