@@ -106,9 +106,9 @@ public class ClassroomSchedulerController {
 
     private int getTimeRowIndex(String time) {
         switch (time) {
-            case "08:30":
+            case "8:30":
                 return 1;
-            case "09:25":
+            case "9:25":
                 return 2;
             case "10:20":
                 return 3;

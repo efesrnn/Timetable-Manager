@@ -40,8 +40,8 @@
         <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
 
         <!-- Time Slots -->
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="08:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" text="09:25" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="8:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" text="9:25" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="10:20" GridPane.columnIndex="0" GridPane.rowIndex="3" />
         <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="11:15" GridPane.columnIndex="0" GridPane.rowIndex="4" />
         <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="12:10" GridPane.columnIndex="0" GridPane.rowIndex="5" />
