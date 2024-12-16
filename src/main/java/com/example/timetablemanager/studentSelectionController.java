@@ -6,6 +6,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class studentSelectionController {
@@ -31,64 +34,87 @@ public class studentSelectionController {
     @FXML
     private Button btnCancel;
 
-    private List<Student> allStudents;
+    private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
+    private static final String DB_URL = "jdbc:sqlite:" + dbPath + File.separator + "TimetableManagement.db";
+    private Connection conn;
+    private List<Student> allStudents = new ArrayList<>();
     private ObservableList<Student> selectedStudents = FXCollections.observableArrayList();
 
+    @FXML
     public void initialize() {
-        // Fetch actual students from the database
-        allStudents = Database.getAllStudents();
+        try {
+            conn = DriverManager.getConnection(DB_URL);
+            System.out.println("Connected to the database.");
+            loadStudents();
+        } catch (SQLException e) {
+            System.err.println("Failed to connect to the database: " + e.getMessage());
+        }
 
-        // Initially display all students
-        listViewAvailable.setItems(FXCollections.observableArrayList(
-                allStudents.stream()
-                        .map(student -> student.getStudentId() + " | " + student.getFullName())
-                        .toList()
-        ));
-
-        // Add listener for searching/filtering available students
+        // Filter students on search input
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            // Filter allStudents based on search text
             List<String> filtered = allStudents.stream()
-                    .filter(student -> student.getFullName().toLowerCase().contains(newValue.toLowerCase())
-                            || student.getStudentId().toLowerCase().contains(newValue.toLowerCase()))
-                    .map(student -> student.getStudentId() + " | " + student.getFullName())
+                    .filter(student -> student.getFullName().toLowerCase().contains(newValue.toLowerCase()))
+                    .map(Student::getFullName)
+                    .distinct()
                     .toList();
             listViewAvailable.setItems(FXCollections.observableArrayList(filtered));
         });
 
-        // ADD BUTTON: Move selected students from available to selected
+        // ADD BUTTON: Move selected students to the selected list
         btnAdd.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewAvailable.getSelectionModel().getSelectedItems();
-            // Add to selected list
-            listViewSelected.getItems().addAll(selectedItems);
-            // Remove from available list
+            selectedItems.stream()
+                    .filter(item -> !listViewSelected.getItems().contains(item))
+                    .forEach(listViewSelected.getItems()::add);
             listViewAvailable.getItems().removeAll(selectedItems);
         });
 
-        // REMOVE BUTTON: Move selected students from selected back to available
+        // REMOVE BUTTON: Move students back to the available list
         btnRemove.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewSelected.getSelectionModel().getSelectedItems();
-            // Add back to available
-            listViewAvailable.getItems().addAll(selectedItems);
-            // Remove from selected
+            selectedItems.stream()
+                    .filter(item -> !listViewAvailable.getItems().contains(item))
+                    .forEach(listViewAvailable.getItems()::add);
             listViewSelected.getItems().removeAll(selectedItems);
         });
 
-        // CANCEL BUTTON: Just close the stage without saving
+        // CANCEL BUTTON: Close the stage without saving
         btnCancel.setOnAction(event -> closeStage());
 
-        // SAVE BUTTON: Map selected strings back to Student objects and close
+        // SAVE BUTTON: Save the selected students
         btnSave.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewSelected.getItems();
-            // Clear and refetch actual students matching the selected strings
             selectedStudents.clear();
             selectedStudents.addAll(
                     allStudents.stream()
-                            .filter(student -> selectedItems.contains(student.getStudentId() + " | " + student.getFullName()))
+                            .filter(student -> selectedItems.contains(student.getFullName()))
                             .toList()
             );
             closeStage();
         });
+    }
+
+    private void loadStudents() {
+        String query = "SELECT studentId, studentName FROM Students";
+        try (PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            allStudents.clear();
+            while (rs.next()) {
+                String name = rs.getString("studentName");
+                allStudents.add(new Student(name, new ArrayList<>()));
+            }
+
+            // Populate the ListView with student names (distinct)
+            listViewAvailable.setItems(FXCollections.observableArrayList(
+                    allStudents.stream()
+                            .map(Student::getFullName)
+                            .distinct()
+                            .toList()
+            ));
+        } catch (SQLException e) {
+            System.err.println("Error loading students: " + e.getMessage());
+        }
     }
 
     private void closeStage() {

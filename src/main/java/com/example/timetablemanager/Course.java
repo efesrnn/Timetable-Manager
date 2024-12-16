@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
-    private String courseName;
     private String courseID;
-    private String description;
     private int capacity;
     private List<Student> students;
     private String classroom;
@@ -15,11 +13,9 @@ public class Course {
     private int duration;
     private String lecturer;
 
-    public Course(String courseName, String courseID, String description, int capacity,
-                  List<Student> students, String classroom, List<String> days, List<String> times,int duration, String lecturer) {
-        this.courseName = courseName;
+    public Course(String courseID,int capacity,
+                  List<Student> students, String classroom, List<String> days, List<String> times, int duration, String lecturer) {
         this.courseID = courseID;
-        this.description = description;
         this.capacity = capacity;
         this.students = students != null ? students : new ArrayList<>();
         this.classroom = classroom;
@@ -39,10 +35,7 @@ public class Course {
         System.out.println("Coudn't add student, returning false");
         return false;
     }
-    @Override
-    public String toString() {
-        return courseName + " (" + courseID + ")";
-    }
+
 
     /* */
     public void assignClassroom(String classroom) {
@@ -50,19 +43,11 @@ public class Course {
     }
 
     public String getSchedule() {
-        return "Course: " + courseName + ", Classroom: " + classroom;
+        return "Course: " + courseID + ", Classroom: " + classroom;
     }
     /* */
 
     //Getter Setter
-
-    public String getCourseName() {
-        return courseName;
-    }
-
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
-    }
 
     public String getCourseID() {
         return courseID;
@@ -70,14 +55,6 @@ public class Course {
 
     public void setCourseID(String courseID) {
         this.courseID = courseID;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getCapacity() {

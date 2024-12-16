@@ -46,7 +46,7 @@ public class AssignClassroomController {
 
         listViewCourses.setItems(FXCollections.observableArrayList(
                 allCourses.stream()
-                        .map(Course::getCourseName)
+                        .map(Course::getCourseID)
                         .distinct()
                         .toList()
         ));
@@ -65,7 +65,7 @@ public class AssignClassroomController {
             }
 
             Course selectedCourse = allCourses.stream()
-                    .filter(course -> course.getCourseName().equals(selectedCourseName))
+                    .filter(course -> course.getCourseID().equals(selectedCourseName))
                     .findFirst().orElse(null);
 
             if (selectedCourse == null) {
@@ -82,8 +82,8 @@ public class AssignClassroomController {
                 return;
             }
 
-            outline.add(selectedCourse.getCourseName() + " -> " + selectedClassroomName);
-            Database.allocateCourseToClassroom(selectedCourse.getCourseName(), selectedClassroomName);
+            outline.add(selectedCourse.getCourseID() + " -> " + selectedClassroomName);
+            Database.allocateCourseToClassroom(selectedCourse.getCourseID(), selectedClassroomName);
 
             // Outline ListView refresh
             listViewOutline.setItems(outline);
@@ -103,7 +103,7 @@ public class AssignClassroomController {
                 }
 
                 Course selectedCourse = allCourses.stream()
-                        .filter(course -> course.getCourseName().equals(selectedCourseName))
+                        .filter(course -> course.getCourseID().equals(selectedCourseName))
                         .findFirst().orElse(null);
 
                 if (selectedCourse == null) {
@@ -113,7 +113,7 @@ public class AssignClassroomController {
 
 
                 selectedCourse.setClassroom(selectedClassroomName);
-                Database.allocateCourseToClassroom(selectedCourse.getCourseName(), selectedClassroomName);
+                Database.allocateCourseToClassroom(selectedCourse.getCourseID(), selectedClassroomName);
             }
             showAlert("Success", "Assignments have been successfully saved!");
 

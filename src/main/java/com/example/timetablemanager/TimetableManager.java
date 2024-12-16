@@ -40,6 +40,10 @@ public class TimetableManager extends Application {
         stage.setTitle("Welcome to Timetable Manager");
         stage.setScene(scene);
         stage.show();
+
+        welcomeController welcome = fxmlLoader.getController();
+        welcome.checkAndLoadCSVFiles();
+
         System.out.println("Timetable Manager initialized.");
     }
 
@@ -114,7 +118,7 @@ public class TimetableManager extends Application {
                     String studentName = columns[i];
                     // Add student to DB
                     Database.addStudent(studentName);
-                    studentList.add(new Student("UnknownID", studentName, new ArrayList<>()));
+                    studentList.add(new Student(studentName, new ArrayList<>()));
                     // Enroll in DB
                     Database.addEnrollment(courseName, studentName);
                 }
@@ -127,7 +131,7 @@ public class TimetableManager extends Application {
                 // Database.addCourse(courseName, "N/A", duration, time); // or skip if irrelevant
                 String lecturer = "N/A";
 
-                Course c = new Course(courseName, courseID, description, capacity, studentList, classroom, days, times, duration , lecturer);
+                Course c = new Course(courseName,capacity, studentList, classroom, days, times, duration , lecturer);
                 courses.add(c);
             }
         } catch (IOException e) {
@@ -161,8 +165,8 @@ public class TimetableManager extends Application {
 
                 // Allocate each course to this classroom
                 for (Course course : allCourses) {
-                    Database.allocateCourseToClassroom(course.getCourseName(), classroomName);
-                    System.out.println("Allocated course: " + course.getCourseName() + " to classroom: " + classroomName);
+                    Database.allocateCourseToClassroom(course.getCourseID(), classroomName);
+                    System.out.println("Allocated course: " + course.getCourseID() + " to classroom: " + classroomName);
                 }
             }
         } catch (IOException e) {
@@ -182,9 +186,7 @@ public class TimetableManager extends Application {
                 studentNames.add(s.getFullName());
             }
             System.out.printf("%-15s%-15s%-20s%-10d%-15s%-20s%-50s\n",
-                    c.getCourseName(),
                     c.getCourseID(),
-                    c.getDescription(),
                     c.getDuration(),
                     c.getClassroom(),
                     dayTime,

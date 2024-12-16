@@ -3,10 +3,7 @@ package com.example.timetablemanager;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -56,6 +53,52 @@ public class welcomeController {
         }
     }
 
+
+    public void checkAndLoadCSVFiles() {
+        String dataPath = "src/main/resources/com/example/timetablemanager/data";
+        File dataDir = new File(dataPath);
+
+        if (dataDir.exists() && dataDir.isDirectory()) {
+            File[] csvFiles = dataDir.listFiles((dir, name) -> name.endsWith(".csv"));
+            if (csvFiles != null && csvFiles.length == 2) {
+                File classroomFile = null;
+                File courseFile = null;
+
+                for (File file : csvFiles) {
+                    String fileType = analyzeFileContent(file);
+                    if ("classroom".equals(fileType)) {
+                        classroomFile = file;
+                    } else if ("course".equals(fileType)) {
+                        courseFile = file;
+                    }
+                }
+
+                if (classroomFile != null && courseFile != null) {
+                    boolean userConsent = showLoadFilesAlert(classroomFile.getName(), courseFile.getName());
+                    if (userConsent) {
+                        try {
+                            selectedFilesLabel.setText(
+                                    "Selected Course File: " + courseFile.getName() +
+                                            "\nSelected Classroom File: " + classroomFile.getName()
+                            );
+                            selectedFilesLabel.setVisible(true);
+                            startBlankButton.setVisible(false);
+                            openCSVButton.setVisible(false);
+
+                            // Process and load files
+                            runDatabaseIntegrationTask(courseFile, classroomFile);
+                        } catch (Exception e) {
+                            showAlert(Alert.AlertType.ERROR, "Error", "Error processing files: " + e.getMessage());
+                        }
+                    }
+                }
+            }else {
+                System.err.println("More or less than 2 .csv file detected in directory. Automatic load cancelled.");
+            }
+        }
+    }
+
+
     private void startWithBlankCSV() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
@@ -97,24 +140,21 @@ public class welcomeController {
             }
 
             if (classroomFile != null && courseFile != null) {
-                // Show the selected files to the user
-                selectedFilesLabel.setText("Selected Course File: " + courseFile.getName() + "\nSelected Classroom File: " + classroomFile.getName());
-                selectedFilesLabel.setVisible(true);
-
-                // Hide the startBlankButton while integrating
-                startBlankButton.setVisible(false);
-
                 try {
-                    File projectDirectory = new File(System.getProperty("user.dir"));
+                    // Copy files to resources/data directory
+                    File destinationDir = new File("src/main/resources/com/example/timetablemanager/data");
+                    if (!destinationDir.exists()) {
+                        destinationDir.mkdirs();
+                    }
 
-                    File destinationCourse = new File(projectDirectory, courseFile.getName());
-                    Files.copy(courseFile.toPath(), destinationCourse.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    File copiedClassroomFile = new File(destinationDir, classroomFile.getName());
+                    File copiedCourseFile = new File(destinationDir, courseFile.getName());
 
-                    File destinationClassroom = new File(projectDirectory, classroomFile.getName());
-                    Files.copy(classroomFile.toPath(), destinationClassroom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(classroomFile.toPath(), copiedClassroomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(courseFile.toPath(), copiedCourseFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                    // Show progress bar and label
-                    // Once files identified and about to run integration:
+                    // Show progress and integrate files
+                    selectedFilesLabel.setText("Selected Course File: " + copiedCourseFile.getName() + "\nSelected Classroom File: " + copiedClassroomFile.getName());
                     selectedFilesLabel.setVisible(true);
                     startBlankButton.setVisible(false);
                     openCSVButton.setVisible(false);
@@ -122,8 +162,8 @@ public class welcomeController {
                     progressBar.setVisible(true);
                     cancelButton.setVisible(true);
 
-
-                    runDatabaseIntegrationTask(destinationCourse, destinationClassroom);
+                    // Run database integration using copied files
+                    runDatabaseIntegrationTask(copiedCourseFile, copiedClassroomFile);
 
                 } catch (Exception e) {
                     showAlert(Alert.AlertType.ERROR,"Error", "Error processing files: " + e.getMessage());
@@ -379,6 +419,78 @@ public class welcomeController {
         Database.close(); // Disconnect from database
         TimetableManager.getTimetable().clear(); // Clear the timetable list
 
+    }
+
+    private boolean showLoadFilesAlert(String classroomFileName, String courseFileName) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        try {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
+        } catch (RuntimeException e) {
+            System.err.println("Couldn't load alert icon");
+            e.printStackTrace();
+        }
+
+        alert.setTitle("Load Files");
+        alert.setHeaderText(null);
+        alert.setContentText(
+                "📂 Detected Files:\n\n" +
+                        "- Classroom: " + classroomFileName + "\n" +
+                        "- Course: " + courseFileName + "\n\n" +
+                        "Would you like to load these files automatically?"
+        );
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle(
+                "-fx-background-color: #FFFFFF; " +
+                        "-fx-border-color: #E0E0E0; " +
+                        "-fx-border-width: 1px; " +
+                        "-fx-border-radius: 8px; " +
+                        "-fx-background-radius: 8px; " +
+                        "-fx-padding: 20px; " +
+                        "-fx-font-family: 'Segoe UI', sans-serif; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-text-fill: #333333;"
+        );
+
+        // Customize Content Text
+        Label contentLabel = new Label(alert.getContentText());
+        contentLabel.setStyle(
+                "-fx-text-fill: #202123; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-line-spacing: 1.2;"
+        );
+        contentLabel.setWrapText(true);
+        dialogPane.setContent(contentLabel);
+
+        // Add custom buttons
+        ButtonType loadButton = new ButtonType("Load Files", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(loadButton, cancelButton);
+
+        // Style buttons
+        Button load = (Button) dialogPane.lookupButton(loadButton);
+        Button cancel = (Button) dialogPane.lookupButton(cancelButton);
+
+        load.setStyle(
+                "-fx-background-color: #10A37F; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-border-radius: 5px; " +
+                        "-fx-background-radius: 5px; " +
+                        "-fx-padding: 5 15;"
+        );
+
+        cancel.setStyle(
+                "-fx-background-color: #F0F0F0; " +
+                        "-fx-text-fill: #333333; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-border-color: #E0E0E0; " +
+                        "-fx-border-width: 1px; " +
+                        "-fx-border-radius: 5px; " +
+                        "-fx-padding: 5 15;"
+        );
+        return alert.showAndWait().orElse(cancelButton) == loadButton;
     }
 
 

@@ -276,8 +276,8 @@ public class selectFilesController {
 
                         // Allocate each course to the current classroom
                         for (Course course : allCourses) {
-                            Database.allocateCourseToClassroom(course.getCourseName(), classroomName);
-                            System.out.println("Allocated course: " + course.getCourseName() + " to classroom: " + classroomName);
+                            Database.allocateCourseToClassroom(course.getCourseID(), classroomName);
+                            System.out.println("Allocated course: " + course.getCourseID() + " to classroom: " + classroomName);
                         }
 
                         currentStep++;

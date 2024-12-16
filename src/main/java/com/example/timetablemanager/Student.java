@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Student {
-    private String studentId;
+
     private String fullName;
     private List<Course> enrolledCourses;
 
-    public Student(String studentId, String fullName, List<Course> enrolledCourses) {
-        this.studentId = studentId;
+    public Student( String fullName, List<Course> enrolledCourses) {
         this.fullName = fullName;
         this.enrolledCourses = enrolledCourses;
     }
@@ -30,19 +29,6 @@ public class Student {
             schedule.add(course.getSchedule());
         }
         return schedule;
-    }
-    @Override
-    public String toString() {
-        return fullName + " (" + studentId + ")";
-    }
-
-    //Geter and setters
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
     }
 
     public String getFullName() {

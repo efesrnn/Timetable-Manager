@@ -83,7 +83,7 @@ public class addCourseController {
             if (selected != null) {
                 this.selectedStudents.addAll(selected);
                 studentListView.setItems(FXCollections.observableArrayList(
-                        this.selectedStudents.stream().map(student -> student.getStudentId() + " | " + student.getFullName()).toList()
+                        this.selectedStudents.stream().map(student ->student.getFullName()).toList()
                 ));
             }
         } catch (IOException e) {
@@ -133,8 +133,6 @@ public class addCourseController {
         // Make sure your Course class constructor includes lecturer
         Course newCourse = new Course(
                 courseName,
-                courseID,
-                description,
                 capacity,
                 new ArrayList<>(selectedStudents),
                 classroom,

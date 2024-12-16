@@ -28,7 +28,7 @@ public class ttManagerController {
     private TableView<Course> timetableTable;
 
     @FXML
-    private TableColumn<Course, String> courseColumn,lecturerColumn,dayColumn,timeColumn,enrolledStudentsColumn,classroomColumn;    // New Column for Course ID
+    private TableColumn<Course, String> courseIDColumn,lecturerColumn,dayColumn,timeColumn,enrolledStudentsColumn,classroomColumn;
 
     @FXML
     private TableColumn<Course, Number> capacityColumn;
@@ -36,9 +36,9 @@ public class ttManagerController {
 
     @FXML
     public void initialize() {
-        // Course Name
-        courseColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getCourseName()));
+        // Course ID
+        courseIDColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getCourseID()));
 
         // Lecturer
         lecturerColumn.setCellValueFactory(data ->
@@ -112,7 +112,7 @@ public class ttManagerController {
         List<Course> original = TimetableManager.getTimetable();
         LinkedHashMap<String, Course> uniqueCourses = new LinkedHashMap<>();
         for (Course c : original) {
-            uniqueCourses.put(c.getCourseName(), c);
+            uniqueCourses.put(c.getCourseID(), c);
         }
 
         //For each unique course, remove duplicate students

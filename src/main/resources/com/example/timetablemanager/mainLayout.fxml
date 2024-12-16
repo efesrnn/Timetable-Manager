@@ -41,8 +41,7 @@
         <TableView fx:id="timetableTable" prefHeight="300.0" prefWidth="700.0" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;">
           <columns>
             <TableColumn fx:id="courseIDColumn" text="Course ID" />
-            <TableColumn fx:id="courseColumn" text="Course Name" />
-            <TableColumn fx:id="lecturerColumn" text="Lecturer" /> <!-- Add this column -->
+            <TableColumn fx:id="lecturerColumn" text="Lecturer" />
             <TableColumn fx:id="dayColumn" text="Day" />
             <TableColumn fx:id="timeColumn" text="Time" />
             <TableColumn fx:id="classroomColumn" text="Classroom" />

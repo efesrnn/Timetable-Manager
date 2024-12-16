@@ -135,7 +135,7 @@ public class Database {
                 List<String> enrolledStudentNames = getStudentsEnrolledInCourse(courseName);
                 List<Student> enrolledStudents = new ArrayList<>();
                 for (String studentName : enrolledStudentNames) {
-                    enrolledStudents.add(new Student("UnknownID", studentName, new ArrayList<>()));
+                    enrolledStudents.add(new Student(studentName, new ArrayList<>()));
                 }
 
                 // For fields not stored in DB, use placeholders:
@@ -167,8 +167,6 @@ public class Database {
 
                 Course course = new Course(
                         courseName,
-                        courseID,
-                        description,
                         capacity,
                         enrolledStudents,
                         classroomName,
@@ -412,7 +410,7 @@ public class Database {
                 String id = String.valueOf(rs.getInt("studentId"));
                 String name = rs.getString("studentName");
                 // Assuming Student has a constructor Student(String studentId, String fullName, List<Course> enrolledCourses)
-                students.add(new Student(id, name, new ArrayList<>()));
+                students.add(new Student(name, new ArrayList<>()));
             }
         } catch (SQLException e) {
             System.err.println("Error while fetching all students: " + e.getMessage());
