@@ -1,0 +1,227 @@
+/* Root Pane */
+.border-pane {
+    -fx-background-color: #f9f9f9;
+}
+
+/* VBox Container */
+.vbox-container {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-padding: 20;
+}
+
+/* Header */
+.header-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c1c1c;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* Labels in GridPane */
+.grid-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* TextFields and ComboBoxes */
+.text-field, .combo-box {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5px;
+    -fx-text-fill: #1c1c1c;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-padding: 5;
+}
+
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #4CAF50; /* Highlight border on focus */
+    -fx-border-width: 1.5px;
+}
+
+/* Spinners */
+.spinner {
+    -fx-pref-width: 100px;
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5px;
+    -fx-text-fill: #1c1c1c;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-padding: 2;
+}
+
+.spinner:focused {
+    -fx-border-color: #4CAF50; /* Highlight border on focus */
+    -fx-border-width: 1.5px;
+}
+
+/* Buttons */
+.button {
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-pref-width: 150px;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, opacity 0.3s;
+}
+
+.button:focused {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}
+
+/* Select Students Button */
+.btn-select-students {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #d4d4d4;
+    -fx-text-fill: #333333;
+}
+
+.btn-select-students:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Create Course Button - Green Theme */
+.btn-create {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.btn-create:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Back Button - Gray Theme */
+.btn-back {
+    -fx-background-color: #9E9E9E;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.btn-back:hover {
+    -fx-background-color: #7e7e7e;
+}
+
+/* ListView */
+.list-view {
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-background-color: #f9f9f9;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+}
+
+.list-view .list-cell {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    -fx-padding: 10;
+    -fx-spacing: 12px;
+}
+
+/* Schedule Container */
+.schedule-container {
+    -fx-padding: 10;
+}
+
+/* Schedule GridPane */
+.schedule-gridpane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0), 4, 0, 0, 2);
+    -fx-padding: 10;
+}
+
+/* Allocation Labels */
+.allocation-label {
+    /* Removed background-color to allow inline styles to apply */
+    -fx-text-fill: #ffffff;
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+    -fx-padding: 5px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0.5px;
+}
+
+.allocation-label:hover {
+    -fx-opacity: 0.8;
+}
+
+/* Temporary Allocation Labels */
+.temporary-allocation {
+    /* Gold color is set via inline styles in the controller */
+    -fx-text-fill: #000000; /* Black text for visibility */
+}
+
+/* Empty Cells in GridPane */
+.empty-cell {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0.5;
+}
+
+/* Student Selection HBox */
+.student-selection {
+    -fx-padding: 5 0 5 0;
+}
+
+/* Form GridPane */
+.form-grid {
+    -fx-padding: 5 0 5 0;
+}
+
+/* Comprehensive Focus Removal for Containers (if needed) */
+.custom-pane:focused,
+.border-pane:focused,
+.scroll-pane:focused,
+.grid-pane:focused,
+.vbox:focused,
+.hbox:focused,
+.separator:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+/* Temporary Allocation Labels (Gold Color) */
+.temporary-allocation {
+    -fx-background-color: #FFD700; /* Gold */
+    -fx-text-fill: #000000; /* Black text for visibility */
+}
+
+/* Blinking Effect Animation */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.allocation-label.temporary-allocation {
+    /* Gold color is set via inline styles, so no need for additional CSS here */
+    /* If you prefer CSS-based animations, you can implement them here */
+}

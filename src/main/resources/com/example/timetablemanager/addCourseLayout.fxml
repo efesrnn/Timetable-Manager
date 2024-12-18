@@ -4,69 +4,104 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.example.timetablemanager.addCourseController"
-           style="-fx-background-color: #f9f9f9;">
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20" />
-    </padding>
-    <children>
-        <VBox alignment="CENTER" spacing="20" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
-            <Label text="Add A New Course" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-padding: 20; -fx-text-fill: #1c1c1c;" />
-            <GridPane alignment="CENTER" hgap="20" vgap="15" style="-fx-padding: 20;">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" minWidth="150" />
-                    <ColumnConstraints halignment="LEFT" minWidth="300" />
-                </columnConstraints>
-                <rowConstraints>
-                    <RowConstraints minHeight="40" />
-                </rowConstraints>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.timetablemanager.addCourseController"
+        stylesheets="@addCourseLayout.css"
+        styleClass="border-pane">
+<padding>
+<Insets bottom="20" left="20" right="20" top="20" />
+</padding>
 
-                <!-- Course ID -->
-                <Label text="Course ID:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="0" />
-                <TextField fx:id="txtCourseID" promptText="Enter course ID" GridPane.rowIndex="0" GridPane.columnIndex="1"
-                           style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+        <!-- Left Region: Course Addition Form -->
+<left>
+<ScrollPane fitToWidth="true" styleClass="scroll-pane">
+    <VBox alignment="TOP_CENTER" spacing="20" styleClass="vbox-container">
+        <!-- Header -->
+        <Label text="Add A New Course" styleClass="header-label" />
 
-                <!-- Lecturer -->
-                <Label text="Lecturer:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="1" />
-                <TextField fx:id="txtLecturer" promptText="Enter lecturer name" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                           style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+        <!-- Course Details GridPane -->
+        <GridPane alignment="CENTER_LEFT" hgap="15" vgap="15" styleClass="form-grid">
+            <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" minWidth="140" />
+                <ColumnConstraints halignment="LEFT" minWidth="250" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="40" />
+                <RowConstraints minHeight="40" />
+                <RowConstraints minHeight="40" />
+                <RowConstraints minHeight="40" />
+                <RowConstraints minHeight="40" />
+                <RowConstraints minHeight="40" />
+            </rowConstraints>
 
-                <!-- Capacity -->
-                <Label text="Capacity:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="2" />
-                <Spinner fx:id="spinnerCapacity" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"
-                         style="-fx-pref-width: 100; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+            <!-- Course ID -->
+            <Label text="Course ID:" styleClass="grid-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="txtCourseID" promptText="Enter course ID" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                       styleClass="text-field" />
 
-                <!-- Duration -->
-                <Label text="Duration (Hours):" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="3" />
-                <Spinner fx:id="spinnerDuration" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"
-                         style="-fx-pref-width: 100; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
+            <!-- Lecturer -->
+            <Label text="Lecturer:" styleClass="grid-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <TextField fx:id="txtLecturer" promptText="Enter lecturer name" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                       styleClass="text-field" />
 
-                <!-- Classroom -->
-                <Label text="Classroom:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="4" />
-                <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1">
-                    <ComboBox fx:id="comboClassroom" promptText="Select Classroom"
-                              style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-                    <!-- Assign Classroom button removed -->
-                </HBox>
+            <!-- Capacity -->
+            <Label text="Capacity:" styleClass="grid-label" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <Spinner fx:id="spinnerCapacity" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                     styleClass="spinner" />
 
-                <!-- Time To Start -->
-                <Label text="Time To Start:" style="-fx-font-size: 16; -fx-text-fill: #333333;" GridPane.rowIndex="5" />
-                <ComboBox fx:id="comboTimeToStart" promptText="Select Day and Time" GridPane.rowIndex="5" GridPane.columnIndex="1"
-                          style="-fx-pref-width: 200; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-            </GridPane>
-            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 40 0 40;">
-                <Button fx:id="btnSelectStudents" text="Select Students"
-                        style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;" />
-                <ListView fx:id="studentListView" prefHeight="150.0" prefWidth="600.0"
-                          style="-fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-background-color: #f9f9f9;" />
-            </VBox>
-            <HBox spacing="20" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
-                <Button fx:id="btnCreateCourse" text="Create Course"
-                        style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;" />
-                <Button fx:id="btnBack" text="Back"
-                        style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-pref-width: 200;" />
+            <!-- Duration -->
+            <Label text="Duration (Hours):" styleClass="grid-label" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+            <Spinner fx:id="spinnerDuration" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                     styleClass="spinner" />
+
+            <!-- Time To Start -->
+            <Label text="Time To Start:" styleClass="grid-label" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+            <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1" alignment="CENTER_LEFT">
+                <ComboBox fx:id="comboDay" promptText="Select Day" styleClass="combo-box" />
+                <ComboBox fx:id="comboTime" promptText="Select Time" styleClass="combo-box" />
             </HBox>
-        </VBox>
-    </children>
-</StackPane>
+
+            <!-- Classroom -->
+            <Label text="Classroom:" styleClass="grid-label" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+            <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                <ComboBox fx:id="comboClassroom" promptText="Select Classroom" styleClass="combo-box" />
+            </HBox>
+        </GridPane>
+
+        <!-- Separator -->
+        <Separator orientation="HORIZONTAL" prefWidth="300" />
+
+        <!-- Student Selection and ListView -->
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="student-selection">
+            <Button fx:id="btnSelectStudents" text="Select Students"
+                    styleClass="btn-select-students" />
+            <ListView fx:id="studentListView" prefHeight="100.0" prefWidth="300.0"
+                      styleClass="list-view" />
+        </HBox>
+
+        <!-- Separator -->
+        <Separator orientation="HORIZONTAL" prefWidth="300" />
+
+        <!-- Action Buttons -->
+        <HBox spacing="15" alignment="CENTER" styleClass="action-buttons">
+            <Button fx:id="btnCreateCourse" text="Create Course"
+                    styleClass="btn-create" />
+            <Button fx:id="btnBack" text="Back"
+                    styleClass="btn-back" />
+        </HBox>
+
+    </VBox>
+</ScrollPane>
+</left>
+
+        <!-- Center Region: Schedule GridPane -->
+<center>
+<VBox spacing="20" styleClass="schedule-container">
+    <Label text="Schedule" styleClass="header-label" />
+    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+        <GridPane fx:id="scheduleGridPane" styleClass="schedule-gridpane" />
+    </ScrollPane>
+</VBox>
+</center>
+
+        </BorderPane>

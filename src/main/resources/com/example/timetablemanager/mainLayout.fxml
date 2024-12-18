@@ -56,7 +56,7 @@
           <Button fx:id="btnSwapClassroom" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Swap Classroom" />
         </HBox>
         <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
-          <Label style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" text="v1.1" />
+          <Label style="-fx-font-size: 12; -fx-text-fill: #4a4a4a;" text="v1.2" />
         </HBox>
       </VBox>
       <padding>
