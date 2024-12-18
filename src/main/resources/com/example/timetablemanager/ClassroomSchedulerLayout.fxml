@@ -32,12 +32,12 @@
         </rowConstraints>
 
         <!-- Day Labels (headers) with red color -->
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Time" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Monday" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Tuesday" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Wednesday" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Thursday" GridPane.columnIndex="4" GridPane.rowIndex="0" />
-        <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #FF0000;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Time" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Monday" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Tuesday" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Wednesday" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Thursday" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
 
         <!-- Time Slots -->
         <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="8:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />

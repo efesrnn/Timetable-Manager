@@ -21,7 +21,7 @@ public class ClassroomSchedulerController {
     private Connection conn;
 
     public void loadClassroomSchedule(String classroomName) {
-        String query = "SELECT c.timeToStart, a.classroomName " +
+        String query = "SELECT c.timeToStart, c.duration, a.classroomName " +
                 "FROM Allocated a " +
                 "JOIN Courses c ON a.courseName = c.courseName " +
                 "WHERE a.classroomName = ?";
@@ -33,8 +33,9 @@ public class ClassroomSchedulerController {
             while (rs.next()) {
                 String timeToStart = rs.getString("timeToStart");  // Example: "Friday 8:30"
                 String classroom = rs.getString("classroomName");
+                int duration = rs.getInt("duration"); // Duration in hours
 
-                System.out.println("Fetched Data -> timeToStart: " + timeToStart + ", classroom: " + classroom);
+                System.out.println("Fetched Data -> timeToStart: " + timeToStart + ", classroom: " + classroom + ", duration: " + duration);
 
                 // Parse timeToStart
                 String[] timeParts = timeToStart.split(" ");
@@ -68,6 +69,7 @@ public class ClassroomSchedulerController {
 
                 classLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Etiketi GridPane'e sığdırma
                 scheduleGrid.add(classLabel, colIndex, rowIndex); // Label'ı GridPane'e ekleme
+                GridPane.setRowSpan(classLabel, duration); // Süre kadar satır kaplama
 
             }
 
