@@ -66,7 +66,7 @@ public class swapCourse {
 
             //Adding Classroom
             Course selectedCourseObject = allCourses.stream()
-                    .filter(course -> course.getCourseName().equals(selectedCourse))
+                    .filter(course -> course.getCourseID().equals(selectedCourse))
                     .findFirst().orElse(null);
 
             if (selectedCourseObject == null) {
@@ -101,7 +101,7 @@ public class swapCourse {
 
             //Adding Classroom
             Course selectedCourseObject = allCourses.stream()
-                    .filter(course -> course.getCourseName().equals(selectedCourse2))
+                    .filter(course -> course.getCourseID().equals(selectedCourse2))
                     .findFirst().orElse(null);
 
             if (selectedCourseObject == null) {
@@ -137,7 +137,7 @@ public class swapCourse {
                 showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
             } else {
                 Course selectedCourseObject = allCourses.stream()
-                        .filter(course -> course.getCourseName().equals(selectedCourse))
+                        .filter(course -> course.getCourseID().equals(selectedCourse))
                         .findFirst().orElse(null);
 
                 if (selectedCourseObject == null) {
@@ -147,7 +147,7 @@ public class swapCourse {
                 String classroom1 =selectedCourseObject.getClassroom();
 
                 Course selectedCourseObject2 = allCourses.stream()
-                        .filter(course -> course.getCourseName().equals(selectedCourse2))
+                        .filter(course -> course.getCourseID().equals(selectedCourse2))
                         .findFirst().orElse(null);
 
                 if (selectedCourseObject2 == null) {
