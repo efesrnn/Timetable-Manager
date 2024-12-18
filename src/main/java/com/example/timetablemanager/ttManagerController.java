@@ -29,8 +29,10 @@ public class ttManagerController {
     private TableView<Course> timetableTable;
 
     @FXML
-    private TableColumn<Course, String> courseIDColumn,lecturerColumn,dayColumn,timeColumn,enrolledStudentsColumn,classroomColumn,capacityColumn;
+    private TableColumn<Course, String> courseIDColumn, lecturerColumn, timeToStartColumn, enrolledStudentsColumn, classroomColumn, capacityColumn;
 
+    @FXML
+    private TableColumn<Course, Integer> durationColumn;
 
     @FXML
     public void initialize() {
@@ -38,31 +40,17 @@ public class ttManagerController {
         courseIDColumn.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getCourseID()));
 
+        // TimeToStart
+        timeToStartColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getTimeToStart()));
+
+        // Duration
+        durationColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleIntegerProperty(data.getValue().getDuration()).asObject());
+
         // Lecturer
         lecturerColumn.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getLecturer()));
-
-        // Days
-        dayColumn.setCellValueFactory(data -> {
-            // Extract the part before the space as the day
-            List<String> days = data.getValue().getDays();
-            String extractedDays = days.stream()
-                    .map(day -> day.split(" ")[0]) // Take the part before the first space
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-            return new javafx.beans.property.SimpleStringProperty(extractedDays);
-        });
-
-        // Times
-        timeColumn.setCellValueFactory(data -> {
-            // Extract the part after the space as the time
-            List<String> times = data.getValue().getTimes();
-            String extractedTimes = times.stream()
-                    .map(time -> time.contains(" ") ? time.substring(time.indexOf(" ") + 1) : time) // Take the part after the first space
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-            return new javafx.beans.property.SimpleStringProperty(extractedTimes);
-        });
 
         // Classroom
         classroomColumn.setCellValueFactory(data -> {
@@ -92,14 +80,7 @@ public class ttManagerController {
             return new javafx.beans.property.SimpleStringProperty(String.valueOf(count));
         });
 
-
-        // Enrolled Students (show count instead of names)
-        enrolledStudentsColumn.setCellValueFactory(data -> {
-            int count = data.getValue().getStudents().size();
-            return new javafx.beans.property.SimpleStringProperty(String.valueOf(count));
-        });
-
-        // TableView'e çift tıklama dinleyicisi ekleme
+        // Double-click listener to open course scheduler
         timetableTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 Course selectedCourse = timetableTable.getSelectionModel().getSelectedItem();
@@ -108,8 +89,6 @@ public class ttManagerController {
                 }
             }
         });
-
-
 
         // Populate table with current timetable courses
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
@@ -129,11 +108,8 @@ public class ttManagerController {
         menuUserManual.setOnAction(event -> showAlert("User Manual", "User Manual not attached yet."));
         menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
-
     }
 
-
-    //TODO: Unique courseID aand StudentName
     public void refreshTable() {
         // Reload courses from the database to get updated assignments
         Database.reloadCourses();
@@ -159,10 +135,6 @@ public class ttManagerController {
         timetableTable.setItems(FXCollections.observableArrayList(uniqueCourses.values()));
     }
 
-
-
-
-
     public void loadTimetableFromCSV(File file) {
         if (file != null) {
             System.out.println("Loading timetable from: " + file.getAbsolutePath());
@@ -171,7 +143,6 @@ public class ttManagerController {
             System.err.println("File is null, cannot load timetable.");
         }
     }
-
 
     public void openCourseSchedulerController(Course course) {
         try {
@@ -188,10 +159,6 @@ public class ttManagerController {
             showAlert("Error", "Failed to load Course Scheduler.");
         }
     }
-
-
-
-
 
     private void switchScene(String fxmlFile) {
         try {

@@ -106,11 +106,8 @@ public class TimetableManager extends Application {
                     continue;
                 }
 
-                List<String> days = new ArrayList<>();
-                days.add(day);
-
-                List<String> times = new ArrayList<>();
-                times.add(time);
+                // Combine day and time into timeToStart
+                String timeToStart = day + " " + time;
 
                 // Students start from column[8] onwards
                 List<Student> studentList = new ArrayList<>();
@@ -120,18 +117,13 @@ public class TimetableManager extends Application {
                     Database.addStudent(studentName);
                     studentList.add(new Student(studentName, new ArrayList<>()));
                     // Enroll in DB
-                    Database.addEnrollment(courseName, studentName);
+                    Database.addEnrollment(courseID, studentName);
                 }
 
                 // Add course to DB
-                // Database.addCourse(courseName, description, duration, time)
-                // The Database.addCourse signature might differ; adjust as needed.
-                // If needed, modify Database methods or skip if they don't match this logic.
-                // For demonstration, call a hypothetical method:
-                // Database.addCourse(courseName, "N/A", duration, time); // or skip if irrelevant
-                String lecturer = "N/A";
+                Database.addCourse(courseID, "N/A", duration, timeToStart); // Replace "N/A" with actual lecturer if available
 
-                Course c = new Course(courseName,capacity, studentList, classroom, days, times, duration , lecturer);
+                Course c = new Course(courseID, capacity, studentList, classroom, timeToStart, duration, "N/A"); // Replace "N/A" with actual lecturer if available
                 courses.add(c);
             }
         } catch (IOException e) {
@@ -139,6 +131,7 @@ public class TimetableManager extends Application {
         }
         return courses;
     }
+
 
     public static void readClassroomCSV(String filePath2) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath2))) {
@@ -174,23 +167,25 @@ public class TimetableManager extends Application {
         }
     }
 
+    // Example modification, ensure consistency
     public static void printTimetable(List<Course> timetable) {
         System.out.println();
-        System.out.printf("%-15s%-15s%-20s%-10s%-15s%-20s%-50s\n", "CourseName", "CourseID", "Description", "Dur", "Classroom", "Days/Times", "Students");
+        System.out.printf("%-15s%-15s%-20s%-10s%-15s%-50s\n", "CourseID", "Lecturer", "TimeToStart", "Dur", "Classroom", "Students");
         System.out.println("---------------------------------------------------------------------------------------------------------------");
 
         for (Course c : timetable) {
-            String dayTime = "Days: " + String.join(",", c.getDays()) + " Times: " + String.join(",", c.getTimes());
             List<String> studentNames = new ArrayList<>();
             for (Student s : c.getStudents()) {
                 studentNames.add(s.getFullName());
             }
-            System.out.printf("%-15s%-15s%-20s%-10d%-15s%-20s%-50s\n",
+            System.out.printf("%-15s%-15s%-20s%-10d%-15s%-50s\n",
                     c.getCourseID(),
+                    c.getLecturer(),
+                    c.getTimeToStart(),
                     c.getDuration(),
                     c.getClassroom(),
-                    dayTime,
                     String.join(", ", studentNames));
         }
     }
+
 }

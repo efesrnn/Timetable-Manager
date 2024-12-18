@@ -56,7 +56,7 @@ public class CourseSchedulerController {
     public void setCourseData(Course course) {
         courseLbl.setText(course.getCourseID());
         lecturerLbl.setText(course.getLecturer());
-        startTimeLbl.setText(String.join(", ", course.getTimes()));
+        startTimeLbl.setText(String.join(", ", course.getTimeToStart()));
         capacityLbl.setText(String.valueOf(course.getCapacity()));
         classroomLbl.setText(course.getClassroom());
         durationLbl.setText(String.valueOf(course.getDuration()));

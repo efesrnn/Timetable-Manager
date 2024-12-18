@@ -41,12 +41,12 @@
         <TableView fx:id="timetableTable" prefHeight="300.0" prefWidth="700.0" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;">
           <columns>
             <TableColumn fx:id="courseIDColumn" text="Course ID" />
+            <TableColumn fx:id="timeToStartColumn" text="Time To Start"/>
+            <TableColumn fx:id="durationColumn" text="Duration (hrs)" />
             <TableColumn fx:id="lecturerColumn" text="Lecturer" />
-            <TableColumn fx:id="dayColumn" text="Day" />
-            <TableColumn fx:id="timeColumn" text="Time" />
-            <TableColumn fx:id="classroomColumn" text="Classroom" />
-            <TableColumn fx:id="capacityColumn" text="Capacity" />
-            <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Students" />
+            <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Student Count" />
+            <TableColumn fx:id="classroomColumn" text="Assigned Classroom" />
+            <TableColumn fx:id="capacityColumn" text="Classroom Capacity" />
           </columns>
         </TableView>
         <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">

@@ -35,6 +35,7 @@ public class AssignClassroomController {
 
     private List<Course> allCourses;
     private List<String> allClassroomNames;
+    //private List<String> assignedClassrooms = Database.getAllAllocatedClassrooms();
     private ObservableList<String> outline = FXCollections.observableArrayList();
 
     public void initialize() {

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -40,6 +41,12 @@ public class studentSelectionController {
     private List<Student> allStudents = new ArrayList<>();
     private ObservableList<Student> selectedStudents = FXCollections.observableArrayList();
 
+    private int courseCapacity = 10; // Default capacity, will be set dynamically
+
+    public void setCourseCapacity(int capacity) {
+        this.courseCapacity = capacity;
+    }
+
     @FXML
     public void initialize() {
         try {
@@ -49,6 +56,10 @@ public class studentSelectionController {
         } catch (SQLException e) {
             System.err.println("Failed to connect to the database: " + e.getMessage());
         }
+
+        // Enable multiple selection in ListView
+        listViewAvailable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        listViewSelected.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Filter students on search input
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -63,10 +74,19 @@ public class studentSelectionController {
         // ADD BUTTON: Move selected students to the selected list
         btnAdd.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewAvailable.getSelectionModel().getSelectedItems();
-            selectedItems.stream()
-                    .filter(item -> !listViewSelected.getItems().contains(item))
-                    .forEach(listViewSelected.getItems()::add);
-            listViewAvailable.getItems().removeAll(selectedItems);
+            int currentSize = listViewSelected.getItems().size();
+            int remainingCapacity = courseCapacity - currentSize;
+
+            if (selectedItems.size() > remainingCapacity) {
+                showAlert("Capacity Limit", "You are trying to add " +
+                        selectedItems.size() + " students. But you only have "+remainingCapacity+
+                        " remaining capacity for the selected course.");
+            } else {
+                selectedItems.stream()
+                        .filter(item -> !listViewSelected.getItems().contains(item))
+                        .forEach(listViewSelected.getItems()::add);
+                listViewAvailable.getItems().removeAll(selectedItems);
+            }
         });
 
         // REMOVE BUTTON: Move students back to the available list
@@ -124,5 +144,21 @@ public class studentSelectionController {
 
     public ObservableList<Student> getSelectedStudents() {
         return selectedStudents;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        try {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
+        } catch (RuntimeException e) {
+            System.err.println("Couldn't load icon");
+            e.printStackTrace();
+        }
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

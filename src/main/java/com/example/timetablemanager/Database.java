@@ -5,6 +5,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.sql.DriverManager.getConnection;
+
 /**
  * This static class is responsible for creating and managing the timetable database.
  * The database consists of 5 tables:
@@ -31,15 +33,15 @@ public class Database {
             dbDir.mkdir();
         }
 
-        if (conn == null) {
-            try {
-                conn = DriverManager.getConnection(url);
+        try {
+            if (conn == null || conn.isClosed()) {
+                conn = getConnection(url);
                 System.out.println("Connected to database!");
                 createTables(); // Create tables when connected
                 loadAllCourses(); // Load courses into memory
-            } catch (SQLException e) {
-                System.err.println("Connection error: " + e.getMessage());
             }
+        } catch (SQLException e) {
+            System.err.println("Connection error: " + e.getMessage());
         }
         return conn;
     }
@@ -58,31 +60,31 @@ public class Database {
     // CREATE TABLES (Creates five tables: Courses,Classrooms,Allocated,Students,Enrollments)
     private static void createTables() {
         String createCoursesTable = """
-            CREATE TABLE IF NOT EXISTS Courses (
-                courseId INTEGER PRIMARY KEY AUTOINCREMENT,
-                courseName TEXT NOT NULL,
-                lecturer TEXT,
-                duration INTEGER,
-                timeToStart TEXT
-            );
+                CREATE TABLE IF NOT EXISTS Courses (
+            courseId INTEGER PRIMARY KEY AUTOINCREMENT,
+            courseName TEXT NOT NULL UNIQUE,
+            lecturer TEXT,
+            duration INTEGER,
+            timeToStart TEXT
+        );
         """;
 
         String createClassroomsTable = """
-            CREATE TABLE IF NOT EXISTS Classrooms (
-                classroomId INTEGER PRIMARY KEY AUTOINCREMENT,
-                classroomName TEXT NOT NULL,
-                capacity INTEGER NOT NULL
-            );
+                CREATE TABLE IF NOT EXISTS Classrooms (
+            classroomId INTEGER PRIMARY KEY AUTOINCREMENT,
+            classroomName TEXT NOT NULL UNIQUE,
+            capacity INTEGER NOT NULL
+        );
         """;
 
         String createAllocatedTable = """
-            CREATE TABLE IF NOT EXISTS Allocated (
-                allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
-                courseName TEXT NOT NULL,
-                classroomName TEXT NOT NULL,
-                FOREIGN KEY (courseName) REFERENCES Courses (courseName),
-                FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName)
-            );
+                CREATE TABLE IF NOT EXISTS Allocated (
+            allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
+            courseName TEXT NOT NULL,
+            classroomName TEXT NOT NULL,
+            FOREIGN KEY (courseName) REFERENCES Courses (courseName) ON DELETE CASCADE,
+            FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName) ON DELETE CASCADE
+        );
         """;
 
         String createStudentsTable = """
@@ -179,8 +181,7 @@ public class Database {
                         capacity,
                         enrolledStudents,
                         classroomName,
-                        days,
-                        times,
+                        startTime,
                         duration,
                         lecturer
                 );
@@ -240,6 +241,38 @@ public class Database {
         }
     }
 
+    public static void addCourseWithAllocation(String courseName, String lecturer, int duration, String timeToStart, String classroomName) throws SQLException {
+        String insertCourseSQL = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
+        String allocateClassroomSQL = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
+
+        try {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement pstmt1 = conn.prepareStatement(insertCourseSQL)) {
+                pstmt1.setString(1, courseName);
+                pstmt1.setString(2, lecturer);
+                pstmt1.setInt(3, duration);
+                pstmt1.setString(4, timeToStart);
+                pstmt1.executeUpdate();
+            }
+
+            try (PreparedStatement pstmt2 = conn.prepareStatement(allocateClassroomSQL)) {
+                pstmt2.setString(1, courseName);
+                pstmt2.setString(2, classroomName);
+                pstmt2.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("Course added and classroom allocated successfully.");
+        } catch (SQLException e) {
+            conn.rollback();
+            System.err.println("Transaction failed: " + e.getMessage());
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
+        }
+    }
+
     public static void addEnrollment(String courseName, String studentName) {
         String sql = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -251,6 +284,21 @@ public class Database {
             System.err.println("Error while adding enrollment: " + e.getMessage());
         }
     }
+
+    public static boolean isEnrollmentExists(String courseName, String studentName) {
+        String query = "SELECT 1 FROM Enrollments WHERE courseName = ? AND studentName = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, courseName);
+            stmt.setString(2, studentName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next(); // Returns true if an entry exists
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking enrollment: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     public static void addStudent(String studentName) {
         String sql = "INSERT INTO Students (studentName) VALUES (?)";
@@ -326,6 +374,44 @@ public class Database {
             System.err.println("Error while allocating course to classroom: " + e.getMessage());
         }
     }
+
+    public static List<String> getAllAllocatedClassrooms() {
+        List<String> allocatedClassrooms = new ArrayList<>();
+        String query = "SELECT DISTINCT classroomName FROM Allocated";
+
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                allocatedClassrooms.add(rs.getString("classroomName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching allocated classrooms: " + e.getMessage());
+        }
+        return allocatedClassrooms;
+    }
+
+    public static List<String> getAllClassroomsWithCapacities() {
+        List<String> classrooms = new ArrayList<>();
+        String sql = "SELECT DISTINCT classroomName, capacity FROM Classrooms";
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String classroomName = rs.getString("classroomName");
+                int capacity = rs.getInt("capacity");
+                classrooms.add(classroomName + " | " + capacity);
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println("Error fetching classrooms with capacities: " + e.getMessage());
+        }
+        return classrooms;
+    }
+
+
 
     public static void changeClassroom(String course, String classroom) {
         try {

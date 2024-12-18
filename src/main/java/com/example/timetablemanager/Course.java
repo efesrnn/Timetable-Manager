@@ -8,19 +8,17 @@ public class Course {
     private int capacity;
     private List<Student> students;
     private String classroom;
-    private List<String> days;
-    private List<String> timesToStart;
+    private String timeToStart; // Combined day and time
     private int duration;
     private String lecturer;
 
     public Course(String courseID, int capacity,
-                  List<Student> students, String classroom, List<String> days, List<String> times, int duration, String lecturer) {
+                  List<Student> students, String classroom, String timeToStart, int duration, String lecturer) {
         this.courseID = courseID;
         this.capacity = capacity;
         this.students = students != null ? students : new ArrayList<>();
         this.classroom = classroom;
-        this.days = days != null ? days : new ArrayList<>();
-        this.timesToStart = times != null ? times : new ArrayList<>();
+        this.timeToStart = timeToStart;
         this.duration = duration;
         this.lecturer = lecturer;
     }
@@ -79,20 +77,12 @@ public class Course {
         this.classroom = classroom;
     }
 
-    public List<String> getDays() {
-        return days;
+    public String getTimeToStart() {
+        return timeToStart;
     }
 
-    public void setDays(List<String> days) {
-        this.days = days;
-    }
-
-    public List<String> getTimes() {
-        return timesToStart;
-    }
-
-    public void setTimes(List<String> times) {
-        this.timesToStart = times;
+    public void setTimeToStart(String timeToStart) {
+        this.timeToStart = timeToStart;
     }
 
     public int getDuration() { return duration; }

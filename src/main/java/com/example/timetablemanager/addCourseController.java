@@ -4,29 +4,26 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class addCourseController {
 
     @FXML
-    private TextField txtCourseName, txtCourseID, txtLecturer;
-
-    @FXML
-    private TextArea txtDescription;
+    private TextField txtCourseID, txtLecturer;
 
     @FXML
     private Spinner<Integer> spinnerCapacity, spinnerDuration;
 
     @FXML
-    private Button btnSelectStudents, btnAssignClassroom, btnCreateCourse, btnBack;
+    private Button btnSelectStudents, btnCreateCourse, btnBack;
 
     @FXML
     private ListView<String> studentListView;
@@ -35,29 +32,46 @@ public class addCourseController {
     private ComboBox<String> comboClassroom;
 
     @FXML
-    private ComboBox<String> comboDay, comboTime;
+    private ComboBox<String> comboTimeToStart; // New ComboBox for TimeToStart
 
     private ObservableList<Student> selectedStudents = FXCollections.observableArrayList();
+    private List<String> assignedClassrooms = Database.getAllAllocatedClassrooms();
+
+
+    // Define possible days and times
+    private final List<String> days = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    private final List<String> times = List.of(
+            "08:30", "09:25", "10:20", "11:15", "12:10",
+            "13:05", "14:00", "14:55", "15:50", "16:45",
+            "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
+    );
 
     @FXML
     public void initialize() {
+        // Ensure the database is connected
+        Database.connect();
+
+        // Initialize Spinners
         spinnerCapacity.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 40));
         spinnerDuration.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 2));
 
-        comboDay.setItems(FXCollections.observableArrayList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"));
-        comboTime.setItems(FXCollections.observableArrayList(
-                "08:30", "09:25", "10:20", "11:15", "12:10",
-                "13:05", "14:00", "14:55", "15:50", "16:45",
-                "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
-        ));
+        // Populate TimeToStart ComboBox with combined day and time options
+        List<String> timeToStartOptions = new ArrayList<>();
+        for (String day : days) {
+            for (String time : times) {
+                timeToStartOptions.add(day + " " + time);
+            }
+        }
+        comboTimeToStart.setItems(FXCollections.observableArrayList(timeToStartOptions));
 
-        // Fetch real classrooms from the database
-        List<String> classrooms = Database.getAllClassroomNames();
-        comboClassroom.setItems(FXCollections.observableArrayList(classrooms));
+        // Fetch classrooms with capacities from the database and exclude assigned ones
+        assignedClassrooms = Database.getAllAllocatedClassrooms(); // Update the assignedClassrooms list
+        List<String> classroomsWithCapacities = Database.getAllClassroomsWithCapacities();
+        classroomsWithCapacities.removeIf(classroom -> assignedClassrooms.contains(classroom.split(" \\| ")[0]));
+        comboClassroom.setItems(FXCollections.observableArrayList(classroomsWithCapacities));
 
         // Button actions
         btnSelectStudents.setOnAction(event -> openStudentSelectionPopup());
-        btnAssignClassroom.setOnAction(event -> assignClassroom());
         btnCreateCourse.setOnAction(event -> createCourse());
         btnBack.setOnAction(event -> switchScene("mainLayout.fxml"));
     }
@@ -67,6 +81,8 @@ public class addCourseController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("studentSelectionLayout.fxml"));
             Stage popupStage = new Stage();
             popupStage.setScene(new Scene(loader.load()));
+
+            // Set window icon (optional)
             try {
                 Stage stage = (Stage) popupStage.getScene().getWindow();
                 stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/student.png")));
@@ -76,14 +92,21 @@ public class addCourseController {
             }
             popupStage.setTitle("Student Enroll");
             studentSelectionController controller = loader.getController();
+            controller.setCourseCapacity(spinnerCapacity.getValue());
             popupStage.showAndWait();
 
-            // Retrieve selected students
+            // Retrieve selected students without duplicates
             ObservableList<Student> selected = controller.getSelectedStudents();
             if (selected != null) {
-                this.selectedStudents.addAll(selected);
+                for (Student student : selected) {
+                    // Add only if the student is not already in the list
+                    if (!this.selectedStudents.contains(student)) {
+                        this.selectedStudents.add(student);
+                    }
+                }
+                // Update ListView with the latest unique list
                 studentListView.setItems(FXCollections.observableArrayList(
-                        this.selectedStudents.stream().map(student ->student.getFullName()).toList()
+                        this.selectedStudents.stream().map(Student::getFullName).distinct().toList()
                 ));
             }
         } catch (IOException e) {
@@ -92,62 +115,74 @@ public class addCourseController {
         }
     }
 
-    private void assignClassroom() {
-        String selectedClassroom = comboClassroom.getValue();
-        if (selectedClassroom == null) {
+
+    private void createCourse() {
+        String courseID = txtCourseID.getText().trim();
+        int capacity = spinnerCapacity.getValue();
+        int duration = spinnerDuration.getValue();
+        String lecturer = txtLecturer.getText().trim();
+
+        String selectedClassroomEntry = comboClassroom.getValue();
+        if (selectedClassroomEntry == null) {
             showAlert("Error", "No classroom selected!");
             return;
         }
 
-        // If you previously removed classrooms from the list to mark them as assigned,
-        // consider not removing them now since we have actual classrooms from DB.
-        // If you still want to simulate 'marking as assigned', you could remove it from the comboBox items:
-        // comboClassroom.getItems().remove(selectedClassroom);
+        // Extract only the classroom name
+        String classroom = selectedClassroomEntry.split(" \\| ")[0];
 
-        showAlert("Success", "Classroom " + selectedClassroom + " assigned successfully.");
-    }
+        String timeToStart = comboTimeToStart.getValue();
 
-    private void createCourse() {
-        String courseName = txtCourseName.getText();
-        String courseID = txtCourseID.getText();
-        String description = txtDescription.getText();
-        int capacity = spinnerCapacity.getValue();
-        int duration = spinnerDuration.getValue();
-        String lecturer = txtLecturer.getText();
-        String classroom = comboClassroom.getValue();
-        String day = comboDay.getValue();
-        String time = comboTime.getValue();
-
-        if (courseName.isEmpty() || courseID.isEmpty() || description.isEmpty() || lecturer.isEmpty() || classroom == null || day == null || time == null) {
-            showAlert("Error", "Please fill in all fields, select day/time, assign students/classroom, and set capacity/duration!");
+        if (courseID.isEmpty() || lecturer.isEmpty() || classroom == null || timeToStart == null) {
+            showAlert("Error", "Please fill in all fields, select time, assign students/classroom, and set capacity/duration!");
             return;
         }
 
-        List<String> days = new ArrayList<>();
-        days.add(day);
+        // Validate classroom capacity
+        if (!Database.hasSufficientCapacity(classroom, selectedStudents.size())) {
+            showAlert("Error", "Selected classroom does not have sufficient capacity for the number of students.");
+            return;
+        }
 
-        List<String> times = new ArrayList<>();
-        times.add(time);
-
-        // Create course
-        // Make sure your Course class constructor includes lecturer
+        // Prepare course data
         Course newCourse = new Course(
-                courseName,
+                courseID,
                 capacity,
                 new ArrayList<>(selectedStudents),
                 classroom,
-                days,
-                times,
+                timeToStart,
                 duration,
                 lecturer
         );
 
-        // TODO: Add the new course to your timetable or database as needed.
-        // e.g., TimetableManager.getTimetable().add(newCourse);
-        // or Database.addCourse(...), etc.
+        // Add the new course to the TimetableManager
+        TimetableManager.getTimetable().add(newCourse);
 
-        showAlert("Success", "Course " + courseName + " with ID " + courseID + " created successfully with lecturer " + lecturer + " on " + day + " at " + time + ".");
+        // Save the course to the database
+        try {
+            Database.addCourseWithAllocation(courseID, lecturer, duration, timeToStart, classroom);
+        } catch (SQLException e) {
+            showAlert("Error", "Failed to create course and allocate classroom: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Removed redundant allocateClassroom call
+        // Database.allocateCourseToClassroom(courseID, classroom);
+
+        for (Student student : selectedStudents) {
+            if (!Database.isEnrollmentExists(courseID, student.getFullName())) {
+                Database.addEnrollment(courseID, student.getFullName());
+            }
+        }
+
+        showAlert("Success", "Course created successfully: " + courseID);
+
+        // Switch back to mainLayout and refresh the table
+        switchScene("mainLayout.fxml");
     }
+
+
 
     private void switchScene(String fxmlFile) {
         try {
@@ -157,6 +192,8 @@ public class addCourseController {
             if (!(newRoot instanceof javafx.scene.Parent)) {
                 throw new IllegalArgumentException("Loaded root is not a valid JavaFX parent node.");
             }
+            ttManagerController controller = loader.getController();
+            controller.refreshTable(); // Refresh the TableView
 
             Stage stage = (Stage) btnBack.getScene().getWindow();
             Scene scene = stage.getScene();
@@ -173,8 +210,6 @@ public class addCourseController {
             showAlert("Error", "Invalid root type in FXML: " + fxmlFile);
         }
     }
-
-
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
