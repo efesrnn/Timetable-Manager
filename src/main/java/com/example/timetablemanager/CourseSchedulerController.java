@@ -42,16 +42,19 @@ public class CourseSchedulerController {
             System.err.println("Failed to connect to the database: " + e.getMessage());
         }
 
-     /*   studentsListView.setOnMouseClicked(event -> {
+      studentsListView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 String selectedStudent = studentsListView.getSelectionModel().getSelectedItem();
                 if (selectedStudent != null) {
-                    openStudentDetails(selectedStudent);
+                    System.out.println(selectedStudent);
+
+                   // openStudentDetails(selectedStudent);
+
                 }
             }
         });
 
-    */
+
 
     /*
         // Add double-click event to classroomLbl (Label)
