@@ -32,6 +32,8 @@ public class AssignClassroomController {
 
     @FXML
     private Button buttonBack;
+    @FXML
+    private Button buttonDelete;
 
     private List<Course> allCourses;
     private List<String> allClassroomNames;
@@ -126,9 +128,26 @@ public class AssignClassroomController {
 
 
 
+        // Back Button Action
         buttonBack.setOnAction(event -> switchScene("mainLayout.fxml"));
 
+        // Delete Button Action
+        buttonDelete.setOnAction(event -> {
+            String selectedOutlineItem = listViewOutline.getSelectionModel().getSelectedItem();
+
+            if (selectedOutlineItem == null) {
+                showAlert("Error", "Please select an item to delete.");
+                return;
+            }
+
+            // Remove the selected item from the outline list
+            outline.remove(selectedOutlineItem);
+
+            // Refresh the ListView
+            listViewOutline.setItems(outline);
+        });
     }
+
     private void switchScene(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/" + fxmlFile));

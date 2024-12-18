@@ -38,6 +38,13 @@ public class CourseSchedulerController {
 
             deleteCourseButton.setOnAction(event -> deleteCourse());
 
+            classroomLbl.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) { // Çift tıklama
+                    String selectedClassroom = classroomLbl.getText();
+                    openClassroomDetails(selectedClassroom);
+                }
+            });
+
         } catch (SQLException e) {
             System.err.println("Failed to connect to the database: " + e.getMessage());
         }
@@ -56,15 +63,26 @@ public class CourseSchedulerController {
 
 
 
-    /*
-        // Add double-click event to classroomLbl (Label)
-        classroomLbl.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {  // Check if double click
-                String selectedClassroom = classroomLbl.getText();
-                openClassroomDetails(selectedClassroom);  // Open Classroom Details
-            }
-        });
-    */
+    }
+    private void openClassroomDetails(String classroomName) {
+        try {
+            // ClassroomScheduler FXML dosyasını yükle
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/ClassroomSchedulerLayout.fxml"));
+            Parent root = loader.load();
+
+            // Kontrolcüyü al ve seçilen sınıf bilgilerini gönder
+            ClassroomSchedulerController classroomController = loader.getController();
+            classroomController.loadClassroomSchedule(classroomName);
+
+            // Yeni bir pencere (Stage) aç
+            Stage stage = new Stage();
+            stage.setTitle("Classroom Schedule - " + classroomName);
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            System.err.println("Sınıf detayları penceresi açılamadı: " + e.getMessage());
+        }
     }
 
     public void setCourseData(Course course) {
