@@ -125,6 +125,8 @@ public class ttManagerController {
         for (Course c : uniqueCourses.values()) {
             LinkedHashMap<String, Student> uniqueStudents = new LinkedHashMap<>();
             for (Student s : c.getStudents()) {
+                // Use getFullName(), getStudentId(), or another unique field as the key
+                // Assuming fullName is unique for demonstration:
                 uniqueStudents.put(s.getFullName(), s);
             }
             // Replace the course's student list with a new list of unique students
@@ -132,6 +134,8 @@ public class ttManagerController {
         }
 
         // Update the table with the filtered, unique courses
+        // Step 3: Update the table with the filtered, unique courses
+        timetableTable.getItems().clear();
         timetableTable.setItems(FXCollections.observableArrayList(uniqueCourses.values()));
     }
 
@@ -153,7 +157,18 @@ public class ttManagerController {
             CourseSchedulerController controller = loader.getController();
             controller.setCourseData(course);
             stage.setTitle("Course Scheduler");
-            stage.show();
+
+           // stage.setOnCloseRequest(event -> refreshTable());  // Refresh table when the course scheduler window is closed
+
+            //TIMETABLE UPDATES
+            stage.showAndWait();
+            TimetableManager.getTimetable().clear();
+            Database.loadAllCourses();
+            TimetableManager.getTimetable().addAll(Database.getAllCourses());
+            timetableTable.getItems().clear();
+            timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
+
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Failed to load Course Scheduler.");
