@@ -17,7 +17,16 @@ public class CourseSchedulerController {
     private Label courseLbl, lecturerLbl, startTimeLbl, capacityLbl, classroomLbl, durationLbl;
 
     @FXML
+    private Button deleteCourseButton;
+
+    @FXML
     private ListView<String> studentsListView;
+
+    private ttManagerController mainController;  // Declare a reference to the main controller
+
+    public void setMainController(ttManagerController mainController) {
+        this.mainController = mainController;
+    }
 
     private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
     private static final String DB_URL = "jdbc:sqlite:" + dbPath + File.separator + "TimetableManagement.db";
@@ -31,6 +40,8 @@ public class CourseSchedulerController {
 
             loadStudents();
             loadCourseData();
+
+            deleteCourseButton.setOnAction(event -> deleteCourse());
 
         } catch (SQLException e) {
             System.err.println("Failed to connect to the database: " + e.getMessage());
@@ -117,7 +128,66 @@ public class CourseSchedulerController {
             e.printStackTrace();
         }
     }
+
+    private void deleteCourse() {
+        String courseName = courseLbl.getText();
+        if (courseName == null || courseName.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Delete Error", "No course selected for deletion.");
+            return;
+        }
+
+        Alert confirmationDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmationDialog.setTitle("Delete Course Confirmation");
+        confirmationDialog.setHeaderText("Are you sure you want to delete this course?");
+        confirmationDialog.setContentText("Course: " + courseName);
+
+        confirmationDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // Delete course from database
+                String deleteQuery = "DELETE FROM Courses WHERE courseName = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(deleteQuery)) {
+                    pstmt.setString(1, courseName);
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        showAlert(Alert.AlertType.INFORMATION, "Successful", "Course successfully deleted.");
+                        refreshTimetableView();
+                        closeCourseScheduler();
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "Delete Error", "Course not found or could not be deleted.");
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Database Error", "An error occurred while deleting the course.");
+                }
+            }
+        });
+    }
+
+    private void refreshTimetableView() {
+        if (mainController != null) {
+            mainController.refreshTable(); // Call the refreshTable method in the main controller
+        }
+    }
+
+    private void closeCourseScheduler() {
+        // Get the current stage (window) and close it
+        Stage currentStage = (Stage) deleteCourseButton.getScene().getWindow();
+        currentStage.close();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+
 }
+
+
+
   /*  private void openClassroomDetails(String classroomName) {
         try {
             // Load the ClassroomScheduler FXML

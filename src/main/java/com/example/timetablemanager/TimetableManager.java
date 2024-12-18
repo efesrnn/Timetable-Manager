@@ -17,6 +17,8 @@ public class TimetableManager extends Application {
 
     private static List<Course> timetable = new ArrayList<>();
 
+
+
     public static List<Course> getTimetable() {
         return timetable;
     }
@@ -191,4 +193,5 @@ public class TimetableManager extends Application {
                     String.join(", ", studentNames));
         }
     }
+
 }

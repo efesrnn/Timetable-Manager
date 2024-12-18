@@ -83,7 +83,7 @@ public class ttManagerController {
         });
 
 
-
+        timetableTable.getItems().clear();
         // Populate table with current timetable courses
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
 
@@ -102,7 +102,6 @@ public class ttManagerController {
         menuUserManual.setOnAction(event -> showAlert("User Manual", "User Manual not attached yet."));
         menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
-
     }
 
 
@@ -128,11 +127,9 @@ public class ttManagerController {
         }
 
         // Step 3: Update the table with the filtered, unique courses
+        timetableTable.getItems().clear();
         timetableTable.setItems(FXCollections.observableArrayList(uniqueCourses.values()));
     }
-
-
-
 
     public void loadTimetableFromCSV(File file) {
         if (file != null) {
@@ -143,7 +140,6 @@ public class ttManagerController {
         }
     }
 
-
     public void openCourseSchedulerController(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/courseSchedulerLayout.fxml"));
@@ -153,16 +149,23 @@ public class ttManagerController {
             CourseSchedulerController controller = loader.getController();
             controller.setCourseData(course);
             stage.setTitle("Course Scheduler");
-            stage.show();
+
+           // stage.setOnCloseRequest(event -> refreshTable());  // Refresh table when the course scheduler window is closed
+
+            //TIMETABLE UPDATES
+            stage.showAndWait();
+            TimetableManager.getTimetable().clear();
+            Database.loadAllCourses();
+            TimetableManager.getTimetable().addAll(Database.getAllCourses());
+            timetableTable.getItems().clear();
+            timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
+
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Failed to load Course Scheduler.");
         }
     }
-
-
-
-
 
     private void switchScene(String fxmlFile) {
         try {

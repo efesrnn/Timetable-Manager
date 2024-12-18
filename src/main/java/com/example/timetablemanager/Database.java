@@ -115,7 +115,7 @@ public class Database {
     }
 
     // Load all courses into the in-memory list (Includes courses and enrolled students)
-    private static void loadAllCourses() {
+    public static void loadAllCourses() {
         courseList.clear();
         String sql = "SELECT DISTINCT courseName, timeToStart, duration, lecturer FROM Courses";
          String sql2 = "SELECT * FROM Allocated WHERE courseName = ? ";
