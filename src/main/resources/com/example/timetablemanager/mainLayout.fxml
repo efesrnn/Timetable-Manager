@@ -13,8 +13,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<StackPane style="-fx-background-color: #f9f9f9;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="com.example.timetablemanager.ttManagerController">
+<StackPane style="-fx-background-color: #f9f9f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.ttManagerController">
   <children>
     <VBox spacing="0" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff;">
       <MenuBar style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
@@ -36,12 +37,20 @@
         <HBox alignment="CENTER" spacing="10" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
           <Label style="-fx-font-size: 14; -fx-text-fill: #4a4a4a;" text="Search:" />
           <TextField fx:id="txtSearch" promptText="Enter student/classroom/course" style="-fx-pref-width: 300; -fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-text-fill: #1c1c1c;" />
-          <Button fx:id="btnSearch" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333;" text="Search" />
+          <Button fx:id="btnSearch" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-cursor: hand;" text="Search" textAlignment="CENTER">
+                  <font>
+                     <Font name="Times New Roman" size="14.0" />
+                  </font></Button>
+               <Button fx:id="btnRefresh" layoutX="543.0" layoutY="20.0" style="-fx-background-color: #f0f0f0; -fx-border-color: #d4d4d4; -fx-border-radius: 5; -fx-text-fill: #333333; -fx-cursor: hand;" text="Refresh" textAlignment="CENTER">
+                  <font>
+                     <Font name="Times New Roman" size="14.0" />
+                  </font>
+               </Button>
         </HBox>
         <TableView fx:id="timetableTable" prefHeight="300.0" prefWidth="700.0" style="-fx-border-color: #e0e0e0; -fx-border-width: 1;">
           <columns>
             <TableColumn fx:id="courseIDColumn" text="Course ID" />
-            <TableColumn fx:id="timeToStartColumn" text="Time To Start"/>
+            <TableColumn fx:id="timeToStartColumn" text="Time To Start" />
             <TableColumn fx:id="durationColumn" text="Duration (hrs)" />
             <TableColumn fx:id="lecturerColumn" text="Lecturer" />
             <TableColumn fx:id="enrolledStudentsColumn" text="Enrolled Student Count" />

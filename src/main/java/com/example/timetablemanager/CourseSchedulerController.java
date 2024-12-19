@@ -5,8 +5,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
@@ -18,6 +22,9 @@ public class CourseSchedulerController {
 
     @FXML
     private Button deleteCourseButton;
+
+    @FXML
+    private Button backButton;
 
     @FXML
     private ListView<String> studentsListView;
@@ -34,6 +41,8 @@ public class CourseSchedulerController {
 
     @FXML
     public void initialize() {
+
+
         try {
             conn = DriverManager.getConnection(DB_URL);
             System.out.println("Connected to the database.");
@@ -71,22 +80,19 @@ public class CourseSchedulerController {
     }
     private void openClassroomDetails(String classroomName) {
         try {
-            // ClassroomScheduler FXML dosyasını yükle
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/ClassroomSchedulerLayout.fxml"));
             Parent root = loader.load();
 
-            // Kontrolcüyü al ve seçilen sınıf bilgilerini gönder
             ClassroomSchedulerController classroomController = loader.getController();
             classroomController.loadClassroomSchedule(classroomName);
 
-            // Yeni bir pencere (Stage) aç
             Stage stage = new Stage();
             stage.setTitle("Classroom Schedule - " + classroomName);
             stage.setScene(new Scene(root));
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Sınıf detayları penceresi açılamadı: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to navigate back to the main screen.");
         }
     }
 
@@ -194,6 +200,18 @@ public class CourseSchedulerController {
         // Get the current stage (window) and close it
         Stage currentStage = (Stage) deleteCourseButton.getScene().getWindow();
         currentStage.close();
+    }
+
+    @FXML
+    private void handleBackButton()
+    {
+        try {
+            Stage currentStage = (Stage) backButton.getScene().getWindow();
+            currentStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to close the current screen.");
+        }
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

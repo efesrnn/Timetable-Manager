@@ -6,10 +6,15 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import static com.example.timetablemanager.Database.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +53,11 @@ public class swapCourse {
 
     private List<Course> allCourses;
 
+    private ttManagerController mainController;  // Declare a reference to the main controller
 
+    public void setMainController(ttManagerController mainController) {
+        this.mainController = mainController;
+    }
 
     @FXML
     public void initialize() {
@@ -128,12 +137,12 @@ public class swapCourse {
 
 
         btnSave.setOnAction(event -> {
-             if(classroomCapacity==null||classroomCapacity2==null) {
-                 showAlert("Error", "Invalid selection. Please try again.");
-             } else if (classroomCapacity.equals("")||classroomCapacity2.equals("")) {
+            if(classroomCapacity==null||classroomCapacity2==null) {
+                showAlert("Error", "Invalid selection. Please try again.");
+            } else if (classroomCapacity.equals("")||classroomCapacity2.equals("")) {
                 showAlert("Error", "Invalid selection. Please try again.");
             }
-             else if(Integer.parseInt(classroomCapacity)<numberOfStudents2 || Integer.parseInt(classroomCapacity2)<numberOfStudents) {
+            else if(Integer.parseInt(classroomCapacity)<numberOfStudents2 || Integer.parseInt(classroomCapacity2)<numberOfStudents) {
                 showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
             } else {
                 Course selectedCourseObject = allCourses.stream()
@@ -159,34 +168,30 @@ public class swapCourse {
                 selectedCourseObject.setClassroom(classroom2);
                 selectedCourseObject2.setClassroom(classroom1);
 
+                Database.changeClassroom(selectedCourse, classroom2);
+                Database.changeClassroom(selectedCourse2, classroom1);
+
+                showAlert("Success", "Courses' classrooms have been swapped successfully!");
+
+                ClassroomListView.setItems(FXCollections.observableArrayList(selectedClass2));
+                ClassroomListView2.setItems(FXCollections.observableArrayList(selectedClass));
+
             }
 
-
-
-
-
-
-//            selectedCourseObject.setClassroom(selectedCourse);
-//            Database.allocateCourseToClassroom(selectedCourseObject.getCourseName(), selectedCourse);
-
-
-
-//
-//            if (!Database.hasSufficientCapacity(selectedClass, numberOfStudents)) {
-//                showAlert("Error", "The selected classroom does not meet the student capacity for the course.");
-//                return;
-//            } else {
-//                changeClassroom(selectedCourse,selectedClass);
-//                System.out.println("done");
-//                allocateCourseToClassroom(selectedCourse,selectedClass);
-//            }
-
         });
+
+        refreshTimetableView();
         btnBack.setOnAction(event -> switchScene("mainLayout.fxml"));
 
 
 
     }
+    private void refreshTimetableView() {
+        if (mainController != null) {
+            mainController.refreshTable(); // Call the refreshTable method in the main controller
+        }
+    }
+
 
 
     private void switchScene(String fxmlFile) {

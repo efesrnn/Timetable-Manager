@@ -1,0 +1,143 @@
+/* Root Pane */
+.stack-pane {
+    -fx-background-color: #19543e;
+    -fx-pref-width: 450px;   /* Sabit genişlik */
+    -fx-pref-height: 700px;  /* Sabit yükseklik */
+}
+
+/* Course Details Container (VBox) */
+.course-details-container {
+    -fx-background-color: #19543e;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5;
+}
+
+/* Header Container (HBox) */
+.header-container {
+    -fx-background-color: #8cb88e; /* Background color */
+    -fx-border-color: #19543e; /* Border color */
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 15; /* Inner padding */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 5);
+    -fx-background-insets: 5;
+}
+
+/* Header Label */
+#courseHeader {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white; /* Dark color for a strong title */
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+    -fx-padding: 10px 0;
+    -fx-alignment: center;
+}
+
+/* Course Label */
+#courseLbl {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #363636;
+    -fx-font-family: 'Montserrat', sans-serif; /* Changed to Montserrat */
+}
+
+/* General Info Labels */
+#lecturerLbl, #startTimeLbl, #capacityLbl, #durationLbl {
+    -fx-font-size: 14px;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-text-fill: #555555;
+}
+
+/* Styled Info Labels */
+#lecturerLbl, #startTimeLbl, #capacityLbl, #durationLbl {
+    -fx-font-size: 14px;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-text-fill: #555555;
+    -fx-padding: 5px;
+}
+
+/* Classroom label underline style */
+#classroomLbl {
+    -fx-underline: true;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* Hover Effect for Classroom Label */
+#classroomLbl:hover {
+    -fx-underline: true;
+    -fx-text-fill:  #19543e; /* Red color when hovering */
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-weight: bold; /* Set font to bold */
+    -fx-cursor: hand;
+    -fx-font-size: 16px; /* Slight increase in font size on hover */
+}
+
+/* Delete Button Styles */
+.btn-delete {
+    -fx-background-color: #8cb88e;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold; /* Set font to bold */
+    -fx-pref-width: 150px;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, opacity 0.3s;
+}
+
+.btn-delete:focused {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+.btn-delete:hover {
+    -fx-opacity: 0.9;
+}
+
+/* HBox and VBox Styling */
+.hbox, .vbox {
+    -fx-spacing: 10px;
+}
+
+.hbox > .label {
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Padding for VBox Containers */
+.vbox > .hbox {
+    -fx-padding: 5px;
+}
+
+
+/* Padding for Student Selection */
+.student-selection {
+    -fx-padding: 5px;
+}
+
+/* Style for the Selected Student in the ListView */
+.list-view .list-cell:selected {
+    -fx-background-color: #8cb88e; /* Background color for selected item */
+    -fx-text-fill: white; /* Text color for selected item */
+}
+
+/* Styling for Student List Items */
+.list-view .list-cell {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #555555; /* Default text color */
+}
+
+/* Student List Hover Effect */
+.list-view .list-cell:hover {
+    -fx-background-color: #d1e7e3; /* Light background when hovering over a list item */
+    -fx-text-fill: #19543e; /* Dark text color when hovering */
+    -fx-cursor: hand;
+}

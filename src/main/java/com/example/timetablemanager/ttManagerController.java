@@ -1,6 +1,7 @@
 package com.example.timetablemanager;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,7 +19,10 @@ import java.util.stream.Collectors;
 public class ttManagerController {
 
     @FXML
-    private Button btnAddCourse, btnEnrollStudent, btnAssignClassroom, btnSwapClassroom, btnSearch;
+    private Button btnAddCourse, btnEnrollStudent, btnAssignClassroom, btnSwapClassroom, btnSearch,btnRefresh;
+
+    @FXML
+    private TextField txtSearch;
 
     @FXML
     private MenuItem menuImportCSV, menuLoadTimetable, menuSaveTimetable, menuExportTimetable, menuExit;
@@ -90,11 +94,13 @@ public class ttManagerController {
             }
         });
 
+
         // Populate table with current timetable courses
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
 
         // Buttons and menu actions
-        btnSearch.setOnAction(event -> showAlert("Search", "Search logic not attached yet."));
+        btnSearch.setOnAction(event -> performSearch());
+        btnRefresh.setOnAction(event -> refreshTable());
         btnAddCourse.setOnAction(event -> switchScene("addCourseLayout.fxml"));
         btnEnrollStudent.setOnAction(event -> showAlert("Enroll Student", "Enroll Student logic not attached yet."));
         btnAssignClassroom.setOnAction(event -> switchScene("assignClassroomLayout.fxml"));
@@ -109,6 +115,25 @@ public class ttManagerController {
         menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
     }
+
+
+    private void performSearch() {
+        String searchText = txtSearch.getText().toLowerCase();
+
+
+        List<Course> filteredCourses = TimetableManager.getTimetable().stream()
+                .filter(course -> course.getCourseID().toLowerCase().contains(searchText)
+                        || course.getTimeToStart().toLowerCase().contains(searchText)
+                        || String.valueOf(course.getDuration()).contains(searchText)
+                        || course.getLecturer().toLowerCase().contains(searchText))
+                .collect(Collectors.toList());
+
+        timetableTable.getItems().setAll(filteredCourses);
+        txtSearch.clear();
+
+    }
+
+
 
     public void refreshTable() {
         // Reload courses from the database to get updated assignments
@@ -133,6 +158,13 @@ public class ttManagerController {
             c.setStudents(new ArrayList<>(uniqueStudents.values()));
         }
 
+        ObservableList<Course> updatedCourses = FXCollections.observableArrayList(uniqueCourses.values());
+        timetableTable.setItems(updatedCourses);
+
+        // Update TimetableManager
+        TimetableManager.getTimetable().clear(); // Clear old timetable
+        TimetableManager.getTimetable().addAll(updatedCourses);
+
         // Update the table with the filtered, unique courses
         // Step 3: Update the table with the filtered, unique courses
         timetableTable.getItems().clear();
@@ -156,7 +188,8 @@ public class ttManagerController {
 
             CourseSchedulerController controller = loader.getController();
             controller.setCourseData(course);
-            stage.setTitle("Course Scheduler");
+            stage.getIcons().add(new Image(getClass().getResource("/com/example/timetablemanager/icons/catalogue.png").toString()));
+            stage.setTitle("Course Details");
 
            // stage.setOnCloseRequest(event -> refreshTable());  // Refresh table when the course scheduler window is closed
 
