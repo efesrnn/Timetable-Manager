@@ -44,22 +44,93 @@
     -fx-border-width: 1.5px;
 }
 
-/* Spinners */
+/* Spinner Control */
 .spinner {
     -fx-pref-width: 100px;
-    -fx-background-color: #f9f9f9;
-    -fx-border-color: #e0e0e0;
-    -fx-border-radius: 5px;
-    -fx-text-fill: #1c1c1c;
+    -fx-min-width: 80px;
+    -fx-max-width: 150px;
+    -fx-background-color: #FFFFFF; /* Pure white background */
+    -fx-border-color: #E0E0E0; /* Light gray border */
+    -fx-border-radius: 8px; /* Rounded corners */
+    -fx-background-radius: 8px;
+    -fx-text-fill: #333333; /* Dark gray text */
     -fx-font-family: 'Segoe UI', sans-serif;
     -fx-font-size: 14px;
-    -fx-padding: 2;
+    -fx-padding: 4; /* Increased padding */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 5, 0, 0, 2); /* Subtle shadow */
+    -fx-transition: background-color 0.3s ease, -fx-border-color 0.3s ease, -fx-effect 0.3s ease; /* Smooth transitions */
 }
 
+/* Focused Spinner */
 .spinner:focused {
-    -fx-border-color: #4CAF50; /* Highlight border on focus */
-    -fx-border-width: 1.5px;
+    -fx-border-color: #10A37F; /* ChatGPT Green border on focus */
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 8, 0, 0, 4); /* Enhanced shadow on focus */
 }
+
+/* Spinner Buttons */
+.spinner .arrow-button {
+    -fx-background-color: #F5F5F5; /* Secondary light gray background */
+    -fx-padding: 0;
+    -fx-border: none;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px; /* Rounded corners */
+    -fx-transition: background-color 0.3s ease, -fx-effect 0.3s ease; /* Smooth transitions */
+    -fx-alignment: center; /* Center the arrow */
+}
+
+/* Hover Effect for Spinner Buttons */
+.spinner .arrow-button:hover {
+    -fx-background-color: #E0E0E0; /* Slightly darker gray on hover */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1); /* Subtle shadow on hover */
+}
+
+/* Increment (Up) Button */
+.spinner .increment-arrow-button {
+    -fx-background-color: #10A37F; /* ChatGPT Green */
+}
+
+.spinner .increment-arrow-button:hover {
+    -fx-background-color: #0E7C66; /* Darker Green on Hover */
+}
+
+/* Decrement (Down) Button */
+.spinner .decrement-arrow-button {
+    -fx-background-color: #10A37F; /* ChatGPT Green for consistency */
+}
+
+.spinner .decrement-arrow-button:hover {
+    -fx-background-color: #0E7C66; /* Darker Green on Hover */
+}
+
+/* Arrow Graphics */
+.spinner .arrow {
+    -fx-background-color: transparent;
+    -fx-padding: 6;
+    -fx-shape: "M 2 6 L 6 2 L 10 6 Z"; /* Default to Up arrow; overridden for down */
+    /* White arrow for contrast */
+    -fx-transition: -fx-rotate 0.3s ease; /* Smooth rotation if needed */
+}
+
+/* Specific Arrow Shapes */
+.spinner .arrow.up {
+    -fx-shape: "M 2 6 L 6 2 L 10 6 Z"; /* Up arrow shape */
+}
+
+.spinner .arrow.down {
+    -fx-shape: "M 2 2 L 6 6 L 10 2 Z"; /* Down arrow shape */
+}
+
+/* Spinner Editor (TextField) */
+.spinner .text-field {
+    -fx-background-color: #FFFFFF; /* White background */
+    -fx-border-color: transparent; /* No border */
+    -fx-text-fill: #333333; /* Dark gray text */
+    -fx-font-size: 14px;
+    -fx-padding: 4 6 4 6; /* Padding for better spacing */
+    -fx-alignment: center; /* Center the text */
+}
+
 
 /* Buttons */
 .button {
