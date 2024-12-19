@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -23,6 +25,8 @@ public class ttManagerController {
 
     @FXML
     private TextField txtSearch;
+    @FXML
+    private MenuBar menuBar;
 
     @FXML
     private MenuItem menuImportCSV, menuLoadTimetable, menuSaveTimetable, menuExportTimetable, menuExit;
@@ -106,10 +110,15 @@ public class ttManagerController {
         btnAssignClassroom.setOnAction(event -> switchScene("assignClassroomLayout.fxml"));
         btnSwapClassroom.setOnAction(event -> switchScene("swapCourse.fxml"));
 
-        menuImportCSV.setOnAction(event -> showAlert("Import CSV", "Import CSV not attached yet."));
-        menuLoadTimetable.setOnAction(event -> showAlert("Load Timetable", "Load Timetable not attached yet."));
-        menuSaveTimetable.setOnAction(event -> showAlert("Save Timetable", "Save Timetable not attached yet."));
-        menuExportTimetable.setOnAction(event -> showAlert("Export Timetable", "Export Timetable not attached yet."));
+        menuImportCSV.setOnAction(event -> {
+        switchScene("welcomeLayout.fxml");
+        timetableTable.getItems().clear();
+        txtSearch.clear();
+
+        } );
+  //      menuLoadTimetable.setOnAction(event -> showAlert("Load Timetable", "Load Timetable not attached yet."));
+    //    menuSaveTimetable.setOnAction(event -> showAlert("Save Timetable", "Save Timetable not attached yet."));
+      //  menuExportTimetable.setOnAction(event -> showAlert("Export Timetable", "Export Timetable not attached yet."));
         menuExit.setOnAction(event -> System.exit(0));
         menuUserManual.setOnAction(event -> showAlert("User Manual", "User Manual not attached yet."));
         menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
@@ -184,7 +193,9 @@ public class ttManagerController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/courseSchedulerLayout.fxml"));
             Stage stage = new Stage();
-            stage.setScene(new Scene(loader.load()));
+            stage.setScene(new Scene(loader.load(), 450, 700));
+            stage.setResizable(false);
+
 
             CourseSchedulerController controller = loader.getController();
             controller.setCourseData(course);
@@ -208,7 +219,7 @@ public class ttManagerController {
         }
     }
 
-    private void switchScene(String fxmlFile) {
+    public void switchScene(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/" + fxmlFile));
             Object newRoot = loader.load();
@@ -229,6 +240,7 @@ public class ttManagerController {
             showAlert("Error", "Invalid root type in FXML: " + fxmlFile);
         }
     }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

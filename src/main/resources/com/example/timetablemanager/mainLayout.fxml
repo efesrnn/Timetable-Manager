@@ -18,12 +18,9 @@
 <StackPane style="-fx-background-color: #f9f9f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.ttManagerController">
   <children>
     <VBox spacing="0" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff;">
-      <MenuBar style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
+      <MenuBar fx:id="menuBar" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
         <Menu style="-fx-text-fill: #333333;" text="File">
           <MenuItem fx:id="menuImportCSV" text="Import CSV" />
-          <MenuItem fx:id="menuLoadTimetable" text="Load Timetable" />
-          <MenuItem fx:id="menuSaveTimetable" text="Save Timetable" />
-          <MenuItem fx:id="menuExportTimetable" text="Export Timetable" />
           <SeparatorMenuItem />
           <MenuItem fx:id="menuExit" text="Exit" />
         </Menu>
