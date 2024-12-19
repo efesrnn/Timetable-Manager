@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<StackPane alignment="CENTER" maxHeight="700.0" maxWidth="450.0" minHeight="700.0" minWidth="450.0" prefHeight="700.0" prefWidth="450.0" style="-fx-background-color: #f9f9f9;" styleClass="stack-pane" stylesheets="@courseDetailLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.CourseSchedulerController">
+<StackPane alignment="CENTER" maxHeight="700.0" maxWidth="450.0" minHeight="700.0" minWidth="450.0" prefHeight="700.0" prefWidth="450.0" style="-fx-background-color: #f9f9f9;" styleClass="stack-pane" stylesheets="@css/courseDetailLayout.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.CourseSchedulerController">
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
