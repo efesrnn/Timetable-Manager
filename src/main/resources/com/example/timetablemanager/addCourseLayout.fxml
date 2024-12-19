@@ -6,7 +6,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.timetablemanager.addCourseController"
-        stylesheets="@addCourseLayout.css"
+            stylesheets="@css/addCourseLayout.css"
         styleClass="border-pane">
 <padding>
 <Insets bottom="20" left="20" right="20" top="20" />

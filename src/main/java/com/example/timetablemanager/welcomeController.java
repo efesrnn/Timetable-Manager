@@ -355,7 +355,7 @@ public class welcomeController {
         });
 
         progressBar.progressProperty().bind(integrationTask.progressProperty());
-        
+
         Thread thread = new Thread(integrationTask);
         thread.setDaemon(true);
         thread.start();
