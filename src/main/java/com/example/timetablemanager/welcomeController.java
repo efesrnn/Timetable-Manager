@@ -211,19 +211,19 @@ public class welcomeController {
                 int currentStep = 0;
 
                 // Prepare batch statements
-                String insertCourseSQL = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
+                String insertCourseSQL = "INSERT OR REPLACE INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
                 PreparedStatement courseStmt = conn.prepareStatement(insertCourseSQL);
 
-                String insertStudentSQL = "INSERT INTO Students (studentName) VALUES (?)";
+                String insertStudentSQL = "INSERT OR REPLACE INTO Students (studentName) VALUES (?)";
                 PreparedStatement studentStmt = conn.prepareStatement(insertStudentSQL);
 
-                String insertEnrollmentSQL = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
+                String insertEnrollmentSQL = "INSERT OR REPLACE INTO Enrollments (courseName, studentName) VALUES (?, ?)";
                 PreparedStatement enrollmentStmt = conn.prepareStatement(insertEnrollmentSQL);
 
-                String insertClassroomSQL = "INSERT INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
+                String insertClassroomSQL = "INSERT OR REPLACE INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
                 PreparedStatement classroomStmt = conn.prepareStatement(insertClassroomSQL);
 
-                String insertAllocatedSQL = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
+                String insertAllocatedSQL = "INSERT OR REPLACE INTO Allocated (courseName, classroomName) VALUES (?, ?)";
                 PreparedStatement allocatedStmt = conn.prepareStatement(insertAllocatedSQL);
 
                 // Process Course CSV (batch inserts)
@@ -345,9 +345,9 @@ public class welcomeController {
 
         integrationTask.setOnSucceeded(event -> navigateToMainLayout());
         integrationTask.setOnFailed(event -> {
-            showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed.");
-            // If an error occurs, we can rollback inside setOnFailed if needed
-            // But since we're committing at the end, the error might have occurred before commit.
+            Throwable ex = integrationTask.getException();
+            showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed: " + ex.getMessage());
+            System.err.println("Database integration failed: " + ex.getMessage());
             try {
                 Connection c = Database.connect();
                 if (c != null) c.rollback();
@@ -355,7 +355,7 @@ public class welcomeController {
         });
 
         progressBar.progressProperty().bind(integrationTask.progressProperty());
-
+        
         Thread thread = new Thread(integrationTask);
         thread.setDaemon(true);
         thread.start();
