@@ -237,6 +237,7 @@ public class Database {
     }
     public static List<Course> loadCoursesForStudent1(String studentName) {
         String query = """
+            SELECT DISTINCT c.courseName, c.timeToStart, c.duration, c.lecturer
             FROM Courses c
             JOIN Enrollments e ON c.courseName = e.courseName
             WHERE e.studentName = ?
