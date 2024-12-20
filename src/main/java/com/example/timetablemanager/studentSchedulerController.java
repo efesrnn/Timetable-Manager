@@ -39,15 +39,25 @@ public class studentSchedulerController {
     public void showStudent() {
         allCourses = Database.getAllCourses();
 
-        schedulerGrid.setGridLinesVisible(true);
+        // schedulerGrid.setGridLinesVisible(true);
 
-        List<Course> enrolledCourses2  = Database.loadCoursesofStudents(getSelectedStudent());
+        List<Course> enrolledCourses2 = Database.loadCoursesForStudent1(getSelectedStudent());
 
-        if(enrolledCourses2==null) {
+        if (enrolledCourses2 == null) {
             System.out.println("noş");
         } else {
             System.out.println("değikl");
         }
+        for (Course course : enrolledCourses2) {
+            System.out.println(course.getTimeToStart());
+        }
+
+
+
+
+
+
+
 
         for (Course course : enrolledCourses2) {
 
@@ -153,13 +163,7 @@ public class studentSchedulerController {
     }
 
 
-    public String getSelectedStudent() {
-        return selectedStudent;
-    }
 
-    public void setSelectedStudent(String selectedStudent) {
-        this.selectedStudent = selectedStudent;
-    }
 
     public Course getSelectedCourse() {
         return selectedCourse;
@@ -167,6 +171,13 @@ public class studentSchedulerController {
 
     public void setSelectedCourse(Course selectedCourse) {
         this.selectedCourse = selectedCourse;
+    }
+public String getSelectedStudent() {
+    return selectedStudent;
+}
+
+    public void setSelectedStudent(String selectedStudent) {
+        this.selectedStudent = selectedStudent;
     }
 
 

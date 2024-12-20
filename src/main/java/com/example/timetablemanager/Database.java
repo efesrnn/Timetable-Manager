@@ -1,7 +1,5 @@
 package com.example.timetablemanager;
 
-import javafx.collections.FXCollections;
-
 import java.io.File;
 import java.sql.*;
 import java.time.LocalTime;
@@ -211,9 +209,9 @@ public class Database {
 
     public static List<Course> loadCoursesofStudents(String student) {
         String query = """
-                SELECT * FROM Courses
-                     WHERE courseName IN (
-                             SELECT courseName
+                SELECT DISTINCT * FROM Courses
+                     WHERE  courseName IN (
+                             SELECT DISTINCT courseName
                              FROM Enrollments
                              WHERE studentName = ?)""";
 
@@ -237,7 +235,105 @@ public class Database {
         return courses;
 
     }
+    public static List<Course> loadCoursesForStudent1(String studentName) {
+        String query = """
+            FROM Courses c
+            JOIN Enrollments e ON c.courseName = e.courseName
+            WHERE e.studentName = ?
+    """;
 
+        String queryAllocated = "SELECT classroomName FROM Allocated WHERE courseName = ?";
+        String queryCapacity = "SELECT capacity FROM Classrooms WHERE classroomName = ?";
+
+        List<Course> courses = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, studentName);
+            ResultSet rs = pstmt.executeQuery();
+
+            boolean coursesFound = false;
+
+            while (rs.next()) {
+                String courseName = rs.getString("courseName");
+                String timeToStart = rs.getString("timeToStart");
+                int duration = rs.getInt("duration");
+                String lecturer = rs.getString("lecturer");
+
+                // Fetch enrolled students for this course
+                List<String> enrolledStudentNames = getStudentsEnrolledInCourse(courseName);
+                List<Student> enrolledStudents = new ArrayList<>();
+                for (String name : enrolledStudentNames) {
+                    enrolledStudents.add(new Student(name, new ArrayList<>()));
+                }
+
+                // Fetch allocated classroom
+                String classroomName = "";
+                try (PreparedStatement pstmtAllocated = conn.prepareStatement(queryAllocated)) {
+                    pstmtAllocated.setString(1, courseName);
+                    ResultSet rsAllocated = pstmtAllocated.executeQuery();
+                    if (rsAllocated.next()) {
+                        classroomName = rsAllocated.getString("classroomName");
+                    }
+                    rsAllocated.close();
+                }
+
+                // Fetch classroom capacity
+                int capacity = 0;
+                if (!classroomName.isEmpty()) {
+                    try (PreparedStatement pstmtCapacity = conn.prepareStatement(queryCapacity)) {
+                        pstmtCapacity.setString(1, classroomName);
+                        ResultSet rsCapacity = pstmtCapacity.executeQuery();
+                        if (rsCapacity.next()) {
+                            capacity = rsCapacity.getInt("capacity");
+                        }
+                        rsCapacity.close();
+                    }
+                }
+
+                // Handle day and time separation if needed
+                List<String> days = new ArrayList<>();
+                List<String> times = new ArrayList<>();
+
+                if (timeToStart != null && !timeToStart.isEmpty()) {
+                    String[] parts = timeToStart.split(" ");
+                    if (parts.length >= 2) {
+                        days.add(parts[0]);   // Day (e.g., "Monday")
+                        times.add(parts[1]);  // Time (e.g., "10:00")
+                    } else {
+                        System.err.println("Unexpected timeToStart format: " + timeToStart);
+                    }
+                }
+
+                // Create and add the course to the list
+                Course course = new Course(
+                        courseName,
+                        capacity,
+                        enrolledStudents,
+                        classroomName,
+                        timeToStart,
+                        duration,
+                        lecturer
+                );
+
+                courses.add(course);
+                coursesFound = true;
+            }
+
+            rs.close();
+
+            if (coursesFound) {
+                System.out.println("Courses for student '" + studentName + "' loaded into memory.");
+            } else {
+                System.out.println("No courses found for student '" + studentName + "'.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error loading courses for student '" + studentName + "': " + e.getMessage());
+        }
+
+        return courses;
+    }
+    
     public static void loadStudents() {
         String query = "SELECT studentId, studentName FROM Students";
 
