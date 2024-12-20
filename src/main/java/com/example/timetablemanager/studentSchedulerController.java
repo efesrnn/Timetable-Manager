@@ -178,6 +178,12 @@ public class studentSchedulerController {
         alert.showAndWait();
     }
 
+    private void refreshGridPane() {
+        schedulerGrid.getChildren().clear(); // Mevcut tüm içerikleri temizler
+        showStudent(); // Yeniden içerik yükler
+    }
+
+
     private void Delete(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -193,6 +199,7 @@ public class studentSchedulerController {
         if (result.isPresent()) {
             if (result.get() == withdrawButton) {
                 Database.removeStudentFromCourse(getSelectedStudent(),getSelectedCourse().getCourseID());
+                refreshGridPane();
                 alert.close();
             } else if (result.get() == cancelButton) {
                 alert.close();
