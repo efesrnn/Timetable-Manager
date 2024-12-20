@@ -59,6 +59,8 @@ public class CourseSchedulerController {
                 String selectedStudent = studentsListView.getSelectionModel().getSelectedItem();
                 if (selectedStudent != null) {
                     System.out.println(selectedStudent);
+                    studentSchedulerController a = new studentSchedulerController(selectedStudent);
+                    a.showStudent();
 
                    // openStudentDetails(selectedStudent);
 

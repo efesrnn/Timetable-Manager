@@ -1,5 +1,7 @@
 package com.example.timetablemanager;
 
+import javafx.collections.FXCollections;
+
 import java.io.File;
 import java.sql.*;
 import java.time.LocalTime;
@@ -28,6 +30,7 @@ public class Database {
 
     // In-memory course list
     private static List<Course> courseList = new ArrayList<>();
+    private static List<Student> allStudents = new ArrayList<>();
 
     // Create database connection
     public static Connection connect() {
@@ -42,6 +45,7 @@ public class Database {
                 System.out.println("Connected to database!");
                 createTables(); // Create tables when connected
                 loadAllCourses(); // Load courses into memory
+                loadStudents();
             }
         } catch (SQLException e) {
             System.err.println("Connection error: " + e.getMessage());
@@ -205,6 +209,57 @@ public class Database {
         }
     }
 
+    public static List<Course> loadCoursesofStudents(String student) {
+        String query = """
+                SELECT * FROM Courses
+                     WHERE courseName IN (
+                             SELECT courseName
+                             FROM Enrollments
+                             WHERE studentName = ?)""";
+
+        List<Course> courses = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)
+             ) {
+            pstmt.setString(1,student);
+            ResultSet rs = pstmt.executeQuery();
+
+            while(rs.next()) {
+                Course course = new Course(rs.getString("courseId"),0,null,null,rs.getString("timeToStart"),
+                        rs.getInt("duration"),rs.getString("lecturer"));
+                courses.add(course);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error loading students: " + e.getMessage());
+        }
+
+        return courses;
+
+    }
+
+    public static void loadStudents() {
+        String query = "SELECT studentId, studentName FROM Students";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            allStudents.clear();
+            while (rs.next()) {
+                String name = rs.getString("studentName");
+                allStudents.add(new Student(name, new ArrayList<>()));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error loading students: " + e.getMessage());
+        }
+    }
+
+    public static List<Student> getStudents() {
+
+        return new ArrayList<>(allStudents);
+    }
+
     public static List<Course> getAllCourses() {
 
         return new ArrayList<>(courseList);
@@ -230,6 +285,8 @@ public class Database {
         }
         return students;
     }
+
+
 
     public static void addCourse(String courseName, String lecturer, int duration, String timeToStart) {
         String sql = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
