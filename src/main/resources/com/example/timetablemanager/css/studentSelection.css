@@ -1,0 +1,189 @@
+/* Root Pane */
+.vbox-container {
+    -fx-background-color: #ffffff; /* Pure white background */
+    -fx-padding: 25;
+    -fx-spacing: 20;
+}
+
+/* Header Label */
+.header-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-alignment: CENTER;
+}
+
+/* Section Labels */
+.section-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #555555;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-padding: 5 0 10 0;
+}
+
+/* TextFields */
+.text-field {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-prompt-text-fill: #aaaaaa;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-padding: 8;
+}
+
+.text-field:focused {
+    -fx-border-color: #81888c;; /* Green border on focus */
+    -fx-background-color: #ffffff;
+
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+}
+
+.list-view .list-cell {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+    -fx-padding: 8;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #e3f2fd; /* Lighter blue on hover */
+    -fx-cursor: hand;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #90caf9; /* Blue when selected */
+}
+
+/* Button Containers */
+.button-container {
+    -fx-pref-width: 80px; /* Ensures Add and Remove buttons have the same width */
+}
+
+/* Buttons */
+
+/* Action Buttons: Add & Remove */
+.btn-action {
+    -fx-background-color: #2196F3; /* Blue background */
+    -fx-text-fill: #ffffff;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 0.5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 3 6 3 6;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, transform 0.2s;
+    -fx-pref-width: 80px; /* Ensures same size */
+}
+
+.btn-action:hover {
+    -fx-background-color: #1e88e5; /* Darker blue on hover */
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-action:pressed {
+    -fx-background-color: #1565c0; /* Even darker blue on press */
+}
+
+/* Save Button */
+.btn-save {
+    -fx-background-color: #4CAF50; /* Green background */
+    -fx-text-fill: #ffffff;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 1px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-save:hover {
+    -fx-background-color: #43a047; /* Darker green on hover */
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-save:pressed {
+    -fx-background-color: #388e3c; /* Even darker green on press */
+}
+
+/* Cancel Button */
+.btn-back {
+    -fx-background-color: #9E9E9E; /* Gray background */
+    -fx-text-fill: #ffffff;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 1px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-back:hover {
+    -fx-background-color: #757575; /* Darker gray on hover */
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-back:pressed {
+    -fx-background-color: #616161; /* Even darker gray on press */
+}
+
+/* List Container */
+.list-container {
+    -fx-pref-width: 250px;
+}
+
+/* ScrollPane for ListView (if needed) */
+.list-container .list-view {
+    -fx-scroll-bar-background-color: #f5f5f5;
+}
+
+.list-container .list-view .scroll-bar .thumb {
+    -fx-background-color: #2196F3; /* Blue scrollbar thumb */
+    -fx-background-radius: 5px;
+}
+
+.list-container .list-view .scroll-bar .thumb:hover {
+    -fx-background-color: #1e88e5; /* Darker blue on hover */
+}
+
+/* Comprehensive Focus Removal for Containers */
+.vbox-container:focused,
+.hbox:focused,
+.list-container:focused,
+.label:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+/* Hover Effect for ListView */
+.list-view:hover {
+    -fx-background-color: #ffffff;
+}
+
+

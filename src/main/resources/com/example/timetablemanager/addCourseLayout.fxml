@@ -34,37 +34,36 @@
                 <RowConstraints minHeight="40" />
             </rowConstraints>
 
-            <!-- Course ID -->
             <Label text="Course ID:" styleClass="grid-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
             <TextField fx:id="txtCourseID" promptText="Enter course ID" GridPane.rowIndex="0" GridPane.columnIndex="1"
-                       styleClass="text-field" />
+                       styleClass="text-field" HBox.hgrow="ALWAYS" />
 
             <!-- Lecturer -->
             <Label text="Lecturer:" styleClass="grid-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
             <TextField fx:id="txtLecturer" promptText="Enter lecturer name" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                       styleClass="text-field" />
+                       styleClass="text-field" HBox.hgrow="ALWAYS" />
 
             <!-- Capacity -->
             <Label text="Capacity:" styleClass="grid-label" GridPane.rowIndex="2" GridPane.columnIndex="0" />
             <Spinner fx:id="spinnerCapacity" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"
-                     styleClass="spinner" />
+                     styleClass="spinner" HBox.hgrow="ALWAYS" />
 
             <!-- Duration -->
             <Label text="Duration (Hours):" styleClass="grid-label" GridPane.rowIndex="3" GridPane.columnIndex="0" />
             <Spinner fx:id="spinnerDuration" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"
-                     styleClass="spinner" />
+                     styleClass="spinner" HBox.hgrow="ALWAYS" />
 
             <!-- Time To Start -->
             <Label text="Time To Start:" styleClass="grid-label" GridPane.rowIndex="4" GridPane.columnIndex="0" />
             <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1" alignment="CENTER_LEFT">
-                <ComboBox fx:id="comboDay" promptText="Select Day" styleClass="combo-box" />
-                <ComboBox fx:id="comboTime" promptText="Select Time" styleClass="combo-box" />
+                <ComboBox fx:id="comboDay" promptText="Select Day" styleClass="combo-box" HBox.hgrow="ALWAYS" />
+                <ComboBox fx:id="comboTime" promptText="Select Time" styleClass="combo-box" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- Classroom -->
             <Label text="Classroom:" styleClass="grid-label" GridPane.rowIndex="5" GridPane.columnIndex="0" />
-            <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
-                <ComboBox fx:id="comboClassroom" promptText="Select Classroom" styleClass="combo-box" />
+            <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1" HBox.hgrow="ALWAYS">
+                <ComboBox fx:id="comboClassroom" promptText="Select Classroom" styleClass="combo-box" HBox.hgrow="ALWAYS" />
             </HBox>
         </GridPane>
 

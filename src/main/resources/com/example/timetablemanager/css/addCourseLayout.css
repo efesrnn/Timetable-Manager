@@ -41,7 +41,7 @@
 
 .text-field:focused, .combo-box:focused {
     -fx-border-color: #4CAF50; /* Highlight border on focus */
-    -fx-border-width: 1.5px;
+    -fx-border-width: 0px;
 }
 
 /* Spinner Control */
@@ -64,7 +64,7 @@
 /* Focused Spinner */
 .spinner:focused {
     -fx-border-color: #10A37F; /* ChatGPT Green border on focus */
-    -fx-border-width: 1px;
+    -fx-border-width: 0px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 8, 0, 0, 4); /* Enhanced shadow on focus */
 }
 
@@ -87,20 +87,20 @@
 
 /* Increment (Up) Button */
 .spinner .increment-arrow-button {
-    -fx-background-color: #10A37F; /* ChatGPT Green */
+    -fx-background-color: #FFF5; /* ChatGPT Green */
 }
 
 .spinner .increment-arrow-button:hover {
-    -fx-background-color: #0E7C66; /* Darker Green on Hover */
+    -fx-background-color: #FFF1; /* Darker Green on Hover */
 }
 
 /* Decrement (Down) Button */
 .spinner .decrement-arrow-button {
-    -fx-background-color: #10A37F; /* ChatGPT Green for consistency */
+    -fx-background-color: #FFF5; /* ChatGPT Green for consistency */
 }
 
 .spinner .decrement-arrow-button:hover {
-    -fx-background-color: #0E7C66; /* Darker Green on Hover */
+    -fx-background-color: #FFF1; /* Darker Green on Hover */
 }
 
 /* Arrow Graphics */
@@ -108,8 +108,6 @@
     -fx-background-color: transparent;
     -fx-padding: 6;
     -fx-shape: "M 2 6 L 6 2 L 10 6 Z"; /* Default to Up arrow; overridden for down */
-    /* White arrow for contrast */
-    -fx-transition: -fx-rotate 0.3s ease; /* Smooth rotation if needed */
 }
 
 /* Specific Arrow Shapes */

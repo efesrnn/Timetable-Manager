@@ -106,7 +106,7 @@ public class ttManagerController {
         btnSearch.setOnAction(event -> performSearch());
         btnRefresh.setOnAction(event -> refreshTable());
         btnAddCourse.setOnAction(event -> switchScene("addCourseLayout.fxml"));
-        btnEnrollStudent.setOnAction(event -> showAlert("Enroll Student", "Enroll Student logic not attached yet."));
+        btnEnrollStudent.setOnAction(event -> switchScene("studentEnrollmentLayout.fxml"));
         btnAssignClassroom.setOnAction(event -> switchScene("assignClassroomLayout.fxml"));
         btnSwapClassroom.setOnAction(event -> switchScene("swapCourse.fxml"));
 

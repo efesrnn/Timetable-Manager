@@ -35,6 +35,10 @@ public class studentSelectionController {
     @FXML
     private Button btnCancel;
 
+    // Optional: Label to show current selection count and capacity
+    @FXML
+    private Label lblSelectionInfo;
+
     private static final String dbPath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "TimetableManagement";
     private static final String DB_URL = "jdbc:sqlite:" + dbPath + File.separator + "TimetableManagement.db";
     private Connection conn;
@@ -45,6 +49,7 @@ public class studentSelectionController {
 
     public void setCourseCapacity(int capacity) {
         this.courseCapacity = capacity;
+        updateSelectionInfo();
     }
 
     @FXML
@@ -74,28 +79,17 @@ public class studentSelectionController {
         // ADD BUTTON: Move selected students to the selected list
         btnAdd.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewAvailable.getSelectionModel().getSelectedItems();
-            int currentSize = listViewSelected.getItems().size();
-            int remainingCapacity = courseCapacity - currentSize;
-
-            if (selectedItems.size() > remainingCapacity) {
-                showAlert("Capacity Limit", "You are trying to add " +
-                        selectedItems.size() + " students. But you only have "+remainingCapacity+
-                        " remaining capacity for the selected course.");
-            } else {
-                selectedItems.stream()
-                        .filter(item -> !listViewSelected.getItems().contains(item))
-                        .forEach(listViewSelected.getItems()::add);
-                listViewAvailable.getItems().removeAll(selectedItems);
-            }
+            listViewSelected.getItems().addAll(selectedItems);
+            listViewAvailable.getItems().removeAll(selectedItems);
+            updateSelectionInfo();
         });
 
         // REMOVE BUTTON: Move students back to the available list
         btnRemove.setOnAction(event -> {
             ObservableList<String> selectedItems = listViewSelected.getSelectionModel().getSelectedItems();
-            selectedItems.stream()
-                    .filter(item -> !listViewAvailable.getItems().contains(item))
-                    .forEach(listViewAvailable.getItems()::add);
+            listViewAvailable.getItems().addAll(selectedItems);
             listViewSelected.getItems().removeAll(selectedItems);
+            updateSelectionInfo();
         });
 
         // CANCEL BUTTON: Close the stage without saving
@@ -115,7 +109,8 @@ public class studentSelectionController {
     }
 
     private void loadStudents() {
-        String query = "SELECT studentId, studentName FROM Students";
+        String query = "SELECT DISTINCT studentName FROM Students"; // Using DISTINCT here
+
         try (PreparedStatement pstmt = conn.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
 
@@ -125,16 +120,34 @@ public class studentSelectionController {
                 allStudents.add(new Student(name, new ArrayList<>()));
             }
 
-            // Populate the ListView with student names (distinct)
+            // Just to be extra sure, remove duplicates if any remain:
+            allStudents = allStudents.stream().distinct().toList();
+
             listViewAvailable.setItems(FXCollections.observableArrayList(
                     allStudents.stream()
                             .map(Student::getFullName)
                             .distinct()
                             .toList()
             ));
+
         } catch (SQLException e) {
             System.err.println("Error loading students: " + e.getMessage());
         }
+    }
+
+    public void setInitiallySelectedStudents(List<String> selectedStudentNames) {
+        // Move these students from available to selected initially
+        List<String> toSelect = new ArrayList<>();
+        for (String name : selectedStudentNames) {
+            if (listViewAvailable.getItems().contains(name)) {
+                toSelect.add(name);
+            }
+        }
+
+        // Move from available to selected
+        listViewAvailable.getItems().removeAll(toSelect);
+        listViewSelected.getItems().addAll(toSelect);
+        updateSelectionInfo();
     }
 
     private void closeStage() {
@@ -160,5 +173,12 @@ public class studentSelectionController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void updateSelectionInfo() {
+        if (lblSelectionInfo != null) {
+            int selectedCount = listViewSelected.getItems().size();
+            lblSelectionInfo.setText("Selected Students: " + selectedCount + " / Capacity: " + courseCapacity);
+        }
     }
 }

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.timetablemanager.studentEnrollmentController"
+            stylesheets="@css/studentEnrollment.css">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+    <!-- Top: Header Label -->
+    <top>
+        <StackPane alignment="CENTER">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <Label text="Manage Student Enrollments" styleClass="header-label"/>
+        </StackPane>
+    </top>
+
+    <!-- Center: Main Content Area -->
+    <center>
+        <HBox spacing="40" alignment="TOP_CENTER">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <!-- Left Section: Course Selection and Details -->
+            <VBox spacing="30" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets bottom="20" left="20" right="20" top="40" />
+                </padding>
+                <!-- Course Selection -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="Select Course:" styleClass="section-label" />
+                    <ComboBox fx:id="comboCourses" promptText="Select a course..." styleClass="combo-box" />
+                </HBox>
+
+                <!-- Course Details -->
+                <GridPane hgap="15" vgap="15" alignment="TOP_LEFT">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" prefWidth="140"/>
+                        <ColumnConstraints halignment="LEFT" prefWidth="300"/>
+                    </columnConstraints>
+
+                    <Label text="Course Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblCourseName" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Label text="Lecturer:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblLecturer" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Label text="Duration:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblDuration" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Label text="Time to Start:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblTimeToStart" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Label text="Classroom:" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblClassroom" GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Label text="Capacity:" GridPane.rowIndex="5" GridPane.columnIndex="0" styleClass="grid-pane-label"/>
+                    <Label fx:id="lblCapacity" GridPane.rowIndex="5" GridPane.columnIndex="1" styleClass="grid-pane-value"/>
+
+                    <Button fx:id="btnEditEnrollment" text="Edit Enrollment"
+                            GridPane.rowIndex="7" GridPane.columnIndex="1" alignment="CENTER_LEFT" styleClass="btn-action"/>
+
+                    <!-- New Label for Enrolled Students Count -->
+                    <Label fx:id="lblEnrolledCount" text="Enrolled Students: 0"
+                           GridPane.rowIndex="6" GridPane.columnIndex="1"
+                           alignment="CENTER_RIGHT" styleClass="enrolled-count-label"/>
+                </GridPane>
+            </VBox>
+
+            <!-- Right Section: Enrolled Students List -->
+            <VBox spacing="15" alignment="TOP_CENTER" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets bottom="20" left="20" right="20" top="20" />
+                </padding>
+                <Label text="Enrolled Students:" styleClass="section-label" />
+                <ListView fx:id="listViewEnrolledStudents" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- Bottom: Action Buttons -->
+    <bottom>
+        <HBox spacing="20" alignment="CENTER">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <Button fx:id="btnSaveChanges" text="Save Changes" styleClass="btn-save"/>
+            <Button fx:id="btnCancel" text="Cancel" styleClass="btn-cancel"/>
+        </HBox>
+    </bottom>
+</BorderPane>

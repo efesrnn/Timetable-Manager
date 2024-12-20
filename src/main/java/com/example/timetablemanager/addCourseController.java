@@ -1,5 +1,6 @@
 package com.example.timetablemanager;
 
+import javafx.application.Platform;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -73,6 +74,12 @@ public class addCourseController { // Renamed to follow Java conventions
     // Map to hold courseID to Color mapping
     private final Map<String, Color> courseColors = new HashMap<>();
 
+    // To track previous selection for reverting
+    private Classroom previousSelectedClassroom = null;
+
+    // Flag to prevent recursive listener calls
+    private boolean isUpdatingSelection = false;
+
     @FXML
     public void initialize() {
         // Ensure the database is connected
@@ -102,9 +109,9 @@ public class addCourseController { // Renamed to follow Java conventions
                         } else {
                             setText(classroom.toString());
                             if (!classroom.isAvailable()) {
-                                setTextFill(Color.RED);
+                                setTextFill(Color.RED); // Highlight unavailable classrooms in red
                             } else {
-                                setTextFill(Color.BLACK);
+                                setTextFill(Color.BLACK); // Available classrooms in black
                             }
                         }
                     }
@@ -123,10 +130,37 @@ public class addCourseController { // Renamed to follow Java conventions
                 } else {
                     setText(classroom.toString());
                     if (!classroom.isAvailable()) {
-                        setTextFill(Color.RED);
+                        setTextFill(Color.RED); // Highlight unavailable classrooms in red
                     } else {
-                        setTextFill(Color.BLACK);
+                        setTextFill(Color.BLACK); // Available classrooms in black
                     }
+                }
+            }
+        });
+
+        // Handle selection changes
+        comboClassroom.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (isUpdatingSelection) {
+                return; // Prevent recursion
+            }
+            if (newVal != null && !newVal.isAvailable()) {
+                // Show alert for unavailable classroom
+                showAlert("Unavailable Classroom", "The selected classroom is not available at the chosen day and time.");
+
+                // Revert selection using Platform.runLater to ensure it happens after the current event
+                Platform.runLater(() -> {
+                    isUpdatingSelection = true;
+                    if (previousSelectedClassroom != null && comboClassroom.getItems().contains(previousSelectedClassroom)) {
+                        comboClassroom.getSelectionModel().select(previousSelectedClassroom);
+                    } else {
+                        comboClassroom.getSelectionModel().clearSelection();
+                    }
+                    isUpdatingSelection = false;
+                });
+            } else {
+                // Update previous selection if available
+                if (newVal != null && newVal.isAvailable()) {
+                    previousSelectedClassroom = newVal;
                 }
             }
         });
@@ -196,24 +230,17 @@ public class addCourseController { // Renamed to follow Java conventions
             Course tempCourse = new Course(
                     courseID,
                     capacity,
-                    new ArrayList<>(selectedStudents),
+                    selectedStudents.stream().distinct().toList(),
                     classroom.getClassroomName(),
                     day + " " + time,
                     duration,
                     lecturer
             );
 
-            // Add the temporary course if it's not already present
-            if (!tempCourses.contains(tempCourse)) {
-                tempCourses.add(tempCourse);
-                allocateCourseInSchedule(tempCourse, true); // Allocate with blinking
-            } else {
-                // Update existing temporary course (if necessary)
-                // For simplicity, remove and re-add to update the schedule
-                tempCourses.remove(tempCourse);
-                tempCourses.add(tempCourse);
-                populateScheduleGridPane(); // Re-populate to reflect changes
-            }
+            // Remove existing temp course with the same courseID before adding the updated one
+            tempCourses.removeIf(course -> course.getCourseID().equals(tempCourse.getCourseID()));
+            tempCourses.add(tempCourse);
+            populateScheduleGridPane(); // Re-populate to reflect changes
         } else {
             // If any field is missing, remove all temporary courses
             if (!tempCourses.isEmpty()) {
@@ -248,7 +275,7 @@ public class addCourseController { // Renamed to follow Java conventions
                 }
 
                 Classroom classroom = new Classroom(classroomName, capacity, available, conflictingCourses);
-                allClassrooms.add(classroom);
+                allClassrooms.add(classroom); // Add all classrooms, regardless of availability
             }
 
             // Update ComboBox with all classrooms
@@ -262,6 +289,7 @@ public class addCourseController { // Renamed to follow Java conventions
 
             // Clear previous classroom selection
             comboClassroom.getSelectionModel().clearSelection();
+            previousSelectedClassroom = null;
         } else {
             // If day or time is not selected, show all classrooms as available
             List<Classroom> allClassrooms = new ArrayList<>();
@@ -378,12 +406,13 @@ public class addCourseController { // Renamed to follow Java conventions
             int row = startRow + i;
             if (row > times.size()) break; // Avoid exceeding grid
 
-            // Remove existing empty label in the cell
+            // Remove any existing node in this cell (empty label or previous course label)
             javafx.scene.Node nodeToRemove = getNodeFromGridPane(col, row);
-            if (nodeToRemove instanceof Label && ((Label) nodeToRemove).getText().isEmpty()) {
+            if (nodeToRemove != null) {
                 scheduleGridPane.getChildren().remove(nodeToRemove);
             }
 
+            // Create the label for this part of the course
             Label allocationLabel = new Label(course.getCourseID());
             allocationLabel.setStyle(
                     "-fx-background-color: " + colorHex + ";" +
@@ -408,18 +437,29 @@ public class addCourseController { // Renamed to follow Java conventions
                 blinkLabel(allocationLabel);
             }
 
-            // Tooltip for additional information
+            // Prepare additional course details for the tooltip
+            int capacity = course.getCapacity();
+            int enrolledCount = course.getStudents() != null ? course.getStudents().size() : 0;
+            String endTime = getEndTime(time, duration);
+
             Tooltip tooltip = new Tooltip(
                     "Course ID: " + course.getCourseID() + "\n" +
                             "Lecturer: " + course.getLecturer() + "\n" +
-                            "Time: " + course.getTimeToStart() + " - " + getEndTime(time, duration)
+                            "Capacity: " + capacity + "\n" +
+                            "Enrolled Students: " + enrolledCount + "\n" +
+                            "Time: " + course.getTimeToStart() + " - " + endTime
             );
+
+            tooltip.setShowDelay(Duration.ZERO);
+            tooltip.setHideDelay(Duration.ZERO);
+            tooltip.setShowDuration(Duration.INDEFINITE);
             Tooltip.install(allocationLabel, tooltip);
 
-            // Assign the label to the specific cell
+            // Assign the label to the specific cell in the schedule
             scheduleGridPane.add(allocationLabel, col, row);
         }
     }
+
 
     /**
      * Applies a blinking animation to a label.
@@ -432,7 +472,7 @@ public class addCourseController { // Renamed to follow Java conventions
                 new KeyFrame(Duration.seconds(0.5), event -> label.setOpacity(0)),
                 new KeyFrame(Duration.seconds(1), event -> label.setOpacity(1))
         );
-        timeline.setCycleCount(4); // Blink 4 times
+        timeline.setCycleCount(5); // Blink 5 times
         timeline.play();
     }
 
@@ -449,7 +489,6 @@ public class addCourseController { // Renamed to follow Java conventions
             return; // No classroom selected
         }
 
-        // Correct Method Call
         List<Course> savedAllocations = Database.getAllAllocatedClassrooms(selectedClassroom.getClassroomName());
         for (Course course : savedAllocations) {
             allocateCourseInSchedule(course, false);
@@ -584,16 +623,34 @@ public class addCourseController { // Renamed to follow Java conventions
             return;
         }
 
+        // **Detailed Debugging Statements**
+        System.out.println("===== Creating Course =====");
+        System.out.println("Course ID: " + courseID);
+        System.out.println("Lecturer: " + lecturer);
+        System.out.println("Course Capacity (spinner): " + capacity);
+        System.out.println("Duration: " + duration);
+        System.out.println("Selected Classroom: " + classroom);
+        System.out.println("Selected Day: " + selectedDay);
+        System.out.println("Selected Time: " + selectedTime);
+        System.out.println("Time to Start: " + timeToStart);
+        System.out.println("Number of Selected Students: " + selectedStudents.size());
+
         // Validate classroom capacity
         if (!Database.hasSufficientCapacity(classroom, selectedStudents.size())) {
             showAlert("Error", "Selected classroom does not have sufficient capacity for the number of students.");
+            System.out.println("Capacity Check Failed: Classroom capacity insufficient.");
             return;
+        } else {
+            System.out.println("Capacity Check Passed: Classroom can accommodate the students.");
         }
 
         // **Additional Availability Check**
         if (!selectedClassroom.isAvailable()) {
             showAlert("Error", "Selected classroom is not available at the chosen day and time.");
+            System.out.println("Availability Check Failed: Classroom is not available.");
             return;
+        } else {
+            System.out.println("Availability Check Passed: Classroom is available.");
         }
 
         // Prepare course data
@@ -610,22 +667,23 @@ public class addCourseController { // Renamed to follow Java conventions
         // Save the course to the database
         try {
             Database.addCourseWithAllocation(courseID, lecturer, duration, timeToStart, classroom);
+            System.out.println("Course added to the database successfully.");
         } catch (SQLException e) {
             showAlert("Error", "Failed to create course and allocate classroom: " + e.getMessage());
             e.printStackTrace();
             return;
         }
 
-        // Allocate classroom to course (Already handled in addCourseWithAllocation)
-
         // Add enrollments for students
         for (Student student : selectedStudents) {
             if (!Database.isEnrollmentExists(courseID, student.getFullName())) {
                 Database.addEnrollment(courseID, student.getFullName());
+                System.out.println("Student enrolled: " + student.getFullName());
             }
         }
 
         showAlert("Success", "Course created successfully: " + courseID);
+        System.out.println("Course creation process completed successfully.");
 
         // Track the newly added course for blinking (if desired)
         newlyAddedCourseKey = selectedDay + "_" + selectedTime;
@@ -643,6 +701,7 @@ public class addCourseController { // Renamed to follow Java conventions
         // Switch back to mainLayout and refresh the table
         switchScene("mainLayout.fxml");
     }
+
 
     /**
      * Implements a blinking effect for the newly added course in the schedule.
@@ -750,7 +809,7 @@ public class addCourseController { // Renamed to follow Java conventions
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
         } catch (RuntimeException e) {
-            System.err.println("Couldn't load icon");
+            System.err.println("Couldn't load alert icon");
             e.printStackTrace();
         }
 
