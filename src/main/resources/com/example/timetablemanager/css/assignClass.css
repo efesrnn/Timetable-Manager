@@ -1,0 +1,113 @@
+/* Root Pane */
+.border-pane {
+    -fx-background-color: #f9f9f9;
+}
+
+/* VBox Container */
+.vbox-container {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-padding: 20;
+}
+
+/* Header */
+.header-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c1c1c;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-alignment: CENTER;
+}
+
+/* Labels in GridPane */
+.grid-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* ListView */
+.list-view {
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-background-color: #f9f9f9;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+}
+
+.list-view .list-cell {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    -fx-padding: 10;
+    -fx-spacing: 15px;
+    -fx-alignment: CENTER;
+}
+
+/* Buttons */
+.button {
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-pref-width: 150px;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+    -fx-transition: background-color 0.3s, opacity 0.3s;
+}
+
+.button:focused {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}
+
+/* Create and Back Buttons */
+.btn-create {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.btn-create:hover {
+    -fx-background-color: #45a049;
+}
+
+.btn-back {
+    -fx-background-color: #9E9E9E;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.btn-back:hover {
+    -fx-background-color: #7e7e7e;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #e0e0e0;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-padding: 10;
+}
+
+/* Ensure labels inside tooltips have the correct text color */
+.tooltip .label {
+    -fx-text-fill: #333333;
+}
+
+/* Additional Styles as Needed */
