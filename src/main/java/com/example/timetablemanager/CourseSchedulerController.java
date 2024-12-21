@@ -63,21 +63,24 @@ public class CourseSchedulerController {
             System.err.println("Failed to connect to the database: " + e.getMessage());
         }
 
-      studentsListView.setOnMouseClicked(event -> {
+        studentsListView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 String selectedStudent = studentsListView.getSelectionModel().getSelectedItem();
                 if (selectedStudent != null) {
                     System.out.println(selectedStudent);
+                    openStudentDetails(selectedStudent);
 
-                   // openStudentDetails(selectedStudent);
 
                 }
             }
         });
 
 
-
     }
+
+
+
+
     private void openClassroomDetails(String classroomName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/ClassroomSchedulerLayout.fxml"));
@@ -193,8 +196,11 @@ public class CourseSchedulerController {
     private void refreshTimetableView() {
         if (mainController != null) {
             mainController.refreshTable(); // Call the refreshTable method in the main controller
+
+
         }
     }
+
 
     private void closeCourseScheduler() {
         // Get the current stage (window) and close it
@@ -223,7 +229,7 @@ public class CourseSchedulerController {
     }
 
 
-}
+
 
 
 
@@ -248,15 +254,19 @@ public class CourseSchedulerController {
         }
 */
 
- /*   private void openStudentDetails(String studentName) {
+    private void openStudentDetails(String studentName) {
         try {
             // Load the StudentScheduler FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/studentSchedulerLayout.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/studentSchedulerController.fxml"));
             Parent root = loader.load();
 
             // Get the controller
-            StudentSchedulerController studentController = loader.getController();
-          //  studentController.setStudentDetails(studentName);  // Pass classroom name to load details
+            studentSchedulerController studentController = loader.getController();
+            studentController.setSelectedStudent(studentName);
+            studentController.showStudent();
+            studentController.setController(this);
+
+
 
             // Show the new window (stage)
             Stage stage = new Stage();
@@ -269,7 +279,7 @@ public class CourseSchedulerController {
         }
     }
 
-  */
+}
 
 
 
