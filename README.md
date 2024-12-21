@@ -33,7 +33,7 @@ Timetable Manager is a desktop application designed to streamline the management
 **View Weekly Schedules:** Users can view predefined weekly schedules for courses,capcaity, duration, start time, classrooms and lecturers.
 
 
-**Search and Refresh:** Quickly refresh schedules and search for specific data.Welcome to the TimetableManager wiki!
+**Search and Refresh:** Quickly refresh schedules and search for specific data.
 
 # User Interface
 ![proje1](https://github.com/user-attachments/assets/23abe9c7-3556-46ea-b4a6-7f6ec5c94f7a)
