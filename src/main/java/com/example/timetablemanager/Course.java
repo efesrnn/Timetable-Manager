@@ -23,14 +23,24 @@ public class Course {
         this.lecturer = lecturer;
     }
 
-    public boolean addStudent(Student student) {
-        if (students.size() < capacity && !students.contains(student)) {
-            students.add(student);
-            System.out.println("Adding student, returning true");
-            return true;
+    public String getDay() {
+        if (timeToStart != null && !timeToStart.isEmpty()) {
+            String[] parts = timeToStart.split(" ");
+            if (parts.length >= 1) {
+                return parts[0];
+            }
         }
-        System.out.println("Couldn't add student, returning false");
-        return false;
+        return "N/A";
+    }
+
+    public String getStartTime() {
+        if (timeToStart != null && !timeToStart.isEmpty()) {
+            String[] parts = timeToStart.split(" ");
+            if (parts.length >= 2) {
+                return parts[1];
+            }
+        }
+        return "N/A";
     }
 
     /* */

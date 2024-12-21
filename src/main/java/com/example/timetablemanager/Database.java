@@ -439,6 +439,22 @@ public class Database {
         return allocations;
     }
 
+    public static void deallocateCourseFromClassroom(String courseName, String classroomName) {
+        String sql = "DELETE FROM Allocated WHERE courseName = ? AND classroomName = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseName);
+            pstmt.setString(2, classroomName);
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Course deallocated from classroom successfully: " + courseName + " -> " + classroomName);
+            } else {
+                System.out.println("No allocation found for course " + courseName + " in classroom " + classroomName);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error while deallocating course from classroom: " + e.getMessage());
+        }
+    }
+
     public static List<Course> getAllAllocationsForClassroom(String classroomName) {
         List<Course> allocations = new ArrayList<>();
         String sql = """
