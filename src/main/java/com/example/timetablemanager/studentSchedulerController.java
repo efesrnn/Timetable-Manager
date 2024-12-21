@@ -3,6 +3,7 @@ package com.example.timetablemanager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,8 @@ import javafx.stage.Stage;
 
 import static com.example.timetablemanager.Database.*;
 import static com.example.timetablemanager.studentSelectionController.*;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,24 +23,29 @@ public class studentSchedulerController {
     @FXML
     private GridPane schedulerGrid;
 
-    private List<Student> allStudents;
+    @FXML
+    private Button asd;
 
     private List<Course> allCourses;
+
 
     private String selectedStudent;
 
     private Course selectedCourse;
+    private CourseSchedulerController controller;
 
-    public studentSchedulerController(String selectedStudent) {
-        this.selectedStudent = selectedStudent;
-    }
 
     @FXML
     public void initialize() {
 
+
     }
     public void showStudent() {
+
         allCourses = Database.getAllCourses();
+
+//schedulerGrid.getChildren().clear();
+
 
         // schedulerGrid.setGridLinesVisible(true);
 
@@ -62,7 +70,7 @@ public class studentSchedulerController {
         for (Course course : enrolledCourses2) {
 
             Label classLabel = new Label(course.getCourseID());
-            setSelectedCourse(course);
+
 
             Course selectedCourseObject = allCourses.stream()
                     .filter(e -> e.getCourseID().equals(course.getCourseID()))
@@ -109,7 +117,10 @@ public class studentSchedulerController {
 
             classLabel.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
-                    showAlert("Warning", "Are you sure you want to withdraw from " + course.getCourseID() + "!");
+                    //setSelectedCourse(classLabel.getText());
+
+                    //showAlert();
+                    Delete("Warning", "Are you sure you want to withdraw from " + course.getCourseID() + "!",classLabel.getText());
                 }
             });
 
@@ -190,12 +201,24 @@ public String getSelectedStudent() {
     }
 
     private void refreshGridPane() {
-        schedulerGrid.getChildren().clear(); // Mevcut tüm içerikleri temizler
-        showStudent(); // Yeniden içerik yükler
+        schedulerGrid.getChildren().clear();
+        this.showStudent();
+
+
+    }
+//    private void refreshTimetableView() {
+//        if (controller != null) {
+//            controller.refreshTable(); // Call the refreshTable method in the main controller
+//        }
+//    }
+
+     // Declare a reference to the main controller
+
+    public void setController(CourseSchedulerController controller) {
+        this.controller = controller;
     }
 
-
-    private void Delete(String title, String message) {
+    private void Delete(String title, String message, String a) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -209,9 +232,25 @@ public String getSelectedStudent() {
 
         if (result.isPresent()) {
             if (result.get() == withdrawButton) {
-                Database.removeStudentFromCourse(getSelectedStudent(),getSelectedCourse().getCourseID());
-                refreshGridPane();
+                Database.removeStudentFromCourse(a, getSelectedStudent());
+                //refreshGridPane();
                 alert.close();
+                Stage stage = (Stage) schedulerGrid.getScene().getWindow();
+
+                allCourses.clear();
+                Database.reloadCourses();
+                allCourses=Database.getAllCourses();
+                Course selectedCourseObject = allCourses.stream()
+                        .filter(e -> e.getCourseID().equals(a))
+                        .findFirst().orElse(null);
+
+
+
+                controller.setCourseData(selectedCourseObject);
+                stage.close();
+
+
+
             } else if (result.get() == cancelButton) {
                 alert.close();
             }
