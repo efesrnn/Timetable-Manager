@@ -38,10 +38,15 @@
         </VBox>
     </HBox>
 
+    <!-- A new Label to display the selected count / capacity -->
+    <Label fx:id="lblSelectionInfo"
+           text="Selected Students: 0 / ?"
+           styleClass="info-label"
+           alignment="CENTER" />
+
     <!-- Save/Cancel Buttons -->
     <HBox spacing="15" alignment="CENTER">
         <Button fx:id="btnSave" text="Save" styleClass="btn-save" prefWidth="90"/>
         <Button fx:id="btnCancel" text="Cancel" styleClass="btn-back" prefWidth="90"/>
     </HBox>
-
 </VBox>

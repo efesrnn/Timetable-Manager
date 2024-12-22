@@ -42,11 +42,20 @@
                </VBox>
             </HBox>
 
-            <!-- Outline List -->
-            <VBox spacing="10" styleClass="vbox-container">
-               <Label text="Outline" styleClass="grid-label" />
-               <ListView fx:id="listViewOutline" styleClass="list-view" prefWidth="620" prefHeight="150"/>
-            </VBox>
+            <!-- Outline and Assigned Courses HBox -->
+            <HBox spacing="20" styleClass="list-container">
+               <!-- Outline List -->
+               <VBox spacing="10" styleClass="vbox-container">
+                  <Label text="Outline" styleClass="grid-label" />
+                  <ListView fx:id="listViewOutline" styleClass="list-view" prefWidth="300" prefHeight="150"/>
+               </VBox>
+
+               <!-- Assigned Courses List -->
+               <VBox spacing="10" styleClass="vbox-container">
+                  <Label text="Assigned Courses" styleClass="grid-label" />
+                  <ListView fx:id="listViewAssignedCourses" styleClass="list-view" prefWidth="300" prefHeight="150"/>
+               </VBox>
+            </HBox>
          </VBox>
       </center>
 

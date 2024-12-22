@@ -37,7 +37,7 @@ public class studentEnrollmentController {
 
     // Labels for course details
     @FXML
-    private Label lblCourseName, lblLecturer, lblDuration, lblTimeToStart, lblClassroom, lblCapacity;
+    private Label lblCourseName, lblLecturer, lblDuration, lblTimeToStart, lblClassroom;
 
     // New Label for Enrolled Students Count
     @FXML
@@ -214,7 +214,6 @@ public class studentEnrollmentController {
         lblDuration.setText(String.valueOf(course.getDuration()) + " hours");
         lblTimeToStart.setText(course.getTimeToStart());
         lblClassroom.setText(course.getClassroom());
-        lblCapacity.setText(String.valueOf(course.getCapacity()));
     }
 
     private void clearCourseDetails() {
@@ -223,7 +222,6 @@ public class studentEnrollmentController {
         lblDuration.setText("");
         lblTimeToStart.setText("");
         lblClassroom.setText("");
-        lblCapacity.setText("");
     }
 
     private void openStudentSelectionPopup() {

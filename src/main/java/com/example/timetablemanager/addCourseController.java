@@ -565,6 +565,7 @@ public class addCourseController { // Renamed to follow Java conventions
     /**
      * Opens the student selection popup.
      */
+    @FXML
     private void openStudentSelectionPopup() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("studentSelectionLayout.fxml"));
@@ -580,31 +581,56 @@ public class addCourseController { // Renamed to follow Java conventions
                 e.printStackTrace();
             }
             popupStage.setTitle("Select Students");
+
+            // 1) GET the controller
             studentSelectionController controller = loader.getController();
-            controller.setCourseCapacity(40);
+
+            // 2) Set the capacity (if known)
+            Classroom selectedClassroom = comboClassroom.getValue();
+            if (selectedClassroom != null) {
+                controller.setCourseCapacity(selectedClassroom.getCapacity());
+            } else {
+                // -1 => unknown capacity => "?"
+                controller.setCourseCapacity(-1);
+            }
+
+            // 3) **PASS CURRENTLY SELECTED** students to the popup
+            //    so that they show up in the "selected" list.
+            List<String> currentlySelectedNames = this.selectedStudents.stream()
+                    .map(Student::getFullName)
+                    .toList();
+            controller.setInitiallySelectedStudents(currentlySelectedNames);
+
+            // Show popup
             popupStage.showAndWait();
 
-            // Retrieve selected students without duplicates
+            // 4) Retrieve newly selected students
             ObservableList<Student> selected = controller.getSelectedStudents();
             if (selected != null) {
-                for (Student student : selected) {
-                    // Add only if the student is not already in the list
-                    if (!this.selectedStudents.contains(student)) {
-                        this.selectedStudents.add(student);
-                    }
-                }
-                // Update ListView with the latest unique list
-                studentListView.setItems(FXCollections.observableArrayList(
-                        this.selectedStudents.stream().map(Student::getFullName).distinct().toList()
-                ));
-                // Update temporary course allocations if all fields are filled
+                // Make sure we clear & add them so we don't accumulate duplicates
+                this.selectedStudents.clear();
+                this.selectedStudents.addAll(selected);
+
+                // Update the UI's list
+                studentListView.setItems(
+                        FXCollections.observableArrayList(
+                                this.selectedStudents.stream()
+                                        .map(Student::getFullName)
+                                        .distinct()
+                                        .toList()
+                        )
+                );
+
+                // Also update the temporary course allocations if needed
                 updateTempCourse();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Failed to load the student selection popup.");
         }
     }
+
 
     /**
      * Creates a new course and updates the schedule GridPane.

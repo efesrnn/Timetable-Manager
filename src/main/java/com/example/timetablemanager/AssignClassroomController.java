@@ -14,6 +14,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import java.util.logging.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -43,6 +44,8 @@ public class AssignClassroomController {
 
     @FXML
     private Button buttonDelete;
+
+    private static final Logger LOGGER = Logger.getLogger(AssignClassroomController.class.getName());
 
     // The list that holds "Course -> Classroom" outline items
     private ObservableList<String> outline = FXCollections.observableArrayList();
@@ -120,6 +123,9 @@ public class AssignClassroomController {
     /**
      * Handles the Assign button action.
      */
+    /**
+     * Handles the Assign button action.
+     */
     private void handleAssign() {
         String selectedCourseItem = listViewCourses.getSelectionModel().getSelectedItem();
         String selectedClassroomItem = listViewClassrooms.getSelectionModel().getSelectedItem();
@@ -163,19 +169,35 @@ public class AssignClassroomController {
         }
 
         String timeToStart = selectedCourse.getTimeToStart();
+        LOGGER.log(Level.INFO, "Assigning course: {0}, timeToStart: {1}", new Object[]{courseName, timeToStart});
+
         if (timeToStart == null || timeToStart.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Error", "Course time is not set.");
             return;
         }
 
-        String[] timeParts = timeToStart.split(" ");
+        String[] timeParts = timeToStart.trim().split(" ");
         if (timeParts.length < 2) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Invalid course time format.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Invalid course time format: \"" + timeToStart + "\". Expected format: 'Day HH:MM' (e.g., 'Monday 08:30').");
             return;
         }
 
-        String day = timeParts[0];
+        String day = capitalizeFirstLetter(timeParts[0]);
         String time = timeParts[1];
+
+        // Additional validation for day and time
+        if (!isValidDay(day)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Invalid day format: \"" + day + "\". Please enter a valid day (e.g., 'Monday').");
+            return;
+        }
+
+        if (!isValidTimeFormat(time)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Invalid time format: \"" + time + "\". Expected format: 'HH:MM' (e.g., '08:30' or '8:30').");
+            return;
+        }
+
+        // Normalize time to two digits
+        time = normalizeTimeFormat(time);
 
         if (!Database.isClassroomAvailable(classroomName, day, time, selectedCourse.getDuration())) {
             showAlert(Alert.AlertType.ERROR, "Error", "The selected classroom is not available at the course's time.");
@@ -187,6 +209,34 @@ public class AssignClassroomController {
         Database.allocateCourseToClassroom(courseName, classroomName);
 
         listViewOutline.setItems(outline);
+
+    }
+    /**
+     * Normalizes the time format to ensure two-digit hours (e.g., "8:30" -> "08:30").
+     */
+    private String normalizeTimeFormat(String time) {
+        String[] parts = time.split(":");
+        if (parts.length != 2) {
+            return time; // Return as is if format is unexpected
+        }
+
+        String hour = parts[0];
+        String minute = parts[1];
+
+        if (hour.length() == 1) {
+            hour = "0" + hour;
+        }
+
+        return hour + ":" + minute;
+    }
+
+
+    /**
+     * Capitalizes the first letter of the given string.
+     */
+    private String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) return input;
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 
     /**
@@ -288,8 +338,7 @@ public class AssignClassroomController {
 
         public CourseListCell() {
             tooltip = new Tooltip();
-            // Remove any inline style so .tooltip in CSS can handle the text color, etc.
-            // If you prefer inline style, add -fx-text-fill: #333 here as well
+            // Configure tooltip display properties
             tooltip.setShowDelay(Duration.ZERO);
             tooltip.setHideDelay(Duration.ZERO);
             tooltip.setShowDuration(Duration.INDEFINITE);
@@ -301,6 +350,7 @@ public class AssignClassroomController {
             if (empty || item == null) {
                 setText(null);
                 setTooltip(null);
+                setStyle(""); // Reset style
             } else {
                 setText(item);
 
@@ -314,7 +364,18 @@ public class AssignClassroomController {
                         .orElse(null);
 
                 if (course != null) {
-                    // Build a small GridPane for course details
+                    // Determine if the course is assigned to a classroom
+                    String assignedClassroom = course.getClassroom();
+                    boolean isAssigned = assignedClassroom != null && !assignedClassroom.trim().isEmpty();
+
+                    // Change text color to blue if assigned
+                    if (isAssigned) {
+                        setStyle("-fx-text-fill: blue;");
+                    } else {
+                        setStyle("-fx-text-fill: black;"); // Default color
+                    }
+
+                    // Build a GridPane for course details in the tooltip
                     GridPane grid = new GridPane();
                     grid.setHgap(10);
                     grid.setVgap(5);
@@ -347,9 +408,17 @@ public class AssignClassroomController {
                     Label lblEnrKey = new Label("Enrolled:");
                     Label lblEnrVal = new Label(String.valueOf(enrolled));
 
-                    // Optional: Set label styles if needed
-                    // e.g.: lblIdVal.setStyle("-fx-text-fill: #333333;");
-
+                    // Assigned Classroom
+                    Label lblAssignKey = new Label("Assigned Classroom:");
+                    Label lblAssignVal = new Label(isAssigned ? assignedClassroom : "N/A");
+                    if(isAssigned){
+                        lblAssignVal.setStyle("-fx-font-weight: bold;");
+                        lblAssignVal.setStyle("-fx-text-fill: blue;");
+                    }else{
+                        lblAssignVal.setStyle("-fx-font-weight: bold;");
+                        lblAssignVal.setStyle("-fx-text-fill: black;");
+                    }
+                    // Add elements to the grid
                     grid.add(lblIdKey, 0, rowIndex);
                     grid.add(lblIdVal, 1, rowIndex++);
                     grid.add(lblLectKey, 0, rowIndex);
@@ -362,17 +431,19 @@ public class AssignClassroomController {
                     grid.add(lblCapVal, 1, rowIndex++);
                     grid.add(lblEnrKey, 0, rowIndex);
                     grid.add(lblEnrVal, 1, rowIndex++);
+                    grid.add(lblAssignKey, 0, rowIndex);
+                    grid.add(lblAssignVal, 1, rowIndex++);
 
                     tooltip.setGraphic(grid);
                     setTooltip(tooltip);
 
                 } else {
                     setTooltip(null);
+                    setStyle("-fx-text-fill: black;"); // Default color
                 }
             }
         }
     }
-
     /* *********************************************************************
      *  Custom ListCell for CLASSROOM (Mini-Schedule Grid, using .tooltip in CSS)
      * *********************************************************************/
@@ -480,11 +551,13 @@ public class AssignClassroomController {
         for (Course c : scheduledCourses) {
             String timeToStart = c.getTimeToStart();
             if (timeToStart == null || !timeToStart.contains(" ")) {
-                continue;
+                continue; // Skip invalid entries
             }
 
             String[] tParts = timeToStart.split(" ");
-            String day = tParts[0];
+            if (tParts.length < 2) continue;
+
+            String day = capitalizeFirstLetter(tParts[0]);
             String startTime = tParts[1];
 
             int dayIndex = days.indexOf(day);
@@ -557,5 +630,22 @@ public class AssignClassroomController {
                 (int) (color.getRed() * 255),
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
+    }
+
+    /**
+     * Validates if the provided day is a valid day of the week.
+     */
+    private boolean isValidDay(String day) {
+        List<String> validDays = Arrays.asList(
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        );
+        return validDays.contains(day);
+    }
+
+    /**
+     * Validates the time format (e.g., "08:30" or "8:30").
+     */
+    private boolean isValidTimeFormat(String time) {
+        return time.matches("^([0-9]{1,2}):([0-5][0-9])$");
     }
 }
