@@ -115,7 +115,7 @@ public class CourseSchedulerController {
             studentSchedulerController studentController = loader.getController();
             studentController.setSelectedStudent(studentName);
             studentController.showStudent();
-            //studentController.setController(this); // If needed
+            studentController.setController(this);
 
             Stage stage = new Stage();
             stage.setTitle("Student Scheduler - " + studentName);

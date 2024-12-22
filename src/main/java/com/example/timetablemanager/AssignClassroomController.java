@@ -623,7 +623,7 @@ public class AssignClassroomController {
     }
 
     /**
-     * Converts a Color object to #RRGGBB for CSS usage.
+     * Converts a Color object to #RGB for CSS usage.
      */
     private String toRgbString(Color color) {
         return String.format("#%02X%02X%02X",

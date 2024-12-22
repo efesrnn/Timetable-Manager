@@ -95,22 +95,19 @@ public class Course {
         this.timeToStart = timeToStart;
     }
 
-    public int getDuration() { return duration; }
+    public int getDuration() {
+        return duration;
+    }
 
-    public void setDuration(int duration) { this.duration = duration; }
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
-    public String getLecturer() { return lecturer; }
+    public String getLecturer() {
+        return lecturer;
+    }
 
-    public void setLecturer(String lecturer) { this.lecturer = lecturer; }
-
-    public boolean assignClassroom(String classroom, int classroomCapacity) {
-        if (students.size() <= classroomCapacity) {
-            this.classroom = classroom;
-            System.out.println("Classroom " + classroom + " assigned successfully.");
-            return true;
-        } else {
-            System.out.println("Error: Classroom " + classroom + " is too small for this course.");
-            return false;  // Classroom is too small, assignment failed
-        }
+    public void setLecturer(String lecturer) {
+        this.lecturer = lecturer;
     }
 }

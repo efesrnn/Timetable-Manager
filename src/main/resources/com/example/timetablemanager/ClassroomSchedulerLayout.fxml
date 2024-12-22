@@ -1,96 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.timetablemanager.ClassroomSchedulerController"
-            styleClass="border-pane"
-            stylesheets="@css/classroomSchedule.css"
-            prefWidth="1080" prefHeight="720">
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.ClassroomSchedulerController">
+    <GridPane fx:id="scheduleGrid" gridLinesVisible="true" hgap="5" style="-fx-padding: 10;" vgap="5">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <!-- Added Columns for Saturday and Sunday -->
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+            <RowConstraints minHeight="50" vgrow="ALWAYS" />
+        </rowConstraints>
 
-    <padding>
-        <Insets bottom="20" left="20" right="20" top="20"/>
-    </padding>
+        <!-- Day Labels (headers) with updated column indices -->
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Time" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Monday" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Tuesday" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Wednesday" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Thursday" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+        <!-- Added Labels for Saturday and Sunday -->
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Saturday" GridPane.columnIndex="6" GridPane.rowIndex="0" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Sunday" GridPane.columnIndex="7" GridPane.rowIndex="0" />
 
-    <!-- Left Section: Timetable Header and Grid -->
-    <left>
-        <VBox alignment="TOP_CENTER" spacing="20" styleClass="vbox-container">
-            <!-- Header -->
-            <Label text="Classroom Timetable" styleClass="header-label"/>
-
-            <!-- Schedule GridPane within a ScrollPane -->
-            <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
-                <GridPane fx:id="scheduleGrid" gridLinesVisible="true" hgap="0" vgap="0"
-                          styleClass="schedule-gridpane">
-                    <!-- Column Constraints: Time + 7 Days -->
-                    <columnConstraints>
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Time Column -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Monday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Tuesday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Wednesday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Thursday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Friday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Saturday -->
-                        <ColumnConstraints halignment="CENTER" prefWidth="140"/> <!-- Sunday -->
-                    </columnConstraints>
-
-                    <!-- Row Constraints: Header + Time Slots -->
-                    <rowConstraints>
-                        <RowConstraints prefHeight="50"/> <!-- Header Row -->
-                        <!-- Define time slot rows dynamically based on 'times' list size -->
-                        <!-- Adjusted to fit within 720 height -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 1 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 2 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 3 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 4 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 5 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 6 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 7 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 8 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 9 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 10 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 11 -->
-                        <RowConstraints prefHeight="50"/> <!-- Time Slot 12 -->
-                    </rowConstraints>
-
-                    <!-- Day Headers -->
-                    <Label text="Time" styleClass="day-header" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <Label text="Monday" styleClass="day-header" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <Label text="Tuesday" styleClass="day-header" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                    <Label text="Wednesday" styleClass="day-header" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                    <Label text="Thursday" styleClass="day-header" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
-                    <Label text="Friday" styleClass="day-header" GridPane.columnIndex="5" GridPane.rowIndex="0"/>
-                    <Label text="Saturday" styleClass="day-header" GridPane.columnIndex="6" GridPane.rowIndex="0"/>
-                    <Label text="Sunday" styleClass="day-header" GridPane.columnIndex="7" GridPane.rowIndex="0"/>
-
-                    <!-- Time Slots -->
-                    <Label text="08:30 - 09:25" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <Label text="09:25 - 10:20" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <Label text="10:20 - 11:15" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <Label text="11:15 - 12:10" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <Label text="12:10 - 13:05" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <Label text="13:05 - 14:00" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                    <Label text="14:00 - 14:55" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                    <Label text="14:55 - 15:50" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
-                    <Label text="15:50 - 16:45" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
-                    <Label text="16:45 - 17:40" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="10"/>
-                    <Label text="17:40 - 18:35" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="11"/>
-                    <Label text="18:35 - 19:30" styleClass="time-slot" GridPane.columnIndex="0" GridPane.rowIndex="12"/>
-                </GridPane>
-            </ScrollPane>
-        </VBox>
-    </left>
-
-    <!-- Center Section: Additional Content (Optional) -->
-    <center>
-        <!-- You can add additional components here if needed -->
-    </center>
-
-</BorderPane>
+        <!-- Time Slots (unchanged) -->
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="8:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" text="9:25" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="10:20" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="11:15" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="12:10" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="13:05" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="14:00" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="14:55" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="15:50" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="16:45" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+        <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="17:40" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+    </GridPane>
+</VBox>

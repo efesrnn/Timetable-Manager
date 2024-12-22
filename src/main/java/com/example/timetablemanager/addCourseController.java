@@ -908,6 +908,7 @@ public class addCourseController { // Renamed to follow Java conventions
      * @param courseID The ID of the course.
      * @return A Color object representing the course's color.
      */
+
     private Color generateColorForCourse(String courseID) {
         // Simple color generation based on hash code
         Random rand = new Random(courseID.hashCode());
