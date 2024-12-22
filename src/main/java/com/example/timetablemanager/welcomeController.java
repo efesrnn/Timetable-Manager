@@ -230,8 +230,6 @@ public class welcomeController {
             System.out.println("Backed up existing DB to: " + backupFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.WARNING, "Backup Failed",
-                    "Couldn't backup existing DB: " + e.getMessage());
         }
     }
 

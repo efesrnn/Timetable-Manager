@@ -37,6 +37,10 @@ public class CourseSchedulerController {
 
     private Course currentCourse; // To keep track of the current course
 
+    public ttManagerController getMainController() {
+        return mainController;
+    }
+
     @FXML
     public void initialize() {
         try {

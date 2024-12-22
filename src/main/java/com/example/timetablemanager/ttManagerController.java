@@ -134,6 +134,10 @@ public class ttManagerController {
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
     }
 
+    public Course getSelectedCourse() {
+        return timetableTable.getSelectionModel().getSelectedItem();
+    }
+
     @FXML
     public void menuUserManualMethod() {
         try {
@@ -230,6 +234,7 @@ public class ttManagerController {
 
 
             CourseSchedulerController controller = loader.getController();
+            controller.setMainController(this);
             controller.setCourseData(course);
             stage.getIcons().add(new Image(getClass().getResource("/com/example/timetablemanager/icons/catalogue.png").toString()));
             stage.setTitle("Course Details");
