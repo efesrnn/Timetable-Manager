@@ -25,7 +25,7 @@ public class CourseSchedulerController {
     @FXML
     private ListView<String> studentsListView;
 
-    private ttManagerController mainController;  // Declare a reference to the main controller
+    private ttManagerController mainController;  // Reference to the main controller
 
     public void setMainController(ttManagerController mainController) {
         this.mainController = mainController;
@@ -35,14 +35,16 @@ public class CourseSchedulerController {
     private static final String DB_URL = "jdbc:sqlite:" + dbPath + File.separator + "TimetableManagement.db";
     private Connection conn = null;
 
+    private Course currentCourse; // To keep track of the current course
+
     @FXML
     public void initialize() {
-
         try {
             conn = DriverManager.getConnection(DB_URL);
             System.out.println("Connected to the database.");
 
-            loadCourseData();
+            // Removed loadCourseData(); since we use setCourseData
+
             loadStudents();
 
             deleteCourseButton.setOnAction(event -> deleteCourse());
@@ -76,67 +78,12 @@ public class CourseSchedulerController {
     }
 
     /**
-     * Opens the Classroom Scheduler view for the selected classroom.
-     *
-     * @param classroomName The name of the selected classroom.
-     */
-    private void openClassroomDetails(String classroomName) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/ClassroomSchedulerLayout.fxml"));
-            Parent root = loader.load();
-
-            ClassroomSchedulerController classroomController = loader.getController();
-            classroomController.loadClassroomSchedule(classroomName); // Ensure method is public
-
-            Stage stage = new Stage();
-            stage.setTitle("Classroom Schedule - " + classroomName);
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open Classroom Scheduler.");
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            showAlert(Alert.AlertType.ERROR, "Controller Error", "ClassroomSchedulerController is not set correctly.");
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Opens the Student Scheduler view for the selected student.
-     *
-     * @param studentName The name of the selected student.
-     */
-    private void openStudentDetails(String studentName) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/studentSchedulerController.fxml"));
-            Parent root = loader.load();
-
-            studentSchedulerController studentController = loader.getController();
-            studentController.setSelectedStudent(studentName);
-            studentController.showStudent();
-            studentController.setController(this);
-
-            Stage stage = new Stage();
-            stage.setTitle("Student Scheduler - " + studentName);
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open Student Scheduler.");
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            showAlert(Alert.AlertType.ERROR, "Controller Error", "StudentSchedulerController is not set correctly.");
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Sets course data to the UI elements.
      *
      * @param course The course object containing data.
      */
     public void setCourseData(Course course) {
+        this.currentCourse = course; // Store the current course
         courseLbl.setText(course.getCourseID());
         lecturerLbl.setText(course.getLecturer());
         startTimeLbl.setText(String.join(", ", course.getTimeToStart()));
@@ -147,45 +94,6 @@ public class CourseSchedulerController {
         studentsListView.getItems().clear();
         for (Student s : course.getStudents()) {
             studentsListView.getItems().add(s.getFullName());
-        }
-    }
-
-    /**
-     * Loads course data from the database and sets it to the UI.
-     */
-    private void loadCourseData() {
-        // Query: Join Courses and Classrooms tables to get the required data
-        String query = "SELECT c.courseName, c.lecturer, c.timeToStart, c.duration, cl.classroomName, cl.capacity " +
-                "FROM Courses c " +
-                "JOIN Allocated a ON c.courseName = a.courseName " +
-                "JOIN Classrooms cl ON a.classroomName = cl.classroomName " +
-                "LIMIT 1"; // Adjust LIMIT as needed
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            if (rs.next()) {
-                // Get course and classroom data
-                String courseName = rs.getString("courseName");
-                String lecturer = rs.getString("lecturer");
-                String startTime = rs.getString("timeToStart");
-                int duration = rs.getInt("duration");
-                String classroomName = rs.getString("classroomName");
-                int capacity = rs.getInt("capacity");
-
-                // Set course data to labels
-                courseLbl.setText(courseName);
-                lecturerLbl.setText(lecturer);
-                startTimeLbl.setText(startTime);
-                durationLbl.setText(String.valueOf(duration));
-                classroomLbl.setText(classroomName);
-                capacityLbl.setText(String.valueOf(capacity));
-            } else {
-                showAlert(Alert.AlertType.INFORMATION, "No Data", "No course data found.");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error loading course data: " + e.getMessage());
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to load course data.");
         }
     }
 
@@ -308,6 +216,62 @@ public class CourseSchedulerController {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to close the current screen.");
+        }
+    }
+
+    /**
+     * Opens the Classroom Scheduler view for the selected classroom.
+     *
+     * @param classroomName The name of the selected classroom.
+     */
+    private void openClassroomDetails(String classroomName) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/ClassroomSchedulerLayout.fxml"));
+            Parent root = loader.load();
+
+            ClassroomSchedulerController classroomController = loader.getController();
+            classroomController.loadClassroomSchedule(classroomName); // Ensure method is public
+
+            Stage stage = new Stage();
+            stage.setTitle("Classroom Schedule - " + classroomName);
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open Classroom Scheduler.");
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            showAlert(Alert.AlertType.ERROR, "Controller Error", "ClassroomSchedulerController is not set correctly.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Opens the Student Scheduler view for the selected student.
+     *
+     * @param studentName The name of the selected student.
+     */
+    private void openStudentDetails(String studentName) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/timetablemanager/studentSchedulerController.fxml"));
+            Parent root = loader.load();
+
+            studentSchedulerController studentController = loader.getController();
+            studentController.setSelectedStudent(studentName);
+            studentController.showStudent();
+            studentController.setController(this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Student Scheduler - " + studentName);
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open Student Scheduler.");
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            showAlert(Alert.AlertType.ERROR, "Controller Error", "StudentSchedulerController is not set correctly.");
+            e.printStackTrace();
         }
     }
 
