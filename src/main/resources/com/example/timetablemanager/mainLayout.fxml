@@ -26,7 +26,6 @@
         </Menu>
         <Menu style="-fx-text-fill: #333333;" text="Help">
           <MenuItem fx:id="menuUserManual" text="User Manual" />
-          <MenuItem fx:id="menuAbout" text="About" />
         </Menu>
       </MenuBar>
       <VBox alignment="TOP_CENTER" spacing="20" style="-fx-pref-width: 800; -fx-pref-height: 600; -fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
