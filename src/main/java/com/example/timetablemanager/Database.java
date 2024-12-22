@@ -160,6 +160,7 @@ public class Database {
         }
     }
 
+
     // Load all courses into the in-memory list (Includes courses and enrolled students)
     public static void loadAllCourses() {
         courseList.clear();
@@ -1048,5 +1049,70 @@ public class Database {
         public boolean overlapsWith(timeRange other) {
             return (this.start.isBefore(other.end) && other.start.isBefore(this.end));
         }
+    }
+
+    public static Course getCourseInfo(String courseName) {
+        String sql = "SELECT * FROM Courses WHERE courseName = ?";
+        String sql2 = "SELECT classroomName FROM Allocated WHERE courseName = ?";
+        String sql3 = "SELECT capacity FROM Classrooms WHERE classroomName = ?";
+        Course course = null;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseName);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int duration = rs.getInt("duration");
+                String lecturer = rs.getString("lecturer");
+
+                // Fetch enrolled students
+                List<String> enrolledStudentNames = getStudentsEnrolledInCourse(courseName);
+                List<Student> enrolledStudents = new ArrayList<>();
+                for (String studentName : enrolledStudentNames) {
+                    enrolledStudents.add(new Student(studentName, new ArrayList<>()));
+                }
+
+                int capacity = 0; // default capacity
+                String classroomName = ""; // no classroom info here
+                String startTime = rs.getString("timeToStart");
+
+                // Fetch allocated classroom
+                try (PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+                    pstmt2.setString(1, courseName);
+                    try (ResultSet rs2 = pstmt2.executeQuery()) {
+                        if (rs2.next()) {
+                            classroomName = rs2.getString("classroomName");
+                        }
+                    }
+                }
+
+                // Fetch classroom capacity
+                if (!classroomName.isEmpty()) {
+                    try (PreparedStatement pstmt3 = conn.prepareStatement(sql3)) {
+                        pstmt3.setString(1, classroomName);
+                        try (ResultSet rs3 = pstmt3.executeQuery()) {
+                            if (rs3.next()) {
+                                capacity = rs3.getInt("capacity");
+                            }
+                        }
+                    }
+                }
+
+                course = new Course(
+                        courseName,
+                        capacity,
+                        enrolledStudents,
+                        classroomName,
+                        startTime,
+                        duration,
+                        lecturer
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error while fetching course info: " + e.getMessage());
+        }
+
+        return course;
     }
 }

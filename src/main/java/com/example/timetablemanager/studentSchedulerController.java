@@ -216,7 +216,7 @@ public class studentSchedulerController {
                         .findFirst().orElse(null);
 
                 if (controller != null && selectedCourseObject != null) {
-                    controller.setCourseData(controller.getMainController().getSelectedCourse());
+                    controller.setCourseData(Database.getCourseInfo(controller.getMainController().getSelectedCourse().getCourseID()));
                 }
 
                 // Refresh the scheduler view
