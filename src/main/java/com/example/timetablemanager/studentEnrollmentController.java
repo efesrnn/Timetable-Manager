@@ -453,7 +453,7 @@ public class studentEnrollmentController {
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent()) {
             if (result.get() == btnSwap) {
-                switchScene("swapCourse.fxml");
+                switchScene("swapClassroom.fxml");
             } else if (result.get() == btnCreateSection) {
                 switchScene("addCourseLayout.fxml");
             }

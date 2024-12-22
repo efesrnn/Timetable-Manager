@@ -108,7 +108,7 @@ public class ttManagerController {
         btnAddCourse.setOnAction(event -> switchScene("addCourseLayout.fxml"));
         btnEnrollStudent.setOnAction(event -> switchScene("studentEnrollmentLayout.fxml"));
         btnAssignClassroom.setOnAction(event -> switchScene("assignClassroomLayout.fxml"));
-        btnSwapClassroom.setOnAction(event -> switchScene("swapCourse.fxml"));
+        btnSwapClassroom.setOnAction(event -> switchScene("swapClassroom.fxml"));
 
         menuImportCSV.setOnAction(event -> {
         switchScene("welcomeLayout.fxml");

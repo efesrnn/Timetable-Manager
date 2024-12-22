@@ -30,6 +30,45 @@ public class Database {
     private static List<Course> courseList = new ArrayList<>();
     private static List<Student> allStudents = new ArrayList<>();
 
+    // Transaction Management Methods
+
+    /**
+     * Begins a database transaction by setting auto-commit to false.
+     */
+    public static void beginTransaction() throws SQLException {
+        if (conn == null || conn.isClosed()) {
+            connect();
+        }
+        conn.setAutoCommit(false);
+        System.out.println("Transaction started.");
+    }
+
+    /**
+     * Commits the current database transaction and sets auto-commit back to true.
+     */
+    public static void commitTransaction() throws SQLException {
+        if (conn != null && !conn.isClosed()) {
+            conn.commit();
+            conn.setAutoCommit(true);
+            System.out.println("Transaction committed.");
+        }
+    }
+
+    /**
+     * Rolls back the current database transaction and sets auto-commit back to true.
+     */
+    public static void rollbackTransaction() {
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.rollback();
+                conn.setAutoCommit(true);
+                System.out.println("Transaction rolled back.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error during transaction rollback: " + e.getMessage());
+        }
+    }
+
     // Create database connection
     public static Connection connect() {
         File dbDir = new File(dbPath);
@@ -55,7 +94,7 @@ public class Database {
         try {
             if (conn != null) {
                 conn.close();
-                System.out.println("Database connection interrupted!");
+                System.out.println("Database connection closed!");
             }
         } catch (SQLException e) {
             System.err.println("An error occurred while closing the connection: " + e.getMessage());
@@ -63,40 +102,39 @@ public class Database {
     }
 
     // CREATE TABLES (Creates five tables: Courses,Classrooms,Allocated,Students,Enrollments)
-    // CREATE TABLES (Creates five tables: Courses,Classrooms,Allocated,Students,Enrollments)
     private static void createTables() {
         String createCoursesTable = """
                 CREATE TABLE IF NOT EXISTS Courses (
-            courseId INTEGER PRIMARY KEY AUTOINCREMENT,
-            courseName TEXT NOT NULL UNIQUE,
-            lecturer TEXT,
-            duration INTEGER,
-            timeToStart TEXT
-        );
-        """;
+                    courseId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    courseName TEXT NOT NULL UNIQUE,
+                    lecturer TEXT,
+                    duration INTEGER,
+                    timeToStart TEXT
+                );
+                """;
 
         String createClassroomsTable = """
                 CREATE TABLE IF NOT EXISTS Classrooms (
-            classroomId INTEGER PRIMARY KEY AUTOINCREMENT,
-            classroomName TEXT NOT NULL UNIQUE,
-            capacity INTEGER NOT NULL
-        );
-        """;
+                    classroomId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    classroomName TEXT NOT NULL UNIQUE,
+                    capacity INTEGER NOT NULL
+                );
+                """;
 
         String createAllocatedTable = """
                 CREATE TABLE IF NOT EXISTS Allocated (
-            allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
-            courseName TEXT NOT NULL,
-            classroomName TEXT NOT NULL,
-            FOREIGN KEY (courseName) REFERENCES Courses (courseName) ON DELETE CASCADE,
-            FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName) ON DELETE CASCADE
-        );
-        """;
+                    allocationID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    courseName TEXT NOT NULL,
+                    classroomName TEXT NOT NULL,
+                    FOREIGN KEY (courseName) REFERENCES Courses (courseName) ON DELETE CASCADE,
+                    FOREIGN KEY (classroomName) REFERENCES Classrooms (classroomName) ON DELETE CASCADE
+                );
+                """;
 
         String createStudentsTable = """
             CREATE TABLE IF NOT EXISTS Students (
                 studentId INTEGER PRIMARY KEY AUTOINCREMENT,
-                studentName TEXT NOT NULL
+                studentName TEXT NOT NULL UNIQUE
             );
         """;
 
@@ -116,7 +154,7 @@ public class Database {
             stmt.execute(createAllocatedTable);
             stmt.execute(createStudentsTable);
             stmt.execute(createEnrollmentsTable);
-            System.out.println("Tables created!");
+            System.out.println("Tables created or verified successfully!");
         } catch (SQLException e) {
             System.err.println("Error while creating tables: " + e.getMessage());
         }
@@ -126,8 +164,8 @@ public class Database {
     public static void loadAllCourses() {
         courseList.clear();
         String sql = "SELECT DISTINCT courseName, timeToStart, duration, lecturer FROM Courses";
-        String sql2 = "SELECT * FROM Allocated WHERE courseName = ? ";
-        String sql3 = "SELECT * FROM Classrooms WHERE classroomName = ? ";
+        String sql2 = "SELECT classroomName FROM Allocated WHERE courseName = ?";
+        String sql3 = "SELECT capacity FROM Classrooms WHERE classroomName = ?";
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -145,41 +183,30 @@ public class Database {
                     enrolledStudents.add(new Student(studentName, new ArrayList<>()));
                 }
 
-
                 int capacity = 0; // default capacity
-                String classroom = ""; // no classroom info here
+                String classroomName = ""; // no classroom info here
                 String startTime = rs.getString("timeToStart");
 
-                //The part where we separate day and start time
-                List<String> days = new ArrayList<>();
-                List<String> times = new ArrayList<>();
-
-                if (startTime != null && !startTime.isEmpty()) {
-                    // Split the string into day and time
-                    String[] parts = startTime.split(" ");
-                    if (parts.length >= 2) {
-                        days.add(parts[0]);   // Day (e.g., "Monday")
-                        times.add(parts[1]);  // Time (e.g., "10:00")
-                    } else {
-                        // Handle cases where the format is unexpected
-                        System.err.println("Unexpected timeToStart format: " + startTime);
+                // Fetch allocated classroom
+                try (PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+                    pstmt2.setString(1, courseName);
+                    try (ResultSet rs2 = pstmt2.executeQuery()) {
+                        if (rs2.next()) {
+                            classroomName = rs2.getString("classroomName");
+                        }
                     }
                 }
 
-                PreparedStatement stmt2 = conn.prepareStatement(sql2);
-                stmt2.setString(1, courseName);
-                ResultSet rs2 = stmt2.executeQuery();
-                String classroomName = "";
-
-                while (rs2.next()) {
-                    classroomName = rs2.getString("classroomName");
-                }
-
-                PreparedStatement stmt3 = conn.prepareStatement(sql3);
-                stmt3.setString(1, classroomName);
-                ResultSet rs3 = stmt3.executeQuery();
-                while (rs3.next()) {
-                    capacity = rs3.getInt("capacity");
+                // Fetch classroom capacity
+                if (!classroomName.isEmpty()) {
+                    try (PreparedStatement pstmt3 = conn.prepareStatement(sql3)) {
+                        pstmt3.setString(1, classroomName);
+                        try (ResultSet rs3 = pstmt3.executeQuery()) {
+                            if (rs3.next()) {
+                                capacity = rs3.getInt("capacity");
+                            }
+                        }
+                    }
                 }
 
                 Course course = new Course(
@@ -218,12 +245,12 @@ public class Database {
         List<Course> courses = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)
-             ) {
-            pstmt.setString(1,student);
+        ) {
+            pstmt.setString(1, student);
             ResultSet rs = pstmt.executeQuery();
 
             while(rs.next()) {
-                Course course = new Course(rs.getString("courseId"),0,null,null,rs.getString("timeToStart"),
+                Course course = new Course(rs.getString("courseName"),0,null,null,rs.getString("timeToStart"),
                         rs.getInt("duration"),rs.getString("lecturer"));
                 courses.add(course);
             }
@@ -235,6 +262,7 @@ public class Database {
         return courses;
 
     }
+
     public static List<Course> loadCoursesForStudent1(String studentName) {
         String query = """
             SELECT DISTINCT c.courseName, c.timeToStart, c.duration, c.lecturer
@@ -334,7 +362,7 @@ public class Database {
 
         return courses;
     }
-    
+
     public static void loadStudents() {
         String query = "SELECT studentId, studentName FROM Students";
 
@@ -353,12 +381,10 @@ public class Database {
     }
 
     public static List<Student> getStudents() {
-
         return new ArrayList<>(allStudents);
     }
 
     public static List<Course> getAllCourses() {
-
         return new ArrayList<>(courseList);
     }
 
@@ -383,8 +409,6 @@ public class Database {
         return students;
     }
 
-
-
     public static void addCourse(String courseName, String lecturer, int duration, String timeToStart) {
         String sql = "INSERT INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -408,8 +432,8 @@ public class Database {
         String day = parts[0];
         String time = parts[1];
 
-        // Check if the classroom is available
-        if (!isClassroomAvailable(classroomName, day, time, duration)) {
+        // Check if the classroom is available excluding the current course
+        if (!isClassroomAvailable(classroomName, day, time, duration, courseName)) {
             throw new SQLException("Classroom " + classroomName + " is not available on " + day + " at " + time + " for duration " + duration + " hours.");
         }
 
@@ -444,7 +468,6 @@ public class Database {
         }
     }
 
-
     public static void addEnrollment(String courseName, String studentName) {
         String sql = "INSERT INTO Enrollments (courseName, studentName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -471,7 +494,6 @@ public class Database {
         }
     }
 
-
     public static void addStudent(String studentName) {
         String sql = "INSERT INTO Students (studentName) VALUES (?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -494,6 +516,7 @@ public class Database {
             System.err.println("Error while adding classroom: " + e.getMessage());
         }
     }
+
     //*****
     // Method to check if the classroom has enough capacity
     public static boolean hasSufficientCapacity(String classroomName, int numberOfStudents) {
@@ -535,7 +558,6 @@ public class Database {
             return;
         }
 
-
         String sql = "INSERT INTO Allocated (courseName, classroomName) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseName);
@@ -556,7 +578,7 @@ public class Database {
                 WHERE a.classroomName = ?
                 """;
 
-        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classroomName);
             ResultSet rs = pstmt.executeQuery();
 
@@ -618,7 +640,7 @@ public class Database {
                 WHERE a.classroomName = ?
                 """;
 
-        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classroomName);
             ResultSet rs = pstmt.executeQuery();
 
@@ -654,6 +676,7 @@ public class Database {
 
         return allocations;
     }
+
     public static List<String> getAllClassroomsWithCapacities() {
         List<String> classrooms = new ArrayList<>();
         String sql = "SELECT DISTINCT classroomName, capacity FROM Classrooms";
@@ -674,7 +697,18 @@ public class Database {
         return classrooms;
     }
 
-    public static boolean isClassroomAvailable(String classroomName, String day, String startTime, int duration) {
+    /**
+     * Enhanced method to check if a classroom is available at a given day and time,
+     * excluding a specific course (useful during swaps).
+     *
+     * @param classroomName   The name of the classroom to check.
+     * @param day             The day of the week (e.g., "Monday").
+     * @param startTime       The start time in "HH:mm" format.
+     * @param duration        The duration in hours.
+     * @param currentCourseId The course ID to exclude from availability checks.
+     * @return True if the classroom is available, false otherwise.
+     */
+    public static boolean isClassroomAvailable(String classroomName, String day, String startTime, int duration, String currentCourseId) {
         // Define time formatter
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime desiredStart;
@@ -711,6 +745,11 @@ public class Database {
                 String timeToStart = rs.getString("timeToStart");
                 int existingDuration = rs.getInt("duration");
                 String lecturer = rs.getString("lecturer");
+
+                // Skip the current course being swapped
+                if (courseName.equals(currentCourseId)) {
+                    continue;
+                }
 
                 // Split the timeToStart into day and time
                 String[] parts = timeToStart.split(" ");
@@ -755,6 +794,30 @@ public class Database {
         return true; // No overlaps found
     }
 
+    /**
+     * Overloaded method to check classroom availability without excluding any course.
+     * Useful when assigning classrooms initially.
+     *
+     * @param classroomName The name of the classroom to check.
+     * @param day           The day of the week (e.g., "Monday").
+     * @param startTime     The start time in "HH:mm" format.
+     * @param duration      The duration in hours.
+     * @return True if the classroom is available, false otherwise.
+     */
+    public static boolean isClassroomAvailable(String classroomName, String day, String startTime, int duration) {
+        // Call the enhanced method without excluding any course
+        return isClassroomAvailable(classroomName, day, startTime, duration, "");
+    }
+
+    /**
+     * Retrieves all courses that have conflicting schedules in a given classroom.
+     *
+     * @param classroomName The name of the classroom.
+     * @param day           The day of the week.
+     * @param time          The start time in "HH:mm" format.
+     * @param duration      The duration in hours.
+     * @return A list of conflicting courses.
+     */
     public static List<Course> getConflictingCourses(String classroomName, String day, String time, int duration) {
         List<Course> conflictingCourses = new ArrayList<>();
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -851,41 +914,41 @@ public class Database {
         return conflictingCourses;
     }
 
+    /**
+     * Changes the classroom allocation for a given course.
+     *
+     * @param course    The name of the course.
+     * @param classroom The new classroom name.
+     */
     public static void changeClassroom(String course, String classroom) {
-        try {
-            String checkAllocation = "SELECT COUNT(*) FROM Allocated WHERE courseName = ?";
-            PreparedStatement checkStmt = conn.prepareStatement(checkAllocation);
+        String checkAllocation = "SELECT COUNT(*) FROM Allocated WHERE courseName = ?";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkAllocation)) {
             checkStmt.setString(1, course);
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
-                PreparedStatement updateStmt = conn.prepareStatement("""
-                UPDATE Allocated
-                SET classroomName = ?
-                WHERE courseName = ?;
-            """);
-                updateStmt.setString(1, classroom);
-                updateStmt.setString(2, course);
-                updateStmt.executeUpdate();
-                System.out.println("Classroom updated successfully for course: " + course);
+                String updateStmtStr = "UPDATE Allocated SET classroomName = ? WHERE courseName = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateStmtStr)) {
+                    updateStmt.setString(1, classroom);
+                    updateStmt.setString(2, course);
+                    updateStmt.executeUpdate();
+                    System.out.println("Classroom updated successfully for course: " + course);
+                }
             } else {
                 System.out.println("No existing allocation found for course: " + course);
             }
+            rs.close();
         } catch (SQLException e) {
             System.err.println("Error while changing classroom: " + e.getMessage());
         }
     }
 
     public static void removeStudentFromCourse(String courseName, String studentName) {
-        try {
-            PreparedStatement deleteEnrollment = conn.prepareStatement("""
-            DELETE FROM Enrollments
-            WHERE courseName = ? AND studentName = ?;
-        """);
-
-            deleteEnrollment.setString(1, courseName);
-            deleteEnrollment.setString(2, studentName);
-            int rowsAffected = deleteEnrollment.executeUpdate();
+        String sql = "DELETE FROM Enrollments WHERE courseName = ? AND studentName = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseName);
+            pstmt.setString(2, studentName);
+            int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
                 System.out.println("Student removed from course successfully: " + studentName + " -> " + courseName);
@@ -912,12 +975,12 @@ public class Database {
         return classroomNames;
     }
 
-    // New method to get all classroom capacity from the DB
+    // New method to get all classroom capacities from the DB
     public static List<Integer> getAllClassroomCapacities(String classroomName) {
         List<Integer> classroomCapacities = new ArrayList<>();
         String sql = "SELECT DISTINCT capacity FROM Classrooms WHERE classroomName = ?";
 
-        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classroomName); // Set the parameter value
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -931,18 +994,15 @@ public class Database {
         return classroomCapacities;
     }
 
-
-
     public static List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT studentId, studentName FROM Students";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String id = String.valueOf(rs.getInt("studentId"));
                 String name = rs.getString("studentName");
-                // Assuming Student has a constructor Student(String studentId, String fullName, List<Course> enrolledCourses)
+                // Assuming Student has a constructor Student(String studentName, List<Course> enrolledCourses)
                 students.add(new Student(name, new ArrayList<>()));
             }
         } catch (SQLException e) {
@@ -966,26 +1026,27 @@ public class Database {
         return courseNames;
     }
 
-        // New method to get all classroom capacity from the DB
-//    public static List<Integer> getCourseCapacities(String courseName) {
-//        List<Integer> courseCapacities = new ArrayList<>();
-//        String sql = "SELECT DISTINCT En FROM Courses WHERE courseName = ?";
-//
-//        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
-//            pstmt.setString(1, courseName); // Set the parameter value
-//            try (ResultSet rs = pstmt.executeQuery()) {
-//                while (rs.next()) {
-//                    courseCapacities.add(rs.getInt("capacity")); // Fetch the capacity as an integer
-//                }
-//            }
-//        } catch (SQLException e) {
-//            System.err.println("Error while fetching course capacities: " + e.getMessage());
-//        }
-//
-//        return courseCapacities;
-//    }
+    /**
+     * Inner class to represent a time range.
+     * Helps in checking overlapping schedules.
+     */
+    private static class timeRange {
+        LocalTime start;
+        LocalTime end;
 
+        public timeRange(LocalTime start, LocalTime end) {
+            this.start = start;
+            this.end = end;
+        }
 
-
-
+        /**
+         * Checks if this time range overlaps with another.
+         *
+         * @param other The other time range to check against.
+         * @return True if there is an overlap, false otherwise.
+         */
+        public boolean overlapsWith(timeRange other) {
+            return (this.start.isBefore(other.end) && other.start.isBefore(this.end));
+        }
+    }
 }

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.timetablemanager.swapClassroomController"
+            styleClass="border-pane"
+            stylesheets="@css/assignClass.css">
+
+   <!-- Padding around the entire layout -->
+   <padding>
+      <Insets top="20" right="20" bottom="20" left="20"/>
+   </padding>
+
+   <!-- CENTER AREA: VBox container holding the title, form (GridPane), and buttons -->
+   <center>
+      <VBox spacing="10" alignment="TOP_CENTER" styleClass="vbox-container">
+         <!-- Header Label -->
+         <Label fx:id="SwapClasroomLabel"
+                text="Swap Classroom"
+                styleClass="header-label" />
+
+         <!-- Main Form Container with ScrollPane for better responsiveness -->
+         <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <GridPane hgap="20" vgap="15" styleClass="form-grid" alignment="CENTER">
+               <padding>
+                  <Insets bottom="20" left="20" right="20" top="20"/>
+               </padding>
+               <!-- Define column constraints for responsive design -->
+               <columnConstraints>
+                  <ColumnConstraints halignment="RIGHT" minWidth="150.0" />
+                  <ColumnConstraints halignment="LEFT" minWidth="250.0" hgrow="ALWAYS" />
+               </columnConstraints>
+               <!-- Define row constraints -->
+               <rowConstraints>
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="40.0" vgrow="NEVER" />
+               </rowConstraints>
+
+               <!-- First Course Section -->
+               <!-- ComboBox -->
+               <Label text="Course A:" styleClass="grid-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+               <ComboBox fx:id="SelectCourseCombo"
+                         promptText="Select Course"
+                         styleClass="combo-box"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="0"
+                         prefWidth="300" />
+
+               <!-- Enrolled Students Label -->
+               <Label fx:id="EnrollmendLabel"
+                      text="Enrolled Students:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="1" />
+
+               <!-- Enrolled Students ListView -->
+               <ListView fx:id="EnrolledListView"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="1"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+
+               <!-- Classroom Label -->
+               <Label fx:id="ClasssroomLabel"
+                      text="Classroom:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="2" />
+
+               <!-- Classroom ListView -->
+               <ListView fx:id="ClassroomListView"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="2"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+
+               <!-- Classroom Capacity Label -->
+               <Label fx:id="CapacityLabel"
+                      text="Classroom Capacity:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="3" />
+
+               <!-- Capacity ListView -->
+               <ListView fx:id="CapacityListView"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="3"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+
+               <!-- Second Course Section -->
+               <!-- ComboBox -->
+               <Label text="Course B:" styleClass="grid-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+               <ComboBox fx:id="SelectCourse2"
+                         promptText="Select Course"
+                         styleClass="combo-box"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="4"
+                         prefWidth="300" />
+
+               <!-- Enrolled Students Label 2 -->
+               <Label fx:id="EnrollmendLabel2"
+                      text="Enrolled Students:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="5" />
+
+               <!-- Enrolled Students ListView 2 -->
+               <ListView fx:id="EnrolledListView2"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="5"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+
+               <!-- Classroom Label 2 -->
+               <Label fx:id="ClasssroomLabel2"
+                      text="Classroom:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="6" />
+
+               <!-- Classroom ListView 2 -->
+               <ListView fx:id="ClassroomListView2"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="6"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+
+               <!-- Classroom Capacity Label 2 -->
+               <Label fx:id="CapacityLabel2"
+                      text="Classroom Capacity:"
+                      styleClass="grid-label"
+                      GridPane.columnIndex="0"
+                      GridPane.rowIndex="7" />
+
+               <!-- Capacity ListView 2 -->
+               <ListView fx:id="CapacityListView2"
+                         styleClass="list-view"
+                         GridPane.columnIndex="1"
+                         GridPane.rowIndex="7"
+                         prefHeight="50.0"
+                         prefWidth="300" />
+            </GridPane>
+         </ScrollPane>
+
+         <!-- Action Buttons -->
+         <HBox spacing="30" alignment="CENTER" styleClass="action-buttons">
+            <Button fx:id="btnSave"
+                    text="Save"
+                    styleClass="btn-create"
+                    prefWidth="100"
+                    prefHeight="40" />
+            <Button fx:id="btnBack"
+                    text="Back"
+                    styleClass="btn-back"
+                    prefWidth="100"
+                    prefHeight="40" />
+         </HBox>
+      </VBox>
+   </center>
+</BorderPane>
