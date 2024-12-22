@@ -6,101 +6,98 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.timetablemanager.addCourseController"
-            stylesheets="@css/addCourseLayout.css"
-        styleClass="border-pane">
-<padding>
-<Insets bottom="20" left="20" right="20" top="20" />
-</padding>
+            styleClass="border-pane"
+            stylesheets="@css/addCourseLayout.css">
 
-        <!-- Left Region: Course Addition Form -->
-<left>
-<ScrollPane fitToWidth="true" styleClass="scroll-pane">
-    <VBox alignment="TOP_CENTER" spacing="20" styleClass="vbox-container">
-        <!-- Header -->
-        <Label text="Add A New Course" styleClass="header-label" />
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20"/>
+    </padding>
 
-        <!-- Course Details GridPane -->
-        <GridPane alignment="CENTER_LEFT" hgap="15" vgap="15" styleClass="form-grid">
-            <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" minWidth="140" />
-                <ColumnConstraints halignment="LEFT" minWidth="250" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="40" />
-                <RowConstraints minHeight="40" />
-                <RowConstraints minHeight="40" />
-                <RowConstraints minHeight="40" />
-                <RowConstraints minHeight="40" />
-                <RowConstraints minHeight="40" />
-            </rowConstraints>
+    <left>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox alignment="TOP_CENTER" spacing="20" styleClass="vbox-container">
+                <!-- Header -->
+                <Label text="Add A New Course" styleClass="header-label"/>
 
-            <Label text="Course ID:" styleClass="grid-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-            <TextField fx:id="txtCourseID" promptText="Enter course ID" GridPane.rowIndex="0" GridPane.columnIndex="1"
-                       styleClass="text-field" HBox.hgrow="ALWAYS" />
+                <!-- Course Details GridPane -->
+                <GridPane alignment="CENTER_LEFT" hgap="15" vgap="15" styleClass="form-grid">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" minWidth="140"/>
+                        <ColumnConstraints halignment="LEFT" minWidth="250"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="40"/>
+                        <RowConstraints minHeight="40"/>
+                        <RowConstraints minHeight="40"/>
+                        <RowConstraints minHeight="40"/>
+                    </rowConstraints>
 
-            <!-- Lecturer -->
-            <Label text="Lecturer:" styleClass="grid-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-            <TextField fx:id="txtLecturer" promptText="Enter lecturer name" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                       styleClass="text-field" HBox.hgrow="ALWAYS" />
+                    <Label text="Course ID:" styleClass="grid-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtCourseID" promptText="Enter course ID"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               styleClass="text-field" HBox.hgrow="ALWAYS"/>
 
-            <!-- Capacity -->
-            <Label text="Capacity:" styleClass="grid-label" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-            <Spinner fx:id="spinnerCapacity" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"
-                     styleClass="spinner" HBox.hgrow="ALWAYS" />
+                    <Label text="Lecturer:" styleClass="grid-label"
+                           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtLecturer" promptText="Enter lecturer name"
+                               GridPane.rowIndex="1" GridPane.columnIndex="1"
+                               styleClass="text-field" HBox.hgrow="ALWAYS"/>
 
-            <!-- Duration -->
-            <Label text="Duration (Hours):" styleClass="grid-label" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-            <Spinner fx:id="spinnerDuration" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"
-                     styleClass="spinner" HBox.hgrow="ALWAYS" />
+                    <Label text="Duration (Hours):" styleClass="grid-label"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Spinner fx:id="spinnerDuration" editable="true"
+                             GridPane.rowIndex="2" GridPane.columnIndex="1"
+                             styleClass="spinner" HBox.hgrow="ALWAYS"/>
 
-            <!-- Time To Start -->
-            <Label text="Time To Start:" styleClass="grid-label" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-            <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1" alignment="CENTER_LEFT">
-                <ComboBox fx:id="comboDay" promptText="Select Day" styleClass="combo-box" HBox.hgrow="ALWAYS" />
-                <ComboBox fx:id="comboTime" promptText="Select Time" styleClass="combo-box" HBox.hgrow="ALWAYS" />
-            </HBox>
+                    <Label text="Time To Start:" styleClass="grid-label"
+                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="comboDay" promptText="Select Day"
+                                  styleClass="combo-box" HBox.hgrow="ALWAYS"/>
+                        <ComboBox fx:id="comboTime" promptText="Select Time"
+                                  styleClass="combo-box" HBox.hgrow="ALWAYS"/>
+                    </HBox>
 
-            <!-- Classroom -->
-            <Label text="Classroom:" styleClass="grid-label" GridPane.rowIndex="5" GridPane.columnIndex="0" />
-            <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1" HBox.hgrow="ALWAYS">
-                <ComboBox fx:id="comboClassroom" promptText="Select Classroom" styleClass="combo-box" HBox.hgrow="ALWAYS" />
-            </HBox>
-        </GridPane>
+                    <Label text="Classroom:" styleClass="grid-label"
+                           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                          HBox.hgrow="ALWAYS">
+                        <ComboBox fx:id="comboClassroom" promptText="Select Classroom"
+                                  styleClass="combo-box" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </GridPane>
+                <Separator orientation="HORIZONTAL" prefWidth="300"/>
 
-        <!-- Separator -->
-        <Separator orientation="HORIZONTAL" prefWidth="300" />
+                <!-- Student Selection and ListView -->
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="student-selection">
+                    <Button fx:id="btnSelectStudents" text="Select Students"
+                            styleClass="btn-select-students"/>
+                    <ListView fx:id="studentListView" prefHeight="100.0" prefWidth="300.0"
+                              styleClass="list-view"/>
+                </HBox>
 
-        <!-- Student Selection and ListView -->
-        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="student-selection">
-            <Button fx:id="btnSelectStudents" text="Select Students"
-                    styleClass="btn-select-students" />
-            <ListView fx:id="studentListView" prefHeight="100.0" prefWidth="300.0"
-                      styleClass="list-view" />
-        </HBox>
+                <Separator orientation="HORIZONTAL" prefWidth="300"/>
 
-        <!-- Separator -->
-        <Separator orientation="HORIZONTAL" prefWidth="300" />
+                <!-- Action Buttons -->
+                <HBox spacing="15" alignment="CENTER" styleClass="action-buttons">
+                    <Button fx:id="btnCreateCourse" text="Create Course"
+                            styleClass="btn-create"/>
+                    <Button fx:id="btnBack" text="Back"
+                            styleClass="btn-back"/>
+                </HBox>
 
-        <!-- Action Buttons -->
-        <HBox spacing="15" alignment="CENTER" styleClass="action-buttons">
-            <Button fx:id="btnCreateCourse" text="Create Course"
-                    styleClass="btn-create" />
-            <Button fx:id="btnBack" text="Back"
-                    styleClass="btn-back" />
-        </HBox>
+            </VBox>
+        </ScrollPane>
+    </left>
 
-    </VBox>
-</ScrollPane>
-</left>
+    <!-- Center Region: Schedule GridPane -->
+    <center>
+        <VBox spacing="20" styleClass="schedule-container">
+            <Label text="Schedule" styleClass="header-label"/>
+            <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+                <GridPane fx:id="scheduleGridPane" styleClass="schedule-gridpane"/>
+            </ScrollPane>
+        </VBox>
+    </center>
 
-        <!-- Center Region: Schedule GridPane -->
-<center>
-<VBox spacing="20" styleClass="schedule-container">
-    <Label text="Schedule" styleClass="header-label" />
-    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
-        <GridPane fx:id="scheduleGridPane" styleClass="schedule-gridpane" />
-    </ScrollPane>
-</VBox>
-</center>
-
-        </BorderPane>
+</BorderPane>

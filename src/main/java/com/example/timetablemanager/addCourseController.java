@@ -35,7 +35,7 @@ public class addCourseController { // Renamed to follow Java conventions
     private TextField txtCourseID, txtLecturer;
 
     @FXML
-    private Spinner<Integer> spinnerCapacity, spinnerDuration;
+    private Spinner<Integer>  spinnerDuration;
 
     @FXML
     private Button btnSelectStudents, btnCreateCourse, btnBack;
@@ -86,8 +86,26 @@ public class addCourseController { // Renamed to follow Java conventions
         Database.connect();
 
         // Initialize Spinners
-        spinnerCapacity.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 40));
-        spinnerDuration.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 2));
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 2);
+        spinnerDuration.setValueFactory(valueFactory);
+
+        // **Allow only integer typed input** in the Spinner’s text field
+        spinnerDuration.setEditable(true);
+        TextFormatter<Integer> integerFormatter = new TextFormatter<>(change -> {
+            if (!change.isContentChange()) {
+                return change;
+            }
+            // The new text the user is typing or pasting
+            String newText = change.getControlNewText();
+            // Accept the change only if it's all digits (or empty)
+            if (newText.matches("\\d*")) {
+                return change;
+            }
+            // Otherwise, ignore the change -> disallow
+            return null;
+        });
+        spinnerDuration.getEditor().setTextFormatter(integerFormatter);
 
         // Populate Day ComboBox
         comboDay.setItems(FXCollections.observableArrayList(days));
@@ -190,7 +208,6 @@ public class addCourseController { // Renamed to follow Java conventions
         // Listen to changes in all relevant input fields
         txtCourseID.textProperty().addListener((obs, oldVal, newVal) -> updateTempCourse());
         txtLecturer.textProperty().addListener((obs, oldVal, newVal) -> updateTempCourse());
-        spinnerCapacity.valueProperty().addListener((obs, oldVal, newVal) -> updateTempCourse());
         spinnerDuration.valueProperty().addListener((obs, oldVal, newVal) -> updateTempCourse());
         comboDay.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateClassroomOptions();
@@ -218,7 +235,7 @@ public class addCourseController { // Renamed to follow Java conventions
     private void updateTempCourse() {
         String courseID = txtCourseID.getText().trim();
         String lecturer = txtLecturer.getText().trim();
-        Integer capacity = spinnerCapacity.getValue();
+        Integer capacity = 100;
         Integer duration = spinnerDuration.getValue();
         String day = comboDay.getValue();
         String time = comboTime.getValue();
@@ -564,7 +581,7 @@ public class addCourseController { // Renamed to follow Java conventions
             }
             popupStage.setTitle("Select Students");
             studentSelectionController controller = loader.getController();
-            controller.setCourseCapacity(spinnerCapacity.getValue());
+            controller.setCourseCapacity(40);
             popupStage.showAndWait();
 
             // Retrieve selected students without duplicates
@@ -594,7 +611,7 @@ public class addCourseController { // Renamed to follow Java conventions
      */
     private void createCourse() {
         String courseID = txtCourseID.getText().trim();
-        int capacity = spinnerCapacity.getValue();
+        int capacity = 100;
         int duration = spinnerDuration.getValue();
         String lecturer = txtLecturer.getText().trim();
 
@@ -615,19 +632,27 @@ public class addCourseController { // Renamed to follow Java conventions
             return;
         }
 
-        // Combine day and time with a space delimiter
+        // Combine day and time
         String timeToStart = selectedDay + " " + selectedTime;
 
+        // Basic empty-field checks
         if (courseID.isEmpty() || lecturer.isEmpty() || classroom.isEmpty() || timeToStart.isEmpty()) {
-            showAlert("Error", "Please fill in all fields, select day and time, assign students/classroom, and set capacity/duration!");
+            showAlert("Error", "Please fill in all fields, select day/time, assign students/classroom, and set duration!");
             return;
         }
 
-        // **Detailed Debugging Statements**
+        // 1) **Check if course ID already exists** in the database:
+        List<String> existingCourseIDs = Database.getAllCourseNames(); // returns a list of existing IDs
+        if (existingCourseIDs.contains(courseID)) {
+            showAlert("Error", "Course ID '" + courseID + "' already exists. Please choose a different ID.");
+            // Remain on this page so user can change it
+            return;
+        }
+
+        // === Debugging statements ===
         System.out.println("===== Creating Course =====");
         System.out.println("Course ID: " + courseID);
         System.out.println("Lecturer: " + lecturer);
-        System.out.println("Course Capacity (spinner): " + capacity);
         System.out.println("Duration: " + duration);
         System.out.println("Selected Classroom: " + classroom);
         System.out.println("Selected Day: " + selectedDay);
@@ -644,7 +669,7 @@ public class addCourseController { // Renamed to follow Java conventions
             System.out.println("Capacity Check Passed: Classroom can accommodate the students.");
         }
 
-        // **Additional Availability Check**
+        // Additional Availability Check
         if (!selectedClassroom.isAvailable()) {
             showAlert("Error", "Selected classroom is not available at the chosen day and time.");
             System.out.println("Availability Check Failed: Classroom is not available.");
@@ -674,7 +699,7 @@ public class addCourseController { // Renamed to follow Java conventions
             return;
         }
 
-        // Add enrollments for students
+        // Enroll selected students
         for (Student student : selectedStudents) {
             if (!Database.isEnrollmentExists(courseID, student.getFullName())) {
                 Database.addEnrollment(courseID, student.getFullName());
@@ -701,6 +726,7 @@ public class addCourseController { // Renamed to follow Java conventions
         // Switch back to mainLayout and refresh the table
         switchScene("mainLayout.fxml");
     }
+
 
 
     /**
@@ -755,7 +781,6 @@ public class addCourseController { // Renamed to follow Java conventions
     private void clearInputFields() {
         txtCourseID.clear();
         txtLecturer.clear();
-        spinnerCapacity.getValueFactory().setValue(40); // Reset to default
         spinnerDuration.getValueFactory().setValue(2);  // Reset to default
         comboDay.getSelectionModel().clearSelection();
         comboTime.getSelectionModel().clearSelection();

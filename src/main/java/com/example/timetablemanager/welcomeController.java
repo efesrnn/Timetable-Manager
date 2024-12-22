@@ -17,13 +17,13 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class welcomeController {
 
     @FXML
-    private Button startBlankButton,openCSVButton,cancelButton;
+    private Button startBlankButton, openCSVButton, cancelButton;
 
     @FXML
     private Label loadingLabel;
@@ -41,80 +41,100 @@ public class welcomeController {
     public void initialize() {
         loadLogo();
         startBlankButton.setOnAction(event -> startWithBlankCSV());
-
     }
 
+    /**
+     * Loads the welcome screen logo if available.
+     */
     private void loadLogo() {
         try {
-            Image logoImage = new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/welcomeIcon.png"));
+            Image logoImage = new Image(
+                    getClass().getResourceAsStream("/com/example/timetablemanager/icons/welcomeIcon.png"));
             logoImageView.setImage(logoImage);
         } catch (Exception e) {
             System.err.println("Error loading logo image: " + e.getMessage());
         }
     }
 
-
+    /**
+     * Called from TimetableManager after the welcome screen is loaded.
+     * 1) Checks if TimetableManagement.db exists in Documents/TimetableManagement.
+     * 2) If yes, ask user if they'd like to continue from that DB.
+     *    - If user says Yes -> load DB, go to main layout (no CSV re-import).
+     *    - If user says No -> remain on welcome screen to either Start Blank or Open CSV.
+     */
     public void checkAndLoadCSVFiles() {
-        String dataPath = "src/main/resources/com/example/timetablemanager/data";
-        File dataDir = new File(dataPath);
+        File dbDir = new File(System.getProperty("user.home"), "Documents" + File.separator + "TimetableManagement");
+        File dbFile = new File(dbDir, "TimetableManagement.db");
 
-        if (dataDir.exists() && dataDir.isDirectory()) {
-            File[] csvFiles = dataDir.listFiles((dir, name) -> name.endsWith(".csv"));
-            if (csvFiles != null && csvFiles.length == 2) {
-                File classroomFile = null;
-                File courseFile = null;
-
-                for (File file : csvFiles) {
-                    String fileType = analyzeFileContent(file);
-                    if ("classroom".equals(fileType)) {
-                        classroomFile = file;
-                    } else if ("course".equals(fileType)) {
-                        courseFile = file;
+        if (dbFile.exists()) {
+            boolean userWantsExistingDB = showLoadDatabaseAlert();
+            if (userWantsExistingDB) {
+                // user wants to keep using existing DB
+                try {
+                    Connection conn = Database.connect();
+                    if (conn == null) {
+                        throw new SQLException("Failed to connect to the existing database.");
                     }
-                }
+                    // Clear and re-fetch in-memory data
+                    TimetableManager.getTimetable().clear();
+                    TimetableManager.getTimetable().addAll(Database.getAllCourses());
 
-                if (classroomFile != null && courseFile != null) {
-                    boolean userConsent = showLoadFilesAlert(classroomFile.getName(), courseFile.getName());
-                    if (userConsent) {
-                        try {
-                            selectedFilesLabel.setText(
-                                    "Selected Course File: " + courseFile.getName() +
-                                            "\nSelected Classroom File: " + classroomFile.getName()
-                            );
-                            selectedFilesLabel.setVisible(true);
-                            startBlankButton.setVisible(false);
-                            openCSVButton.setVisible(false);
-
-                            // Process and load files
-                            runDatabaseIntegrationTask(courseFile, classroomFile);
-                        } catch (Exception e) {
-                            showAlert(Alert.AlertType.ERROR, "Error", "Error processing files: " + e.getMessage());
-                        }
-                    }
+                    // Navigate straight to main layout
+                    navigateToMainLayout();
+                    return; // done
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Error",
+                            "Unable to use existing DB: " + e.getMessage());
                 }
-            }else {
-                System.err.println("More or less than 2 .csv file detected in directory. Automatic load cancelled.");
             }
         }
+        // If user said No or no DB file is found,
+        // we do nothing else here; the user must pick "Start Blank" or "Open CSV."
     }
 
-
+    /**
+     * "Start Blank" means:
+     *  1) Backup old DB if it exists
+     *  2) Clear all tables => effectively a brand new, empty DB
+     *  3) Then go to main layout (no CSV import)
+     */
     private void startWithBlankCSV() {
+        // 1) Backup existing DB if present
+        backupExistingDbFile();
+
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainLayout.fxml"));
+            // 2) Clear the DB so it's truly blank
+            Connection conn = Database.connect();
+            clearDatabase(conn); // new method (see below)
+
+            // 3) Load the main layout
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    getClass().getResource("mainLayout.fxml"));
             Parent root = fxmlLoader.load();
 
             Stage stage = (Stage) startBlankButton.getScene().getWindow();
             stage.setTitle("Timetable Manager - New Timetable");
-            Scene scene = stage.getScene();
-            scene.setRoot(root);
+            stage.getScene().setRoot(root);
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR,"Error", "Failed to load the main layout.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load the main layout.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Failed to clear database for blank start: " + e.getMessage());
         }
     }
 
+    /**
+     * "Open CSV" button => user picks 2 CSV files manually.
+     * Once chosen, we:
+     *  1) Backup existing DB if it exists
+     *  2) Clear the DB
+     *  3) Integrate CSV data into the now-empty DB
+     *  4) Load main layout
+     */
     @FXML
     public void selectAndAnalyzeCSVFiles() {
         FileChooser fileChooser = new FileChooser();
@@ -126,63 +146,129 @@ public class welcomeController {
         Stage stage = (Stage) openCSVButton.getScene().getWindow();
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(stage);
 
-        if (selectedFiles != null && selectedFiles.size() == 2) {
-            File classroomFile = null;
-            File courseFile = null;
+        if (selectedFiles == null || selectedFiles.size() != 2) {
+            showAlert(Alert.AlertType.ERROR, "Error", "You must select exactly two CSV files.");
+            return;
+        }
 
-            for (File file : selectedFiles) {
-                String fileType = analyzeFileContent(file);
-                if ("classroom".equals(fileType)) {
-                    classroomFile = file;
-                } else if ("course".equals(fileType)) {
-                    courseFile = file;
-                }
+        File classroomFile = null;
+        File courseFile = null;
+
+        // Decide which is classroom vs course by scanning keywords
+        for (File file : selectedFiles) {
+            String fileType = analyzeFileContent(file);
+            if ("classroom".equals(fileType)) {
+                classroomFile = file;
+            } else if ("course".equals(fileType)) {
+                courseFile = file;
             }
+        }
 
-            if (classroomFile != null && courseFile != null) {
-                try {
-                    // Copy files to resources/data directory
-                    File destinationDir = new File("src/main/resources/com/example/timetablemanager/data");
-                    if (!destinationDir.exists()) {
-                        destinationDir.mkdirs();
-                    }
+        if (classroomFile == null || courseFile == null) {
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Please select valid Classroom and Course CSV files.\n" +
+                            "(The files must contain a keyword 'classroom' or 'course').");
+            return;
+        }
 
-                    File copiedClassroomFile = new File(destinationDir, classroomFile.getName());
-                    File copiedCourseFile = new File(destinationDir, courseFile.getName());
+        // 1) Backup existing DB if present
+        backupExistingDbFile();
 
-                    Files.copy(classroomFile.toPath(), copiedClassroomFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    Files.copy(courseFile.toPath(), copiedCourseFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        try {
+            // 2) Clear the DB so it's truly blank
+            Connection conn = Database.connect();
+            clearDatabase(conn);
 
-                    // Show progress and integrate files
-                    selectedFilesLabel.setText("Selected Course File: " + copiedCourseFile.getName() + "\nSelected Classroom File: " + copiedClassroomFile.getName());
-                    selectedFilesLabel.setVisible(true);
-                    startBlankButton.setVisible(false);
-                    openCSVButton.setVisible(false);
-                    loadingLabel.setVisible(true);
-                    progressBar.setVisible(true);
-                    cancelButton.setVisible(true);
+            // Show progress + integrate files
+            selectedFilesLabel.setText("Selected Course File: " + courseFile.getName() +
+                    "\nSelected Classroom File: " + classroomFile.getName());
+            selectedFilesLabel.setVisible(true);
+            startBlankButton.setVisible(false);
+            openCSVButton.setVisible(false);
+            loadingLabel.setVisible(true);
+            progressBar.setVisible(true);
+            cancelButton.setVisible(true);
 
-                    // Run database integration using copied files
-                    runDatabaseIntegrationTask(copiedCourseFile, copiedClassroomFile);
-
-                } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR,"Error", "Error processing files: " + e.getMessage());
-                }
-            } else {
-                showAlert(Alert.AlertType.ERROR,"Error", "Please select valid Classroom and Course CSV files.");
-            }
-        } else {
-            showAlert(Alert.AlertType.ERROR,"Error", "You must select exactly two CSV files.");
+            // 3) Now run database integration
+            runDatabaseIntegrationTask(courseFile, classroomFile);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error",
+                    "Failed to clear database before CSV import: " + e.getMessage());
         }
     }
 
+    /**
+     * Utility: If a TimetableManagement.db already exists in Documents, copy it
+     * to `saves/` directory under your project root, named with a timestamp,
+     * e.g. dbLog[22.12.24](13.25).db
+     */
+    private void backupExistingDbFile() {
+        File dbDir = new File(System.getProperty("user.home"),
+                "Documents" + File.separator + "TimetableManagement");
+        File dbFile = new File(dbDir, "TimetableManagement.db");
+
+        if (!dbFile.exists()) {
+            return; // no DB => no backup needed
+        }
+
+        // Build saves/ subdirectory in your project root
+        File savesDir = new File("saves");
+        if (!savesDir.exists()) {
+            savesDir.mkdirs();
+        }
+
+        // Create a date-time stamp for the backup name
+        String timeStamp = new SimpleDateFormat("dd.MM.yy_HH.mm")
+                .format(new Date());
+        String backupName = "dbLog[" + timeStamp + "].db";
+
+        File backupFile = new File(savesDir, backupName);
+        try {
+            Files.copy(dbFile.toPath(), backupFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Backed up existing DB to: " + backupFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.WARNING, "Backup Failed",
+                    "Couldn't backup existing DB: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Clears all rows from every table, effectively leaving an empty DB.
+     * Adjust if you have constraints or special table dependencies.
+     */
+    private void clearDatabase(Connection conn) throws SQLException {
+        // Because of foreign keys, might need to disable/enable constraints or
+        // delete in correct order. For example:
+        try (PreparedStatement ps1 = conn.prepareStatement("DELETE FROM Allocated");
+             PreparedStatement ps2 = conn.prepareStatement("DELETE FROM Enrollments");
+             PreparedStatement ps3 = conn.prepareStatement("DELETE FROM Students");
+             PreparedStatement ps4 = conn.prepareStatement("DELETE FROM Classrooms");
+             PreparedStatement ps5 = conn.prepareStatement("DELETE FROM Courses")) {
+            ps1.executeUpdate();
+            ps2.executeUpdate();
+            ps3.executeUpdate();
+            ps4.executeUpdate();
+            ps5.executeUpdate();
+        }
+        // Also clear in-memory lists:
+        TimetableManager.getTimetable().clear();
+        System.out.println("Database tables cleared. Now empty.");
+    }
+
+    /**
+     * Reads the lines from a CSV to guess "classroom" or "course" by keywords.
+     */
     private String analyzeFileContent(File file) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.toLowerCase().contains("classroom")) {
+                line = line.toLowerCase();
+                if (line.contains("classroom")) {
                     return "classroom";
-                } else if (line.toLowerCase().contains("course")) {
+                } else if (line.contains("course")) {
                     return "course";
                 }
             }
@@ -192,6 +278,9 @@ public class welcomeController {
         return "unknown";
     }
 
+    /**
+     * Run a background Task to read and integrate the CSV data into the (now-blank) DB.
+     */
     private void runDatabaseIntegrationTask(File courseCSV, File classroomCSV) {
         Task<Void> integrationTask = new Task<>() {
             @Override
@@ -200,7 +289,6 @@ public class welcomeController {
                 if (conn == null) {
                     throw new SQLException("Failed to connect to database.");
                 }
-
                 // Disable auto-commit for transaction
                 conn.setAutoCommit(false);
 
@@ -210,132 +298,116 @@ public class welcomeController {
 
                 int currentStep = 0;
 
-                // Prepare batch statements
-                String insertCourseSQL = "INSERT OR REPLACE INTO Courses (courseName, lecturer, duration, timeToStart) VALUES (?, ?, ?, ?)";
+                String insertCourseSQL =
+                        "INSERT OR REPLACE INTO Courses (courseName, lecturer, duration, timeToStart) "
+                                + "VALUES (?, ?, ?, ?)";
                 PreparedStatement courseStmt = conn.prepareStatement(insertCourseSQL);
 
-                String insertStudentSQL = "INSERT OR REPLACE INTO Students (studentName) VALUES (?)";
+                String insertStudentSQL =
+                        "INSERT OR REPLACE INTO Students (studentName) VALUES (?)";
                 PreparedStatement studentStmt = conn.prepareStatement(insertStudentSQL);
 
-                String insertEnrollmentSQL = "INSERT OR REPLACE INTO Enrollments (courseName, studentName) VALUES (?, ?)";
+                String insertEnrollmentSQL =
+                        "INSERT OR REPLACE INTO Enrollments (courseName, studentName) VALUES (?, ?)";
                 PreparedStatement enrollmentStmt = conn.prepareStatement(insertEnrollmentSQL);
 
-                String insertClassroomSQL = "INSERT OR REPLACE INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
+                String insertClassroomSQL =
+                        "INSERT OR REPLACE INTO Classrooms (classroomName, capacity) VALUES (?, ?)";
                 PreparedStatement classroomStmt = conn.prepareStatement(insertClassroomSQL);
 
-                String insertAllocatedSQL = "INSERT OR REPLACE INTO Allocated (courseName, classroomName) VALUES (?, ?)";
-                PreparedStatement allocatedStmt = conn.prepareStatement(insertAllocatedSQL);
-
-                // Process Course CSV (batch inserts)
-                List<String[]> classroomData = new ArrayList<>(); // Store classroom data for later
-                List<String> courseNamesForClassroom = new ArrayList<>(); // We'll need course names after loading
-
-                // First, read and insert courses + enrollments in batch
+                // 1) Process Course CSV
                 try (BufferedReader br = new BufferedReader(new FileReader(courseCSV))) {
-                    String line = br.readLine(); // header
+                    String line = br.readLine(); // skip header
                     while ((line = br.readLine()) != null) {
                         String[] columns = line.split(";");
                         if (columns.length < 4) {
-                            System.err.println("Skipping invalid line (not enough columns): " + line);
+                            System.err.println("Skipping invalid line: " + line);
                             continue;
                         }
-
                         String courseName = columns[0];
                         String startTime = columns[1];
 
-                        String durationStr = columns[2].replaceAll("[^0-9]", "");
+                        String durStr = columns[2].replaceAll("[^0-9]", "");
                         int duration = 0;
-                        if (!durationStr.isEmpty()) {
+                        if (!durStr.isEmpty()) {
                             try {
-                                duration = Integer.parseInt(durationStr);
+                                duration = Integer.parseInt(durStr);
                             } catch (NumberFormatException e) {
-                                System.err.println("Invalid duration value for course '" + courseName + "': " + columns[2]);
+                                System.err.println("Invalid duration for " + courseName + ": " + columns[2]);
                                 continue;
                             }
-                        } else {
-                            System.err.println("Empty or invalid duration for course '" + courseName + "'");
-                            continue;
                         }
-
                         String lecturer = columns[3];
+
+                        // Next columns might be students
                         List<String> students = new ArrayList<>();
                         for (int i = 4; i < columns.length; i++) {
                             students.add(columns[i]);
                         }
 
-                        // Add course to batch
+                        // Insert course
                         courseStmt.setString(1, courseName);
                         courseStmt.setString(2, lecturer);
                         courseStmt.setInt(3, duration);
                         courseStmt.setString(4, startTime);
                         courseStmt.addBatch();
 
-                        // Batch students and enrollments
-                        for (String student : students) {
-                            studentStmt.setString(1, student);
+                        // Insert students + enrollments
+                        for (String s : students) {
+                            studentStmt.setString(1, s);
                             studentStmt.addBatch();
 
                             enrollmentStmt.setString(1, courseName);
-                            enrollmentStmt.setString(2, student);
+                            enrollmentStmt.setString(2, s);
                             enrollmentStmt.addBatch();
                         }
-
-                        courseNamesForClassroom.add(courseName);
 
                         currentStep++;
                         updateProgress(currentStep, totalSteps);
                     }
                 }
 
-                // Now process Classroom CSV
+                // 2) Process Classroom CSV
                 try (BufferedReader br = new BufferedReader(new FileReader(classroomCSV))) {
-                    String line = br.readLine(); // header
+                    String line = br.readLine(); // skip header
                     while ((line = br.readLine()) != null) {
                         String[] columns = line.split(";");
                         if (columns.length < 2) {
-                            System.err.println("Skipping invalid line (not enough columns): " + line);
+                            System.err.println("Skipping invalid line: " + line);
                             continue;
                         }
                         String classroomName = columns[0];
                         String capacityStr = columns[1];
+
                         int capacity;
                         try {
                             capacity = Integer.parseInt(capacityStr);
                         } catch (NumberFormatException e) {
-                            System.err.println("Invalid capacity value for classroom '" + classroomName + "': " + capacityStr);
+                            System.err.println("Invalid capacity for classroom " + classroomName);
                             continue;
                         }
 
-                        // Add classroom to batch
+                        // Insert classroom
                         classroomStmt.setString(1, classroomName);
                         classroomStmt.setInt(2, capacity);
                         classroomStmt.addBatch();
-/*
-                        // We'll allocate each course to this classroom after we load them from DB,
-                        // but since we want speed, let's assume we allocate all known courses:
-                        // This is a simplification; if you need logic to allocate only specific courses, adjust accordingly.
-                        for (String cname : courseNamesForClassroom) {
-                            allocatedStmt.setString(1, cname);
-                            allocatedStmt.setString(2, classroomName);
-                            allocatedStmt.addBatch();
-                        }
-*/
+
                         currentStep++;
                         updateProgress(currentStep, totalSteps);
                     }
                 }
 
-                // Execute all batches inside one transaction
+                // Execute batches
                 courseStmt.executeBatch();
                 studentStmt.executeBatch();
                 enrollmentStmt.executeBatch();
                 classroomStmt.executeBatch();
-                allocatedStmt.executeBatch();
 
-                conn.commit(); // commit once
+                // commit
+                conn.commit();
                 conn.setAutoCommit(true);
 
-                // Reload courses from DB into in-memory TimetableManager
+                // Reload into in-memory list
                 TimetableManager.getTimetable().clear();
                 TimetableManager.getTimetable().addAll(Database.getAllCourses());
 
@@ -343,11 +415,15 @@ public class welcomeController {
             }
         };
 
+        // On success
         integrationTask.setOnSucceeded(event -> navigateToMainLayout());
+
+        // On fail
         integrationTask.setOnFailed(event -> {
             Throwable ex = integrationTask.getException();
-            showAlert(Alert.AlertType.ERROR, "Error", "Database integration failed: " + ex.getMessage());
-            System.err.println("Database integration failed: " + ex.getMessage());
+            showAlert(Alert.AlertType.ERROR,
+                    "Error", "Database integration failed: " + ex.getMessage());
+            System.err.println("DB integration failed: " + ex.getMessage());
             try {
                 Connection c = Database.connect();
                 if (c != null) c.rollback();
@@ -361,7 +437,6 @@ public class welcomeController {
         thread.start();
     }
 
-
     private int countLines(File file) throws IOException {
         int lines = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -372,6 +447,9 @@ public class welcomeController {
         return lines;
     }
 
+    /**
+     * Once DB is integrated or loaded, navigate to main layout.
+     */
     private void navigateToMainLayout() {
         System.out.println("Courses from DB: " + Database.getAllCourses().size());
         System.out.println("Courses in Timetable after update: " + TimetableManager.getTimetable().size());
@@ -392,6 +470,7 @@ public class welcomeController {
             stage.setTitle("Timetable Manager - Main Layout");
             stage.getScene().setRoot(root);
 
+            // Refresh table or other UI logic
             controller.refreshTable();
 
         } catch (IOException e) {
@@ -400,105 +479,154 @@ public class welcomeController {
         }
     }
 
-
-
-
+    /**
+     * Cancel integration = hide progress, re-show initial buttons, disconnect DB, etc.
+     */
     public void cancelIntegration() {
-        // Hide progress and loading
         loadingLabel.setVisible(false);
         progressBar.setVisible(false);
         selectedFilesLabel.setVisible(false);
         cancelButton.setVisible(false);
 
-        // Show the startBlankButton and openCSVButton again
         startBlankButton.setVisible(true);
         openCSVButton.setVisible(true);
 
-
-        // Disconnect from database and clear in-memory timetable
-        Database.close(); // Disconnect from database
-        TimetableManager.getTimetable().clear(); // Clear the timetable list
-
+        // Disconnect from DB and clear in-memory timetable
+        Database.close();
+        TimetableManager.getTimetable().clear();
     }
 
-    private boolean showLoadFilesAlert(String classroomFileName, String courseFileName) {
+    /**
+     * Existing DB alert
+     */
+    private boolean showLoadDatabaseAlert() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+        // Attempt to set the alert icon
         try {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
+            stage.getIcons().add(new Image(
+                    getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
         } catch (RuntimeException e) {
             System.err.println("Couldn't load alert icon");
             e.printStackTrace();
         }
 
-        alert.setTitle("Load Files");
+        alert.setTitle("Existing Database Found");
         alert.setHeaderText(null);
         alert.setContentText(
-                "📂 Detected Files:\n\n" +
-                        "- Classroom: " + classroomFileName + "\n" +
-                        "- Course: " + courseFileName + "\n\n" +
-                        "Would you like to load these files automatically?"
+                "A TimetableManagement.db file was found in your Documents/TimetableManagement folder.\n\n"
+                        + "Would you like to continue from that existing database?\n"
+                        + "(If you choose No, you'll remain here to import CSV or start blank.)"
         );
+
+        // Style the Alert's root DialogPane
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setStyle(
-                "-fx-background-color: #FFFFFF; " +
-                        "-fx-border-color: #E0E0E0; " +
-                        "-fx-border-width: 1px; " +
-                        "-fx-border-radius: 8px; " +
-                        "-fx-background-radius: 8px; " +
-                        "-fx-padding: 20px; " +
-                        "-fx-font-family: 'Segoe UI', sans-serif; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-text-fill: #333333;"
+                "-fx-background-color: #f9f9f9;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-width: 1px;"
+                        + "-fx-border-radius: 8px;"
+                        + "-fx-background-radius: 8px;"
+                        + "-fx-padding: 20px;"
+                        + "-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);"
+                        + "-fx-font-family: 'Segoe UI', sans-serif;"
+                        + "-fx-font-size: 14px;"
+                        + "-fx-text-fill: #333333;"
         );
 
-        // Customize Content Text
+        // Custom label
         Label contentLabel = new Label(alert.getContentText());
-        contentLabel.setStyle(
-                "-fx-text-fill: #202123; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-line-spacing: 1.2;"
-        );
         contentLabel.setWrapText(true);
+        contentLabel.setStyle(
+                "-fx-text-fill: #1c1c1c;"
+                        + "-fx-font-size: 14px;"
+                        + "-fx-line-spacing: 1.2;"
+                        + "-fx-font-family: 'Segoe UI', sans-serif;"
+        );
         dialogPane.setContent(contentLabel);
 
-        // Add custom buttons
-        ButtonType loadButton = new ButtonType("Load Files", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(loadButton, cancelButton);
+        ButtonType useDBButton = new ButtonType("Use Existing DB", ButtonBar.ButtonData.OK_DONE);
+        ButtonType csvButton   = new ButtonType("No, I'll Decide", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(useDBButton, csvButton);
 
-        // Style buttons
-        Button load = (Button) dialogPane.lookupButton(loadButton);
-        Button cancel = (Button) dialogPane.lookupButton(cancelButton);
-
-        load.setStyle(
-                "-fx-background-color: #10A37F; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-border-radius: 5px; " +
-                        "-fx-background-radius: 5px; " +
-                        "-fx-padding: 5 15;"
+        // Style them
+        Button useDBBtnRef = (Button) alert.getDialogPane().lookupButton(useDBButton);
+        useDBBtnRef.setStyle(
+                "-fx-background-color: #4CAF50;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
         );
+        useDBBtnRef.setOnMouseEntered(e -> useDBBtnRef.setStyle(
+                "-fx-background-color: #45A049;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
+        ));
+        useDBBtnRef.setOnMouseExited(e -> useDBBtnRef.setStyle(
+                "-fx-background-color: #4CAF50;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
+        ));
 
-        cancel.setStyle(
-                "-fx-background-color: #F0F0F0; " +
-                        "-fx-text-fill: #333333; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-border-color: #E0E0E0; " +
-                        "-fx-border-width: 1px; " +
-                        "-fx-border-radius: 5px; " +
-                        "-fx-padding: 5 15;"
+        Button csvBtnRef = (Button) alert.getDialogPane().lookupButton(csvButton);
+        csvBtnRef.setStyle(
+                "-fx-background-color: #9E9E9E;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
         );
-        return alert.showAndWait().orElse(cancelButton) == loadButton;
+        csvBtnRef.setOnMouseEntered(e -> csvBtnRef.setStyle(
+                "-fx-background-color: #7e7e7e;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
+        ));
+        csvBtnRef.setOnMouseExited(e -> csvBtnRef.setStyle(
+                "-fx-background-color: #9E9E9E;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-border-radius: 5px;"
+                        + "-fx-background-radius: 5px;"
+                        + "-fx-padding: 5 15;"
+                        + "-fx-cursor: hand;"
+                        + "-fx-font-size: 14px;"
+        ));
+
+        return alert.showAndWait().orElse(csvButton) == useDBButton;
     }
 
-
+    /**
+     * Quick utility for showing a simple alert.
+     */
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         try {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
+            stage.getIcons().add(new Image(
+                    getClass().getResourceAsStream("/com/example/timetablemanager/icons/alert.png")));
         } catch (RuntimeException e) {
             System.err.println("Couldn't load alert icon");
             e.printStackTrace();
