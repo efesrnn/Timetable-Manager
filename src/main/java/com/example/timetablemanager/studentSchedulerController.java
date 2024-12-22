@@ -220,7 +220,8 @@ public class studentSchedulerController {
                 }
 
                 // Refresh the scheduler view
-                refreshGridPane();
+               // refreshGridPane();
+                stage.close();
             } else if (result.get() == cancelButton) {
                 alert.close();
             }
