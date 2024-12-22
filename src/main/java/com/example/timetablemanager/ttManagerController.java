@@ -1,5 +1,6 @@
 package com.example.timetablemanager;
 
+import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,11 +9,19 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -124,25 +133,27 @@ public class ttManagerController {
        // menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
     }
+
     @FXML
     public void menuUserManualMethod() {
         try {
-            // Use the absolute path of the PDF file
-            String filePath = "src/main/resources/UserManual.pdf";
-            File file = new File(getClass().getResource("UserManual.pdf").toURI());
+            // Get the file as a stream
+            InputStream is = getClass().getResourceAsStream("UserManual.pdf");
 
-            if (file.exists()) {
-                Process p = Runtime
-                        .getRuntime()
-                        .exec("rundll32 url.dll,FileProtocolHandler " + file.getAbsolutePath());
-                p.waitFor();
-            } else {
-                System.out.println("File does not exist");
+            File tempFile = File.createTempFile("UserManual", ".pdf"); // Temporary file and copy the resource to it
+            tempFile.deleteOnExit();
+            try (OutputStream os = new FileOutputStream(tempFile)) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, length);
+                }
             }
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            }
+        } catch (IOException ex) {
 
-            System.out.println("Done");
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
