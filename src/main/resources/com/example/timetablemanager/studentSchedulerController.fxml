@@ -7,45 +7,52 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.timetablemanager.studentSchedulerController">
-      <GridPane fx:id="schedulerGrid" gridLinesVisible="true" hgap="5" style="-fx-padding: 10;" vgap="5">
-         <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-            <RowConstraints minHeight="50" vgrow="ALWAYS" />
-         </rowConstraints>
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Time" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Monday" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Tuesday" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Wednesday" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Thursday" GridPane.columnIndex="4" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72 ;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="8:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" text="9:25" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="10:20" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="11:15" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="12:10" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="13:05" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="14:00" GridPane.columnIndex="0" GridPane.rowIndex="7" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="14:55" GridPane.columnIndex="0" GridPane.rowIndex="8" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="15:50" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="16:45" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-            <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="17:40" GridPane.columnIndex="0" GridPane.rowIndex="11" />
-      </GridPane>
+   <GridPane fx:id="schedulerGrid" gridLinesVisible="true" hgap="5" style="-fx-padding: 10;" vgap="5">
+      <columnConstraints>
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" />
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" /> <!-- Saturday -->
+         <ColumnConstraints hgrow="ALWAYS" minWidth="70" /> <!-- Sunday -->
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+         <RowConstraints minHeight="50" vgrow="ALWAYS" />
+      </rowConstraints>
+      <!-- Header Labels -->
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Time" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Monday" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Tuesday" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Wednesday" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Thursday" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="65.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Friday" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Saturday" GridPane.columnIndex="6" GridPane.rowIndex="0" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" style="-fx-font-weight: bold; -fx-text-fill: #00AA72;" text="Sunday" GridPane.columnIndex="7" GridPane.rowIndex="0" />
+
+      <!-- Time Labels -->
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="68.0" text="8:30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="67.0" text="9:25" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="10:20" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="11:15" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="12:10" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="13:05" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="14:00" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="14:55" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="70.0" text="15:50" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="71.0" text="16:45" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+      <Label alignment="CENTER" prefHeight="18.0" prefWidth="69.0" text="17:40" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+   </GridPane>
 </VBox>

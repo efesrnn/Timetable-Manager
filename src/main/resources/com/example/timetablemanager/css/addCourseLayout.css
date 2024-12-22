@@ -289,8 +289,3 @@
     50% { opacity: 0; }
     100% { opacity: 1; }
 }
-
-.allocation-label.temporary-allocation {
-    /* Gold color is set via inline styles, so no need for additional CSS here */
-    /* If you prefer CSS-based animations, you can implement them here */
-}

@@ -1,76 +1,50 @@
 package com.example.timetablemanager;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import static com.example.timetablemanager.Database.*;
-import static com.example.timetablemanager.studentSelectionController.*;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
 
 public class studentSchedulerController {
 
     @FXML
     private GridPane schedulerGrid;
 
-    @FXML
-    private Button asd;
-
     private List<Course> allCourses;
-
 
     private String selectedStudent;
 
     private Course selectedCourse;
     private CourseSchedulerController controller;
 
-
     @FXML
     public void initialize() {
-
-
+        // Initialize scheduler when controller is loaded
+        showStudent();
     }
-    public void showStudent() {
 
+    public void showStudent() {
         allCourses = Database.getAllCourses();
 
-//schedulerGrid.getChildren().clear();
+        List<Course> enrolledCourses = Database.loadCoursesForStudent1(getSelectedStudent());
 
-
-        // schedulerGrid.setGridLinesVisible(true);
-
-        List<Course> enrolledCourses2 = Database.loadCoursesForStudent1(getSelectedStudent());
-
-        if (enrolledCourses2 == null) {
-            System.out.println("noş");
+        if (enrolledCourses == null || enrolledCourses.isEmpty()) {
+            System.out.println("No enrolled courses found.");
+            return;
         } else {
-            System.out.println("değikl");
-        }
-        for (Course course : enrolledCourses2) {
-            System.out.println(course.getTimeToStart());
+            System.out.println("Enrolled courses loaded.");
         }
 
+        for (Course course : enrolledCourses) {
+            System.out.println("Course Time: " + course.getTimeToStart());
+        }
 
-
-
-
-
-
-
-        for (Course course : enrolledCourses2) {
+        for (Course course : enrolledCourses) {
 
             Label classLabel = new Label(course.getCourseID());
-
 
             Course selectedCourseObject = allCourses.stream()
                     .filter(e -> e.getCourseID().equals(course.getCourseID()))
@@ -78,11 +52,12 @@ public class studentSchedulerController {
 
             if (selectedCourseObject == null) {
                 showAlert("Error", "Invalid selection. Please try again.");
-                return;
+                continue; // Continue to next course instead of returning
             }
-            int duration = selectedCourseObject.getDuration();
 
+            int duration = selectedCourseObject.getDuration();
             String timeToStart = selectedCourseObject.getTimeToStart();
+
             // Parse timeToStart
             String[] timeParts = timeToStart.split(" ");
             if (timeParts.length != 2) {
@@ -111,20 +86,17 @@ public class studentSchedulerController {
                             "-fx-wrap-text: true; " +
                             "-fx-alignment: center;");
 
-            classLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Etiketi GridPane'e sığdırma
-            schedulerGrid.add(classLabel, colIndex, rowIndex); // Label'ı GridPane'e ekleme
-            GridPane.setRowSpan(classLabel, duration); // Süre kadar satır kaplama
+            classLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Fit Label within GridPane
+            schedulerGrid.add(classLabel, colIndex, rowIndex); // Add Label to GridPane
+            GridPane.setRowSpan(classLabel, duration); // Span rows based on duration
 
             classLabel.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
-                    //setSelectedCourse(classLabel.getText());
-
-                    //showAlert();
-                    Delete("Warning", "Are you sure you want to withdraw from " + course.getCourseID() + "!",classLabel.getText());
+                    // Prompt withdrawal confirmation
+                    Delete("Warning", "Are you sure you want to withdraw from " + course.getCourseID() + "?", course.getCourseID());
                 }
             });
-
-            }
+        }
     }
 
     private int getDayColumnIndex(String day) {
@@ -139,8 +111,13 @@ public class studentSchedulerController {
                 return 4;
             case "friday":
                 return 5;
+            case "saturday":
+                return 6;
+            case "sunday":
+                return 7;
             default:
-                return 0;  // In case there's an unexpected day
+                System.err.println("Unrecognized day: " + day);
+                return 0;  // Invalid day
         }
     }
 
@@ -169,13 +146,12 @@ public class studentSchedulerController {
             case "17:40":
                 return 11;
             default:
-                return 0;  // Default to first row if time is unexpected
+                System.err.println("Unrecognized time: " + time);
+                return 0;  // Invalid time
         }
     }
 
-
-
-
+    // Getter and Setter methods
     public Course getSelectedCourse() {
         return selectedCourse;
     }
@@ -183,15 +159,16 @@ public class studentSchedulerController {
     public void setSelectedCourse(Course selectedCourse) {
         this.selectedCourse = selectedCourse;
     }
-public String getSelectedStudent() {
-    return selectedStudent;
-}
+
+    public String getSelectedStudent() {
+        return selectedStudent;
+    }
 
     public void setSelectedStudent(String selectedStudent) {
         this.selectedStudent = selectedStudent;
     }
 
-
+    // Alert utility method
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -200,30 +177,23 @@ public String getSelectedStudent() {
         alert.showAndWait();
     }
 
+    // Refresh the GridPane to reflect changes
     private void refreshGridPane() {
         schedulerGrid.getChildren().clear();
         this.showStudent();
-
-
     }
-//    private void refreshTimetableView() {
-//        if (controller != null) {
-//            controller.refreshTable(); // Call the refreshTable method in the main controller
-//        }
-//    }
 
-     // Declare a reference to the main controller
-
+    // Reference to the main controller
     public void setController(CourseSchedulerController controller) {
         this.controller = controller;
     }
 
-    private void Delete(String title, String message, String a) {
+    // Delete (Withdraw) method with confirmation
+    private void Delete(String title, String message, String courseId) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-
 
         ButtonType withdrawButton = new ButtonType("Withdraw");
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -232,25 +202,25 @@ public String getSelectedStudent() {
 
         if (result.isPresent()) {
             if (result.get() == withdrawButton) {
-                Database.removeStudentFromCourse(a, getSelectedStudent());
-                //refreshGridPane();
+                Database.removeStudentFromCourse(courseId, getSelectedStudent());
                 alert.close();
                 Stage stage = (Stage) schedulerGrid.getScene().getWindow();
 
+                // Reload courses
                 allCourses.clear();
                 Database.reloadCourses();
-                allCourses=Database.getAllCourses();
+                allCourses = Database.getAllCourses();
+
                 Course selectedCourseObject = allCourses.stream()
-                        .filter(e -> e.getCourseID().equals(a))
+                        .filter(e -> e.getCourseID().equals(courseId))
                         .findFirst().orElse(null);
 
+                if (controller != null && selectedCourseObject != null) {
+                    controller.setCourseData(selectedCourseObject);
+                }
 
-
-                controller.setCourseData(selectedCourseObject);
-                stage.close();
-
-
-
+                // Refresh the scheduler view
+                refreshGridPane();
             } else if (result.get() == cancelButton) {
                 alert.close();
             }
