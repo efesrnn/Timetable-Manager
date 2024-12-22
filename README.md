@@ -36,7 +36,7 @@ Timetable Manager is a desktop application designed to streamline the management
 **Search and Refresh:** Quickly refresh schedules and search for specific data.
 
 # User Interface
-![proje1](https://github.com/user-attachments/assets/23abe9c7-3556-46ea-b4a6-7f6ec5c94f7a)
+![proje1](https://github.com/user-attachments/assets/c7ac8a3c-93e0-4093-816b-8d7bfea4b20a)
 
 ![proje2](https://github.com/user-attachments/assets/03900a2d-c690-49cb-ac16-3fe90be2482b)
 
