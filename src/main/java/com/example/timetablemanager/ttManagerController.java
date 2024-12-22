@@ -120,9 +120,31 @@ public class ttManagerController {
     //    menuSaveTimetable.setOnAction(event -> showAlert("Save Timetable", "Save Timetable not attached yet."));
       //  menuExportTimetable.setOnAction(event -> showAlert("Export Timetable", "Export Timetable not attached yet."));
         menuExit.setOnAction(event -> System.exit(0));
-        menuUserManual.setOnAction(event -> showAlert("User Manual", "User Manual not attached yet."));
+        menuUserManual.setOnAction(event -> menuUserManualMethod());
         menuAbout.setOnAction(event -> showAlert("About", "About not attached yet."));
         timetableTable.setItems(FXCollections.observableArrayList(TimetableManager.getTimetable()));
+    }
+    @FXML
+    public void menuUserManualMethod() {
+        try {
+            // Use the absolute path of the PDF file
+            String filePath = "src/main/resources/UserManual.pdf";
+            File file = new File(filePath);
+
+            if (file.exists()) {
+                // Open the file using the default system viewer
+                Process p = Runtime
+                        .getRuntime()
+                        .exec("rundll32 url.dll,FileProtocolHandler " + file.getAbsolutePath());
+                p.waitFor();
+            } else {
+                System.out.println("File does not exist");
+            }
+
+            System.out.println("Done");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 
